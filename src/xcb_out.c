@@ -75,6 +75,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
     struct iovec prefix[2];
     CARD16 shortlen = 0;
     CARD32 longlen = 0;
+    enum workarounds workaround = WORKAROUND_NONE;
 
     assert(c != 0);
     assert(request != 0);
@@ -121,6 +122,12 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
         assert(extension && extension->present);
         ((CARD8 *) prefix[0].iov_base)[0] = extension->major_opcode;
         ((CARD8 *) prefix[0].iov_base)[1] = req->opcode;
+
+        /* do we need to work around the X server bug described in glx.xml? */
+        if(strcmp(req->ext->name, "GLX") &&
+                ((req->opcode == 17 && ((CARD32 *) vector[0].iov_base)[0] == 0x10004) ||
+                 req->opcode == 21))
+            workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
     }
     else
         ((CARD8 *) prefix[0].iov_base)[0] = req->opcode;
@@ -136,7 +143,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
     *request = ++c->out.request;
 
     if(!req->isvoid)
-        _xcb_in_expect_reply(c, *request);
+        _xcb_in_expect_reply(c, *request, workaround);
 
     ret = _xcb_out_write_block(c, prefix, i);
     if(ret > 0)

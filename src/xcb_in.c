@@ -35,6 +35,11 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
+typedef struct {
+    unsigned int request;
+    enum workarounds workaround;
+} pending_reply;
+
 typedef struct XCBReplyData {
     unsigned int request;
     void *data;
@@ -200,7 +205,9 @@ int _xcb_in_init(_xcb_in *in)
     in->replies = _xcb_map_new();
     in->events = _xcb_queue_new();
     in->readers = _xcb_list_new();
-    if(!in->current_reply || !in->replies || !in->events || !in->readers)
+
+    in->pending_replies = _xcb_queue_new();
+    if(!in->current_reply || !in->replies || !in->events || !in->readers || !in->pending_replies)
         return 0;
 
     return 1;
@@ -213,11 +220,24 @@ void _xcb_in_destroy(_xcb_in *in)
     _xcb_map_delete(in->replies, free);
     _xcb_queue_delete(in->events, free);
     _xcb_list_delete(in->readers, 0);
+    _xcb_queue_delete(in->pending_replies, free);
 }
 
-int _xcb_in_expect_reply(XCBConnection *c, unsigned int request)
+int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround)
 {
-    /* XXX: currently a no-op */
+    if(workaround != WORKAROUND_NONE)
+    {
+        pending_reply *pend = malloc(sizeof(pending_reply));
+        if(!pend)
+            return 0;
+        pend->request = request;
+        pend->workaround = workaround;
+        if(!_xcb_queue_enqueue(c->in.pending_replies, pend))
+        {
+            free(pend);
+            return 0;
+        }
+    }
     return 1;
 }
 
@@ -234,21 +254,7 @@ int _xcb_in_read_packet(XCBConnection *c)
     /* Get the response type, length, and sequence number. */
     memcpy(&genrep, c->in.queue, sizeof(genrep));
 
-    /* For reply packets, check that the entire packet is available. */
-    if(genrep.response_type == 1)
-        length += genrep.length * 4;
-
-    buf = malloc(length);
-    if(!buf)
-        return 0;
-    if(_xcb_in_read_block(c, buf, length) <= 0)
-    {
-        free(buf);
-        return 0;
-    }
-
     /* Compute 32-bit sequence number of this packet. */
-    /* XXX: do "sequence lost" check here */
     if((genrep.response_type & 0x7f) != KeymapNotify)
     {
         int lastread = c->in.request_read;
@@ -260,6 +266,37 @@ int _xcb_in_read_packet(XCBConnection *c)
         }
         if(c->in.request_read < lastread)
             c->in.request_read += 0x10000;
+    }
+
+    /* For reply packets, check that the entire packet is available. */
+    if(genrep.response_type == 1)
+    {
+        pending_reply *pend = _xcb_list_peek_head(c->in.pending_replies);
+        if(pend && pend->request == c->in.request_read)
+        {
+            switch(pend->workaround)
+            {
+            case WORKAROUND_NONE:
+                break;
+            case WORKAROUND_GLX_GET_FB_CONFIGS_BUG:
+                {
+                    CARD32 *p = (CARD32 *) c->in.queue;
+                    genrep.length = p[2] * p[3] * 2;
+                }
+                break;
+            }
+            free(_xcb_queue_dequeue(c->in.pending_replies));
+        }
+        length += genrep.length * 4;
+    }
+
+    buf = malloc(length);
+    if(!buf)
+        return 0;
+    if(_xcb_in_read_block(c, buf, length) <= 0)
+    {
+        free(buf);
+        return 0;
     }
 
     if(buf[0] == 1) /* response is a reply */

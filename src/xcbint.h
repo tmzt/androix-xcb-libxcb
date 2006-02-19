@@ -38,6 +38,11 @@
     _xcb_assert_sequence_less((c)->out.request_written, (c)->out.request); \
 } while(0)
 
+enum workarounds {
+    WORKAROUND_NONE,
+    WORKAROUND_GLX_GET_FB_CONFIGS_BUG
+};
+
 /* xcb_list.c */
 
 typedef struct _xcb_list _xcb_list;
@@ -125,12 +130,14 @@ typedef struct _xcb_in {
     _xcb_map *replies;
     _xcb_queue *events;
     _xcb_list *readers;
+
+    _xcb_queue *pending_replies;
 } _xcb_in;
 
 int _xcb_in_init(_xcb_in *in);
 void _xcb_in_destroy(_xcb_in *in);
 
-int _xcb_in_expect_reply(XCBConnection *c, unsigned int request);
+int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround);
 
 int _xcb_in_read_packet(XCBConnection *c);
 int _xcb_in_read(XCBConnection *c);
