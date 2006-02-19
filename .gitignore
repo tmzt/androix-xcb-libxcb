@@ -8,6 +8,7 @@ config.log
 config.status
 config.sub
 configure
+configure.lineno
 depcomp
 install-sh
 libtool

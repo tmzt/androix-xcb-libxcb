@@ -8,8 +8,10 @@ stamp-h1
 *.lo
 *.loT
 *.la
+*.o
 xproto.c
 xproto.h
+xcb_des.c
 xcb_types.c
 xcb_types.h
 extensions
