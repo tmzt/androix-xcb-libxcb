@@ -1,0 +1,5 @@
+usr/X11R6/include/X11/*
+usr/lib/lib*.a
+usr/lib/lib*.so
+usr/lib/pkgconfig/*
+usr/lib/*.la
