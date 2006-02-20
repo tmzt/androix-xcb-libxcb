@@ -55,27 +55,49 @@ AC_ARG_WITH(opt,
 AC_HELP_STRING([--with-opt],       [compile with reasonable optimizations])
 AC_HELP_STRING([--with-opt=FLAGS], [compile with specified FLAGS])
 AC_HELP_STRING([--with-opt=small], [compile for smallest code])
-AC_HELP_STRING([--with-opt=debug], [compile for debugging (default)]),
+AC_HELP_STRING([--without-opt],    [compile without optimization (default)]),
 [
 	case "$withval" in
 	yes)
-		optflags="-O3"
+		COPTFLAGS="-O3"
 		;;
 	small)
-		optflags="-Os -fomit-frame-pointer -DNDEBUG"
+		COPTFLAGS="-Os -fomit-frame-pointer -DNDEBUG"
 		;;
-	no|debug)
-		optflags="-g"
+	no)
+		COPTFLAGS=""
 		;;
 	*)
-		optflags="$withval"
+		COPTFLAGS="$withval"
 		;;
 	esac
 ])
-AC_CACHE_CHECK([what compiler optimizations to apply], [optflags], [optflags="-g"])
-CDEBUGFLAGS="$optflags -Wall -pedantic -Wpointer-arith \
-	-Wstrict-prototypes -Wmissing-declarations -Wnested-externs"
+AC_CACHE_CHECK([what compiler optimizations to apply], [COPTFLAGS], [COPTFLAGS=""])
+AC_SUBST(COPTFLAGS)
+
+AC_ARG_WITH(debug,
+AC_HELP_STRING([--with-debug],       [compile with debugging (default)])
+AC_HELP_STRING([--with-debug=FLAGS], [compile with specified debugging FLAGS])
+AC_HELP_STRING([--without-debug],    [compile without debugging]),
+[
+	case "$withval" in
+	yes)
+		CDEBUGFLAGS="-g"
+		;;
+	no)
+		CDEBUGFLAGS=""
+		;;
+	*)
+		CDEBUGFLAGS="$withval"
+		;;
+	esac
+])
+AC_CACHE_CHECK([what debugging options to apply], [CDEBUGFLAGS], [CDEBUGFLAGS="-g"])
 AC_SUBST(CDEBUGFLAGS)
+
+CWARNFLAGS="-Wall -pedantic -Wpointer-arith \
+	-Wstrict-prototypes -Wmissing-declarations -Wnested-externs"
+AC_SUBST(CWARNFLAGS)
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_CONFIG_FILES([xcb.pc])
