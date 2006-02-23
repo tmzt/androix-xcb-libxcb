@@ -181,8 +181,6 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
     int ret;
     fd_set rfds, wfds;
 
-    _xcb_assert_valid_sequence(c);
-
     /* If the thing I should be doing is already being done, wait for it. */
     if(should_write ? c->out.writing : c->in.reading)
     {

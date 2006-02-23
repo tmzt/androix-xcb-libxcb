@@ -28,16 +28,6 @@
 #ifndef __XCBINT_H
 #define __XCBINT_H
 
-/* Not simply (a <= b) because eventually the 32-bit sequence number
- * will wrap, causing earlier sequence numbers to be higher than later
- * ones for a brief but fatal period. (a and b must be unsigned.) */
-#define _xcb_assert_sequence_less(a,b) assert((b) - (a) < 65536)
-
-#define _xcb_assert_valid_sequence(c) do { \
-    _xcb_assert_sequence_less((c)->in.request_read, (c)->out.request_written); \
-    _xcb_assert_sequence_less((c)->out.request_written, (c)->out.request); \
-} while(0)
-
 enum workarounds {
     WORKAROUND_NONE,
     WORKAROUND_GLX_GET_FB_CONFIGS_BUG
