@@ -270,7 +270,7 @@ int _xcb_out_flush(XCBConnection *c)
 {
     int ret = 1;
     c->out.request_written = c->out.request;
-    while(ret > 0 && (c->out.queue_len || c->out.vec_len))
+    while(ret && (c->out.queue_len || c->out.vec_len))
         ret = _xcb_conn_wait(c, /*should_write*/ 1, &c->out.cond);
     pthread_cond_broadcast(&c->out.cond);
     return ret;

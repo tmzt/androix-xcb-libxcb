@@ -223,5 +223,5 @@ done:
         --c->out.writing;
     --c->in.reading;
 
-    return ret;
+    return ret > 0;
 }

@@ -104,7 +104,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     while(!(e && *e) && ((signed int) (c->in.request_read - request) < 0 ||
             (c->in.request_read == request &&
 	     _xcb_queue_is_empty(c->in.current_reply))))
-        if(_xcb_conn_wait(c, /*should_write*/ 0, &cond) <= 0)
+        if(!_xcb_conn_wait(c, /*should_write*/ 0, &cond))
             goto done;
 
     if(c->in.request_read != request)
@@ -145,7 +145,7 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
     pthread_mutex_lock(&c->iolock);
     /* _xcb_list_remove_head returns 0 on empty list. */
     while(!(ret = _xcb_queue_dequeue(c->in.events)))
-        if(_xcb_conn_wait(c, /*should_write*/ 0, &c->in.event_cond) <= 0)
+        if(!_xcb_conn_wait(c, /*should_write*/ 0, &c->in.event_cond))
             break;
 
     wake_up_next_reader(c);
