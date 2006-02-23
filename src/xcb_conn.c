@@ -70,9 +70,7 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     _xcb_out_write_block(c, parts, count);
     ret = _xcb_out_flush(c);
     pthread_mutex_unlock(&c->iolock);
-    if(ret <= 0)
-        return 0;
-    return 1;
+    return ret;
 }
 
 static int read_setup(XCBConnection *c)
@@ -180,7 +178,7 @@ void XCBDisconnect(XCBConnection *c)
 
 int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *cond)
 {
-    int ret = 1;
+    int ret;
     fd_set rfds, wfds;
 
     _xcb_assert_valid_sequence(c);
@@ -204,24 +202,21 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
     }
 
     pthread_mutex_unlock(&c->iolock);
-    ret = select(c->fd + 1, &rfds, &wfds, 0, 0);
+    ret = select(c->fd + 1, &rfds, &wfds, 0, 0) > 0;
     pthread_mutex_lock(&c->iolock);
 
-    if(ret <= 0) /* error: select failed */
-        goto done;
+    if(ret)
+    {
+        if(FD_ISSET(c->fd, &rfds))
+            ret = ret && _xcb_in_read(c) > 0;
 
-    if(FD_ISSET(c->fd, &rfds))
-        if((ret = _xcb_in_read(c)) <= 0)
-            goto done;
+        if(FD_ISSET(c->fd, &wfds))
+            ret = ret && _xcb_out_write(c) > 0;
+    }
 
-    if(FD_ISSET(c->fd, &wfds))
-        if((ret = _xcb_out_write(c)) <= 0)
-            goto done;
-
-done:
     if(should_write)
         --c->out.writing;
     --c->in.reading;
 
-    return ret > 0;
+    return ret;
 }

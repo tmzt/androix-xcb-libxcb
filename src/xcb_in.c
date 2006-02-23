@@ -82,7 +82,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
 
     /* If this request has not been written yet, write it. */
     if((signed int) (c->out.request_written - request) < 0)
-        if(_xcb_out_flush(c) <= 0)
+        if(!_xcb_out_flush(c))
             goto done; /* error */
 
     if(_xcb_list_find(c->in.readers, match_reply, &request))

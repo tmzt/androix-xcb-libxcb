@@ -258,7 +258,7 @@ int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
         c->out.vec[c->out.vec_len].iov_base = (void *) pad;
         c->out.vec[c->out.vec_len++].iov_len = XCB_PAD(vector[i].iov_len);
     }
-    if(_xcb_out_flush(c) <= 0)
+    if(!_xcb_out_flush(c))
         len = -1;
     free(c->out.vec);
     c->out.vec = 0;
