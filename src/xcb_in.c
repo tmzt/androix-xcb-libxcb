@@ -68,6 +68,90 @@ static void wake_up_next_reader(XCBConnection *c)
     assert(pthreadret == 0);
 }
 
+static int read_packet(XCBConnection *c)
+{
+    XCBGenericRep genrep;
+    int length = 32;
+    unsigned char *buf;
+
+    /* Wait for there to be enough data for us to read a whole packet */
+    if(c->in.queue_len < length)
+        return 0;
+
+    /* Get the response type, length, and sequence number. */
+    memcpy(&genrep, c->in.queue, sizeof(genrep));
+
+    /* Compute 32-bit sequence number of this packet. */
+    if((genrep.response_type & 0x7f) != KeymapNotify)
+    {
+        int lastread = c->in.request_read;
+        c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
+        if(c->in.request_read != lastread && !_xcb_queue_is_empty(c->in.current_reply))
+        {
+            _xcb_map_put(c->in.replies, lastread, c->in.current_reply);
+            c->in.current_reply = _xcb_queue_new();
+        }
+        if(c->in.request_read < lastread)
+            c->in.request_read += 0x10000;
+    }
+
+    /* For reply packets, check that the entire packet is available. */
+    if(genrep.response_type == 1)
+    {
+        pending_reply *pend = _xcb_list_peek_head(c->in.pending_replies);
+        if(pend && pend->request == c->in.request_read)
+        {
+            switch(pend->workaround)
+            {
+            case WORKAROUND_NONE:
+                break;
+            case WORKAROUND_GLX_GET_FB_CONFIGS_BUG:
+                {
+                    CARD32 *p = (CARD32 *) c->in.queue;
+                    genrep.length = p[2] * p[3] * 2;
+                }
+                break;
+            }
+            free(_xcb_queue_dequeue(c->in.pending_replies));
+        }
+        length += genrep.length * 4;
+    }
+
+    buf = malloc(length);
+    if(!buf)
+        return 0;
+    if(_xcb_in_read_block(c, buf, length) <= 0)
+    {
+        free(buf);
+        return 0;
+    }
+
+    if(buf[0] == 1) /* response is a reply */
+    {
+        XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
+        _xcb_queue_enqueue(c->in.current_reply, buf);
+        if(reader)
+            pthread_cond_signal(reader->data);
+        return 1;
+    }
+
+    if(buf[0] == 0) /* response is an error */
+    {
+        XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
+        if(reader && reader->error)
+        {
+            *reader->error = (XCBGenericError *) buf;
+            pthread_cond_signal(reader->data);
+            return 1;
+        }
+    }
+
+    /* event, or error without a waiting reader */
+    _xcb_queue_enqueue(c->in.events, buf);
+    pthread_cond_signal(&c->in.event_cond);
+    return 1; /* I have something for you... */
+}
+
 /* Public interface */
 
 void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
@@ -165,7 +249,7 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
     if(error)
         *error = 0;
     /* FIXME: follow X meets Z architecture changes. */
-    if(_xcb_in_read(c) >= 0)
+    if(_xcb_in_read(c))
         ret = _xcb_queue_dequeue(c->in.events);
     else if(error)
         *error = -1;
@@ -241,98 +325,12 @@ int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workaround
     return 1;
 }
 
-int _xcb_in_read_packet(XCBConnection *c)
-{
-    XCBGenericRep genrep;
-    int length = 32;
-    unsigned char *buf;
-
-    /* Wait for there to be enough data for us to read a whole packet */
-    if(c->in.queue_len < length)
-        return 0;
-
-    /* Get the response type, length, and sequence number. */
-    memcpy(&genrep, c->in.queue, sizeof(genrep));
-
-    /* Compute 32-bit sequence number of this packet. */
-    if((genrep.response_type & 0x7f) != KeymapNotify)
-    {
-        int lastread = c->in.request_read;
-        c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
-        if(c->in.request_read != lastread && !_xcb_queue_is_empty(c->in.current_reply))
-        {
-            _xcb_map_put(c->in.replies, lastread, c->in.current_reply);
-            c->in.current_reply = _xcb_queue_new();
-        }
-        if(c->in.request_read < lastread)
-            c->in.request_read += 0x10000;
-    }
-
-    /* For reply packets, check that the entire packet is available. */
-    if(genrep.response_type == 1)
-    {
-        pending_reply *pend = _xcb_list_peek_head(c->in.pending_replies);
-        if(pend && pend->request == c->in.request_read)
-        {
-            switch(pend->workaround)
-            {
-            case WORKAROUND_NONE:
-                break;
-            case WORKAROUND_GLX_GET_FB_CONFIGS_BUG:
-                {
-                    CARD32 *p = (CARD32 *) c->in.queue;
-                    genrep.length = p[2] * p[3] * 2;
-                }
-                break;
-            }
-            free(_xcb_queue_dequeue(c->in.pending_replies));
-        }
-        length += genrep.length * 4;
-    }
-
-    buf = malloc(length);
-    if(!buf)
-        return 0;
-    if(_xcb_in_read_block(c, buf, length) <= 0)
-    {
-        free(buf);
-        return 0;
-    }
-
-    if(buf[0] == 1) /* response is a reply */
-    {
-        XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
-        _xcb_queue_enqueue(c->in.current_reply, buf);
-        if(reader)
-            pthread_cond_signal(reader->data);
-        return 1;
-    }
-
-    if(buf[0] == 0) /* response is an error */
-    {
-        XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
-        if(reader && reader->error)
-        {
-            *reader->error = (XCBGenericError *) buf;
-            pthread_cond_signal(reader->data);
-            return 1;
-        }
-    }
-
-    /* event, or error without a waiting reader */
-    _xcb_queue_enqueue(c->in.events, buf);
-    pthread_cond_signal(&c->in.event_cond);
-    return 1; /* I have something for you... */
-}
-
 int _xcb_in_read(XCBConnection *c)
 {
     int n = _xcb_readn(c->fd, c->in.queue, sizeof(c->in.queue), &c->in.queue_len);
-    if(n < 0 && errno == EAGAIN)
-        n = 1;
-    while(_xcb_in_read_packet(c) > 0)
+    while(read_packet(c))
         /* empty */;
-    return n;
+    return (n > 0) || (n < 0 && errno == EAGAIN);
 }
 
 int _xcb_in_read_block(XCBConnection *c, void *buf, int len)

@@ -208,10 +208,10 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
     if(ret)
     {
         if(FD_ISSET(c->fd, &rfds))
-            ret = ret && _xcb_in_read(c) > 0;
+            ret = ret && _xcb_in_read(c);
 
         if(FD_ISSET(c->fd, &wfds))
-            ret = ret && _xcb_out_write(c) > 0;
+            ret = ret && _xcb_out_write(c);
     }
 
     if(should_write)

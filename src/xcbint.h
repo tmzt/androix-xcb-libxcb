@@ -138,7 +138,6 @@ void _xcb_in_destroy(_xcb_in *in);
 
 int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround);
 
-int _xcb_in_read_packet(XCBConnection *c);
 int _xcb_in_read(XCBConnection *c);
 int _xcb_in_read_block(XCBConnection *c, void *buf, int nread);
 

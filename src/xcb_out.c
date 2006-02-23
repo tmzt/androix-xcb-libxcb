@@ -199,8 +199,9 @@ int _xcb_out_write(XCBConnection *c)
     else
         n = _xcb_write(c->fd, &c->out.queue, &c->out.queue_len);
 
-    if(n < 0 && errno == EAGAIN)
-        n = 1;
+    /* XXX: should "nothing was written" be considered failure or
+     * success for this function? it's not an I/O error, but... */
+    n = (n > 0) || (n < 0 && errno == EAGAIN);
 
     if(c->out.vec_len)
     {
