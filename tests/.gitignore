@@ -1,3 +1,7 @@
+.libs
 .deps
+*.o
 Makefile.in
 CheckLog.html
+CheckLog_xcb.xml
+check_all
