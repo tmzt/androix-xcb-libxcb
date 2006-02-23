@@ -305,9 +305,9 @@ int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
 int _xcb_out_flush(XCBConnection *c)
 {
     int ret = 1;
-    c->out.request_written = c->out.request;
     while(ret && (c->out.queue_len || c->out.vec_len))
         ret = _xcb_conn_wait(c, /*should_write*/ 1, &c->out.cond);
+    c->out.request_written = c->out.request;
     pthread_cond_broadcast(&c->out.cond);
     return ret;
 }
