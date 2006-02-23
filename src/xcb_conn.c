@@ -182,12 +182,6 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
 {
     int ret = 1;
     fd_set rfds, wfds;
-#if USE_THREAD_ASSERT
-    static __thread int already_here = 0;
-
-    assert(!already_here);
-    ++already_here;
-#endif
 
     _xcb_assert_valid_sequence(c);
 
@@ -195,9 +189,6 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
     if(should_write ? c->out.writing : c->in.reading)
     {
         pthread_cond_wait(cond, &c->iolock);
-#if USE_THREAD_ASSERT
-        --already_here;
-#endif
         return 1;
     }
 
@@ -232,8 +223,5 @@ done:
         --c->out.writing;
     --c->in.reading;
 
-#if USE_THREAD_ASSERT
-    --already_here;
-#endif
     return ret;
 }
