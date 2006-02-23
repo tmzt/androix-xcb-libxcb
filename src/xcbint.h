@@ -99,7 +99,6 @@ typedef struct _xcb_out {
     struct iovec *vec;
     int vec_len;
 
-    void *last_request;
     unsigned int request;
     unsigned int request_written;
 
