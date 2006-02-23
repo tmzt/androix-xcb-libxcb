@@ -31,6 +31,7 @@
 #include <pthread.h>
 #include "xcb.h"
 
+/* This function must be called with the IOLock held. */
 unsigned int XCBGetRequestSent(XCBConnection *c);
 
 pthread_mutex_t *XCBGetIOLock(XCBConnection *c);

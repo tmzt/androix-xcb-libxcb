@@ -28,11 +28,7 @@
 
 unsigned int XCBGetRequestSent(XCBConnection *c)
 {
-    unsigned int ret;
-    pthread_mutex_lock(&c->iolock);
-    ret = c->out.request;
-    pthread_mutex_unlock(&c->iolock);
-    return ret;
+    return c->out.request;
 }
 
 pthread_mutex_t *XCBGetIOLock(XCBConnection *c)
