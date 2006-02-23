@@ -243,37 +243,3 @@ int _xcb_read_block(const int fd, void *buf, const size_t len)
     }
     return len;
 }
-
-int _xcb_write(const int fd, char (*buf)[], int *count)
-{
-    int n = write(fd, *buf, *count);
-    if(n > 0)
-    {
-        *count -= n;
-        if(*count)
-            memmove(*buf, *buf + n, *count);
-    }
-    return n;
-}
-
-int _xcb_writev(const int fd, struct iovec *vec, int count)
-{
-    int n = writev(fd, vec, count);
-    if(n > 0)
-    {
-        int rem = n;
-        for(; count; --count, ++vec)
-        {
-            int cur = vec->iov_len;
-            if(cur > rem)
-                cur = rem;
-            vec->iov_len -= cur;
-            vec->iov_base = (char *) vec->iov_base + cur;
-            rem -= cur;
-            if(vec->iov_len)
-                break;
-        }
-        assert(rem == 0);
-    }
-    return n;
-}

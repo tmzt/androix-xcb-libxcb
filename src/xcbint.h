@@ -84,8 +84,6 @@ void *_xcb_map_remove(_xcb_map *q, unsigned int key);
 int _xcb_set_fd_flags(const int fd);
 int _xcb_readn(const int fd, void *buf, const int buflen, int *count);
 int _xcb_read_block(const int fd, void *buf, const size_t len);
-int _xcb_write(const int fd, char (*buf)[], int *count);
-int _xcb_writev(const int fd, struct iovec *vec, int count);
 
 
 /* xcb_out.c */
