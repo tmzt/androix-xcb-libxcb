@@ -261,6 +261,9 @@ int _xcb_out_write(XCBConnection *c)
 
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
 {
+    while(c->out.writing)
+        pthread_cond_wait(&c->out.cond, &c->iolock);
+    assert(!c->out.vec && !c->out.vec_len);
     while(count && c->out.queue_len + vector[0].iov_len < sizeof(c->out.queue))
     {
         memcpy(c->out.queue + c->out.queue_len, vector[0].iov_base, vector[0].iov_len);
@@ -275,8 +278,6 @@ int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
     vector[0].iov_len = c->out.queue_len;
     c->out.queue_len = 0;
 
-    assert(!c->out.vec_len);
-    assert(!c->out.vec);
     c->out.vec_len = count;
     c->out.vec = vector;
     return _xcb_out_flush(c);
@@ -288,8 +289,7 @@ int _xcb_out_flush(XCBConnection *c)
     struct iovec vec;
     if(c->out.queue_len)
     {
-        assert(!c->out.vec_len);
-        assert(!c->out.vec);
+        assert(!c->out.vec && !c->out.vec_len);
         vec.iov_base = c->out.queue;
         vec.iov_len = c->out.queue_len;
         c->out.vec = &vec;
