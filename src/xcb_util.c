@@ -217,20 +217,14 @@ int _xcb_set_fd_flags(const int fd)
     return 1;
 }
 
-int _xcb_readn(const int fd, void *buf, const int buflen, int *count)
-{
-    int n = read(fd, ((char *) buf) + *count, buflen - *count);
-    if(n > 0)
-        *count += n;
-    return n;
-}
-
 int _xcb_read_block(const int fd, void *buf, const size_t len)
 {
     int done = 0;
     while(done < len)
     {
-        int ret = _xcb_readn(fd, buf, len, &done);
+        int ret = read(fd, ((char *) buf) + done, len - done);
+        if(ret > 0)
+            done += ret;
         if(ret < 0 && errno == EAGAIN)
         {
             fd_set fds;

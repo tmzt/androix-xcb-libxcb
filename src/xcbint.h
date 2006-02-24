@@ -72,7 +72,6 @@ void *_xcb_map_remove(_xcb_map *q, unsigned int key);
 #define XCB_PAD(i) ((4 - (i & 3)) & 3)
 
 int _xcb_set_fd_flags(const int fd);
-int _xcb_readn(const int fd, void *buf, const int buflen, int *count);
 int _xcb_read_block(const int fd, void *buf, const size_t len);
 
 
