@@ -58,28 +58,6 @@ static int force_sequence_wrap(XCBConnection *c)
     return ret;
 }
 
-static int _xcb_writev(const int fd, struct iovec *vec, int count)
-{
-    int n = writev(fd, vec, count);
-    if(n > 0)
-    {
-        int rem = n;
-        for(; count; --count, ++vec)
-        {
-            int cur = vec->iov_len;
-            if(cur > rem)
-                cur = rem;
-            vec->iov_len -= cur;
-            vec->iov_base = (char *) vec->iov_base + cur;
-            rem -= cur;
-            if(vec->iov_len)
-                break;
-        }
-        assert(rem == 0);
-    }
-    return n;
-}
-
 /* Public interface */
 
 CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
@@ -251,12 +229,27 @@ int _xcb_out_write(XCBConnection *c)
 {
     int n;
     assert(!c->out.queue_len);
-    n = _xcb_writev(c->fd, c->out.vec, c->out.vec_len);
-    while(c->out.vec_len && !c->out.vec[0].iov_len)
-        ++c->out.vec, --c->out.vec_len;
+    n = writev(c->fd, c->out.vec, c->out.vec_len);
+    if(n < 0 && errno == EAGAIN)
+        return 1;
+    if(n <= 0)
+        return 0;
+
+    for(; c->out.vec_len; --c->out.vec_len, ++c->out.vec)
+    {
+        int cur = c->out.vec->iov_len;
+        if(cur > n)
+            cur = n;
+        c->out.vec->iov_len -= cur;
+        c->out.vec->iov_base = (char *) c->out.vec->iov_base + cur;
+        n -= cur;
+        if(c->out.vec->iov_len)
+            break;
+    }
     if(!c->out.vec_len)
         c->out.vec = 0;
-    return (n > 0) || (n < 0 && errno == EAGAIN);
+    assert(n == 0);
+    return 1;
 }
 
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
