@@ -137,7 +137,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
 
     /* put together the length field, possibly using BIGREQUESTS */
     for(i = 0; i < req->count; ++i)
-        longlen += XCB_CEIL(vector[i].iov_len) >> 2;
+        longlen += (vector[i].iov_len + 3) >> 2;
 
     if(longlen > c->setup->maximum_request_length)
     {

@@ -70,10 +70,7 @@ void *_xcb_map_remove(_xcb_map *q, unsigned int key);
 
 /* xcb_util.c */
 
-/* Index of nearest 4-byte boundary following E. */
-#define XCB_CEIL(E) (((E)+3)&~3)
-
-#define XCB_PAD(i) ((4 - (i & 3)) & 3)
+#define XCB_PAD(i) (-(i) & 3)
 
 int _xcb_set_fd_flags(const int fd);
 int _xcb_read_block(const int fd, void *buf, const size_t len);
