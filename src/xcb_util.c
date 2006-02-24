@@ -216,24 +216,3 @@ int _xcb_set_fd_flags(const int fd)
         return 0;
     return 1;
 }
-
-int _xcb_read_block(const int fd, void *buf, const size_t len)
-{
-    int done = 0;
-    while(done < len)
-    {
-        int ret = read(fd, ((char *) buf) + done, len - done);
-        if(ret > 0)
-            done += ret;
-        if(ret < 0 && errno == EAGAIN)
-        {
-            fd_set fds;
-            FD_ZERO(&fds);
-            FD_SET(fd, &fds);
-            ret = select(fd + 1, &fds, 0, 0, 0);
-        }
-        if(ret <= 0)
-            return ret;
-    }
-    return len;
-}

@@ -88,7 +88,7 @@ static int read_setup(XCBConnection *c)
     if(!c->setup)
         return 0;
 
-    if(_xcb_read_block(c->fd, c->setup, sizeof(XCBConnSetupGenericRep)) != sizeof(XCBConnSetupGenericRep))
+    if(_xcb_in_read_block(c, c->setup, sizeof(XCBConnSetupGenericRep)) != sizeof(XCBConnSetupGenericRep))
         return 0;
 
     {
@@ -98,7 +98,7 @@ static int read_setup(XCBConnection *c)
         c->setup = tmp;
     }
 
-    if(_xcb_read_block(c->fd, (char *) c->setup + sizeof(XCBConnSetupGenericRep), c->setup->length * 4) <= 0)
+    if(_xcb_in_read_block(c, (char *) c->setup + sizeof(XCBConnSetupGenericRep), c->setup->length * 4) <= 0)
         return 0;
 
     /* 0 = failed, 2 = authenticate, 1 = success */

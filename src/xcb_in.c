@@ -153,6 +153,27 @@ static int read_packet(XCBConnection *c)
     return 1; /* I have something for you... */
 }
 
+static int read_block(const int fd, void *buf, const size_t len)
+{
+    int done = 0;
+    while(done < len)
+    {
+        int ret = read(fd, ((char *) buf) + done, len - done);
+        if(ret > 0)
+            done += ret;
+        if(ret < 0 && errno == EAGAIN)
+        {
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(fd, &fds);
+            ret = select(fd + 1, &fds, 0, 0, 0);
+        }
+        if(ret <= 0)
+            return ret;
+    }
+    return len;
+}
+
 /* Public interface */
 
 void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
@@ -348,7 +369,7 @@ int _xcb_in_read_block(XCBConnection *c, void *buf, int len)
 
     if(len > done)
     {
-        int ret = _xcb_read_block(c->fd, (char *) buf + done, len - done);
+        int ret = read_block(c->fd, (char *) buf + done, len - done);
         if(ret <= 0)
             return ret;
     }
