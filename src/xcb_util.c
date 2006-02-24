@@ -28,7 +28,6 @@
 #include <assert.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/fcntl.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -196,23 +195,4 @@ int XCBSync(XCBConnection *c, XCBGenericError **e)
     XCBGetInputFocusRep *reply = XCBGetInputFocusReply(c, XCBGetInputFocus(c), e);
     free(reply);
     return reply != 0;
-}
-
-/* The functions beyond this point still use only public interfaces,
- * but are not themselves part of the public interface. So their
- * prototypes are in xcbint.h. */
-
-#include "xcbint.h"
-
-int _xcb_set_fd_flags(const int fd)
-{
-    long flags = fcntl(fd, F_GETFL, 0);
-    if(flags == -1)
-        return 0;
-    flags |= O_NONBLOCK;
-    if(fcntl(fd, F_SETFL, flags) == -1)
-        return 0;
-    if(fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
-        return 0;
-    return 1;
 }

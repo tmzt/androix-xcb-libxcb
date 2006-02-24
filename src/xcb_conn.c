@@ -32,9 +32,23 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <sys/select.h>
+#include <sys/fcntl.h>
 
 #include "xcb.h"
 #include "xcbint.h"
+
+static int set_fd_flags(const int fd)
+{
+    long flags = fcntl(fd, F_GETFL, 0);
+    if(flags == -1)
+        return 0;
+    flags |= O_NONBLOCK;
+    if(fcntl(fd, F_SETFL, flags) == -1)
+        return 0;
+    if(fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
+        return 0;
+    return 1;
+}
 
 static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
 {
@@ -147,7 +161,7 @@ XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
     c->fd = fd;
 
     if(!(
-        _xcb_set_fd_flags(fd) &&
+        set_fd_flags(fd) &&
         pthread_mutex_init(&c->iolock, 0) == 0 &&
         _xcb_in_init(&c->in) &&
         _xcb_out_init(&c->out) &&

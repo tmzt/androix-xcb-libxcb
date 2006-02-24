@@ -37,6 +37,8 @@ enum workarounds {
     WORKAROUND_GLX_GET_FB_CONFIGS_BUG
 };
 
+#define XCB_PAD(i) (-(i) & 3)
+
 /* xcb_list.c */
 
 typedef struct _xcb_list _xcb_list;
@@ -66,13 +68,6 @@ void _xcb_map_delete(_xcb_map *q, XCBListFreeFunc do_free);
 int _xcb_map_put(_xcb_map *q, unsigned int key, void *data);
 void *_xcb_map_get(_xcb_map *q, unsigned int key);
 void *_xcb_map_remove(_xcb_map *q, unsigned int key);
-
-
-/* xcb_util.c */
-
-#define XCB_PAD(i) (-(i) & 3)
-
-int _xcb_set_fd_flags(const int fd);
 
 
 /* xcb_out.c */
