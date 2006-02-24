@@ -28,6 +28,10 @@
 #ifndef __XCBINT_H
 #define __XCBINT_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 enum workarounds {
     WORKAROUND_NONE,
     WORKAROUND_GLX_GET_FB_CONFIGS_BUG
