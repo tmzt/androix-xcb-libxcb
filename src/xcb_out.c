@@ -31,6 +31,16 @@
 #include <string.h>
 #include <errno.h>
 
+#ifndef __GNUC__
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  endif
+# endif
+#endif
+
 #include "xcb.h"
 #include "xcbext.h"
 #include "xcbint.h"
@@ -105,9 +115,11 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
 
 int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector, const XCBProtocolRequest *req)
 {
+    static const char pad[3];
     int ret;
     int i;
-    struct iovec prefix[2];
+    struct iovec *padded;
+    int padlen = 0;
     CARD16 shortlen = 0;
     CARD32 longlen = 0;
     enum workarounds workaround = WORKAROUND_NONE;
@@ -151,17 +163,37 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
         longlen = 0;
     }
 
+    padded =
+#ifdef HAVE_ALLOCA
+        alloca
+#else
+        malloc
+#endif
+        ((req->count * 2 + 3) * sizeof(struct iovec));
     /* set the length field. */
     ((CARD16 *) vector[0].iov_base)[1] = shortlen;
     if(!shortlen)
     {
-        prefix[0].iov_base = vector[0].iov_base;
-        prefix[0].iov_len = sizeof(CARD32);
+        padded[0].iov_base = vector[0].iov_base;
+        padded[0].iov_len = sizeof(CARD32);
         vector[0].iov_base = ((char *) vector[0].iov_base) + sizeof(CARD32);
         vector[0].iov_len -= sizeof(CARD32);
         ++longlen;
-        prefix[1].iov_base = &longlen;
-        prefix[1].iov_len = sizeof(CARD32);
+        padded[1].iov_base = &longlen;
+        padded[1].iov_len = sizeof(CARD32);
+        padlen = 2;
+    }
+
+    for(i = 0; i < req->count; ++i)
+    {
+        if(!vector[i].iov_len)
+            continue;
+        padded[padlen].iov_base = vector[i].iov_base;
+        padded[padlen++].iov_len = vector[i].iov_len;
+        if(!XCB_PAD(vector[i].iov_len))
+            continue;
+        padded[padlen].iov_base = (caddr_t) pad;
+        padded[padlen++].iov_len = XCB_PAD(vector[i].iov_len);
     }
 
     /* get a sequence number and arrange for delivery. */
@@ -169,6 +201,9 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
     if(req->isvoid && !force_sequence_wrap(c))
     {
         pthread_mutex_unlock(&c->iolock);
+#ifndef HAVE_ALLOCA
+        free(padded);
+#endif
         return -1;
     }
 
@@ -177,13 +212,11 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
     if(!req->isvoid)
         _xcb_in_expect_reply(c, *request, workaround);
 
-    if(!shortlen)
-        ret = _xcb_out_write_block(c, prefix, 2);
-    else
-        ret = 1;
-    if(ret > 0)
-        ret = _xcb_out_write_block(c, vector, req->count);
+    ret = _xcb_out_write_block(c, padded, padlen);
     pthread_mutex_unlock(&c->iolock);
+#ifndef HAVE_ALLOCA
+    free(padded);
+#endif
 
     return ret;
 }
@@ -244,6 +277,7 @@ int _xcb_out_write(XCBConnection *c)
         for(i = 0; i < c->out.vec_len; ++i)
             if(c->out.vec[i].iov_len)
                 return n;
+        c->out.vec = 0;
         c->out.vec_len = 0;
     }
     return n;
@@ -251,55 +285,25 @@ int _xcb_out_write(XCBConnection *c)
 
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
 {
-    static const char pad[3];
-    int i;
-    int len = 0;
-
-    for(i = 0; i < count; ++i)
-        len += XCB_CEIL(vector[i].iov_len);
-
-    /* Is the queue about to overflow? */
-    if(c->out.queue_len + len < sizeof(c->out.queue))
+    while(count && c->out.queue_len + vector[0].iov_len < sizeof(c->out.queue))
     {
-        /* No, this will fit. */
-        for(i = 0; i < count; ++i)
-        {
-            memcpy(c->out.queue + c->out.queue_len, vector[i].iov_base, vector[i].iov_len);
-            if(vector[i].iov_len & 3)
-                memset(c->out.queue + c->out.queue_len + vector[i].iov_len, 0, XCB_PAD(vector[i].iov_len));
-            c->out.queue_len += XCB_CEIL(vector[i].iov_len);
-        }
-        return len;
+        memcpy(c->out.queue + c->out.queue_len, vector[0].iov_base, vector[0].iov_len);
+        c->out.queue_len += vector[0].iov_len;
+        ++vector, --count;
     }
+    if(!count)
+        return 1;
+
+    memmove(vector + 1, vector, count++ * sizeof(struct iovec));
+    vector[0].iov_base = c->out.queue;
+    vector[0].iov_len = c->out.queue_len;
+    c->out.queue_len = 0;
 
     assert(!c->out.vec_len);
     assert(!c->out.vec);
-    c->out.vec = malloc(sizeof(struct iovec) * (1 + count * 2));
-    if(!c->out.vec)
-        return -1;
-    if(c->out.queue_len)
-    {
-        c->out.vec[c->out.vec_len].iov_base = c->out.queue;
-        c->out.vec[c->out.vec_len++].iov_len = c->out.queue_len;
-        c->out.queue_len = 0;
-    }
-    for(i = 0; i < count; ++i)
-    {
-        if(!vector[i].iov_len)
-            continue;
-        c->out.vec[c->out.vec_len].iov_base = vector[i].iov_base;
-        c->out.vec[c->out.vec_len++].iov_len = vector[i].iov_len;
-        if(!XCB_PAD(vector[i].iov_len))
-            continue;
-        c->out.vec[c->out.vec_len].iov_base = (void *) pad;
-        c->out.vec[c->out.vec_len++].iov_len = XCB_PAD(vector[i].iov_len);
-    }
-    if(!_xcb_out_flush(c))
-        len = -1;
-    free(c->out.vec);
-    c->out.vec = 0;
-
-    return len;
+    c->out.vec_len = count;
+    c->out.vec = vector;
+    return _xcb_out_flush(c);
 }
 
 int _xcb_out_flush(XCBConnection *c)

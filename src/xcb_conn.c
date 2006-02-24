@@ -38,8 +38,9 @@
 
 static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
 {
+    static const char pad[3];
     XCBConnSetupReq out;
-    struct iovec parts[3];
+    struct iovec parts[6];
     int count = 0;
     int endian = 0x01020304;
     int ret;
@@ -57,14 +58,21 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     out.authorization_protocol_data_len = 0;
     parts[count].iov_len = sizeof(XCBConnSetupReq);
     parts[count++].iov_base = &out;
+    parts[count].iov_len = XCB_PAD(sizeof(XCBConnSetupReq));
+    parts[count++].iov_base = (caddr_t) pad;
 
     if(auth_info)
     {
         parts[count].iov_len = out.authorization_protocol_name_len = auth_info->namelen;
         parts[count++].iov_base = auth_info->name;
+        parts[count].iov_len = XCB_PAD(out.authorization_protocol_name_len);
+        parts[count++].iov_base = (caddr_t) pad;
         parts[count].iov_len = out.authorization_protocol_data_len = auth_info->datalen;
         parts[count++].iov_base = auth_info->data;
+        parts[count].iov_len = XCB_PAD(out.authorization_protocol_data_len);
+        parts[count++].iov_base = (caddr_t) pad;
     }
+    assert(count <= sizeof(parts) / sizeof(*parts));
 
     pthread_mutex_lock(&c->iolock);
     _xcb_out_write_block(c, parts, count);
