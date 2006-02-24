@@ -58,18 +58,6 @@ static int force_sequence_wrap(XCBConnection *c)
     return ret;
 }
 
-static int _xcb_write(const int fd, char (*buf)[], int *count)
-{
-    int n = write(fd, *buf, *count);
-    if(n > 0)
-    {
-        *count -= n;
-        if(*count)
-            memmove(*buf, *buf + n, *count);
-    }
-    return n;
-}
-
 static int _xcb_writev(const int fd, struct iovec *vec, int count)
 {
     int n = writev(fd, vec, count);
@@ -256,31 +244,19 @@ void _xcb_out_destroy(_xcb_out *out)
 {
     pthread_cond_destroy(&out->cond);
     pthread_mutex_destroy(&out->reqlenlock);
-    free(out->vec);
 }
 
+/* precondition: there must be something for us to write. */
 int _xcb_out_write(XCBConnection *c)
 {
     int n;
-    if(c->out.vec_len)
-        n = _xcb_writev(c->fd, c->out.vec, c->out.vec_len);
-    else
-        n = _xcb_write(c->fd, &c->out.queue, &c->out.queue_len);
-
-    /* XXX: should "nothing was written" be considered failure or
-     * success for this function? it's not an I/O error, but... */
-    n = (n > 0) || (n < 0 && errno == EAGAIN);
-
-    if(c->out.vec_len)
-    {
-        int i;
-        for(i = 0; i < c->out.vec_len; ++i)
-            if(c->out.vec[i].iov_len)
-                return n;
+    assert(!c->out.queue_len);
+    n = _xcb_writev(c->fd, c->out.vec, c->out.vec_len);
+    while(c->out.vec_len && !c->out.vec[0].iov_len)
+        ++c->out.vec, --c->out.vec_len;
+    if(!c->out.vec_len)
         c->out.vec = 0;
-        c->out.vec_len = 0;
-    }
-    return n;
+    return (n > 0) || (n < 0 && errno == EAGAIN);
 }
 
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
@@ -309,7 +285,18 @@ int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
 int _xcb_out_flush(XCBConnection *c)
 {
     int ret = 1;
-    while(ret && (c->out.queue_len || c->out.vec_len))
+    struct iovec vec;
+    if(c->out.queue_len)
+    {
+        assert(!c->out.vec_len);
+        assert(!c->out.vec);
+        vec.iov_base = c->out.queue;
+        vec.iov_len = c->out.queue_len;
+        c->out.vec = &vec;
+        c->out.vec_len = 1;
+        c->out.queue_len = 0;
+    }
+    while(ret && c->out.vec_len)
         ret = _xcb_conn_wait(c, /*should_write*/ 1, &c->out.cond);
     c->out.request_written = c->out.request;
     pthread_cond_broadcast(&c->out.cond);
