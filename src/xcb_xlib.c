@@ -26,6 +26,11 @@
 #include "xcbxlib.h"
 #include "xcbint.h"
 
+unsigned int XCBGetQueuedRequestRead(XCBConnection *c)
+{
+    return c->in.request_read;
+}
+
 unsigned int XCBGetRequestSent(XCBConnection *c)
 {
     return c->out.request;
