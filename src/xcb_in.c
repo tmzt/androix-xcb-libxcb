@@ -69,14 +69,6 @@ static void wake_up_next_reader(XCBConnection *c)
     assert(pthreadret == 0);
 }
 
-static int readn(const int fd, void *buf, const int buflen, int *count)
-{
-    int n = read(fd, ((char *) buf) + *count, buflen - *count);
-    if(n > 0)
-        *count += n;
-    return n;
-}
-
 static int read_packet(XCBConnection *c)
 {
     XCBGenericRep genrep;
@@ -336,7 +328,9 @@ int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workaround
 
 int _xcb_in_read(XCBConnection *c)
 {
-    int n = readn(c->fd, c->in.queue, sizeof(c->in.queue), &c->in.queue_len);
+    int n = read(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len);
+    if(n > 0)
+        c->in.queue_len += n;
     while(read_packet(c))
         /* empty */;
     return (n > 0) || (n < 0 && errno == EAGAIN);
