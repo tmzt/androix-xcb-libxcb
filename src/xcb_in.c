@@ -36,9 +36,10 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
-typedef struct {
+typedef struct pending_reply {
     unsigned int request;
     enum workarounds workaround;
+    struct pending_reply *next;
 } pending_reply;
 
 typedef struct XCBReplyData {
@@ -99,7 +100,7 @@ static int read_packet(XCBConnection *c)
     /* For reply packets, check that the entire packet is available. */
     if(genrep.response_type == 1)
     {
-        pending_reply *pend = _xcb_list_peek_head(c->in.pending_replies);
+        pending_reply *pend = c->in.pending_replies;
         if(pend && pend->request == c->in.request_read)
         {
             switch(pend->workaround)
@@ -113,7 +114,10 @@ static int read_packet(XCBConnection *c)
                 }
                 break;
             }
-            free(_xcb_queue_dequeue(c->in.pending_replies));
+            c->in.pending_replies = pend->next;
+            if(!pend->next)
+                c->in.pending_replies_tail = &c->in.pending_replies;
+            free(pend);
         }
         length += genrep.length * 4;
     }
@@ -301,10 +305,10 @@ int _xcb_in_init(_xcb_in *in)
     in->replies = _xcb_map_new();
     in->events = _xcb_queue_new();
     in->readers = _xcb_list_new();
-
-    in->pending_replies = _xcb_queue_new();
-    if(!in->current_reply || !in->replies || !in->events || !in->readers || !in->pending_replies)
+    if(!in->current_reply || !in->replies || !in->events || !in->readers)
         return 0;
+
+    in->pending_replies_tail = &in->pending_replies;
 
     return 1;
 }
@@ -316,7 +320,12 @@ void _xcb_in_destroy(_xcb_in *in)
     _xcb_map_delete(in->replies, free);
     _xcb_queue_delete(in->events, free);
     _xcb_list_delete(in->readers, 0);
-    _xcb_queue_delete(in->pending_replies, free);
+    while(in->pending_replies)
+    {
+        pending_reply *pend = in->pending_replies;
+        in->pending_replies = pend->next;
+        free(pend);
+    }
 }
 
 int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround)
@@ -328,11 +337,9 @@ int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workaround
             return 0;
         pend->request = request;
         pend->workaround = workaround;
-        if(!_xcb_queue_enqueue(c->in.pending_replies, pend))
-        {
-            free(pend);
-            return 0;
-        }
+        pend->next = 0;
+        *c->in.pending_replies_tail = pend;
+        c->in.pending_replies_tail = &pend->next;
     }
     return 1;
 }

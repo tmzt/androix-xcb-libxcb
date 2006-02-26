@@ -112,7 +112,8 @@ typedef struct _xcb_in {
     _xcb_queue *events;
     _xcb_list *readers;
 
-    _xcb_queue *pending_replies;
+    struct pending_reply *pending_replies;
+    struct pending_reply **pending_replies_tail;
 } _xcb_in;
 
 int _xcb_in_init(_xcb_in *in);
