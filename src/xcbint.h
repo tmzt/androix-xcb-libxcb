@@ -142,7 +142,8 @@ void _xcb_xid_destroy(XCBConnection *c);
 
 typedef struct _xcb_ext {
     pthread_mutex_t lock;
-    _xcb_map *extensions;
+    struct lazyreply *extensions;
+    int extensions_size;
 } _xcb_ext;
 
 int _xcb_ext_init(XCBConnection *c);

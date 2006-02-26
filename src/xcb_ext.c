@@ -32,13 +32,28 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
-typedef struct {
-    enum { LAZY_COOKIE, LAZY_FORCED } tag;
+typedef struct lazyreply {
+    enum { LAZY_NONE = 0, LAZY_COOKIE, LAZY_FORCED } tag;
     union {
         XCBQueryExtensionCookie cookie;
         XCBQueryExtensionRep *reply;
     } value;
 } lazyreply;
+
+static lazyreply *get_index(XCBConnection *c, int index)
+{
+    if(index > c->ext.extensions_size)
+    {
+        int new_size = index << 1;
+        lazyreply *new_extensions = realloc(c->ext.extensions, sizeof(lazyreply) * new_size);
+        if(!new_extensions)
+            return 0;
+        memset(new_extensions + c->ext.extensions_size, 0, sizeof(lazyreply) * (new_size - c->ext.extensions_size));
+        c->ext.extensions = new_extensions;
+        c->ext.extensions_size = new_size;
+    }
+    return c->ext.extensions + index - 1;
+}
 
 static lazyreply *get_lazyreply(XCBConnection *c, XCBExtension *ext)
 {
@@ -52,26 +67,14 @@ static lazyreply *get_lazyreply(XCBConnection *c, XCBExtension *ext)
         ext->global_id = ++next_global_id;
     pthread_mutex_unlock(&global_lock);
 
-    data = _xcb_map_get(c->ext.extensions, ext->global_id);
-    if(!data)
+    data = get_index(c, ext->global_id);
+    if(data && data->tag == LAZY_NONE)
     {
         /* cache miss: query the server */
-        data = malloc(sizeof(lazyreply));
-        if(!data)
-            return 0;
         data->tag = LAZY_COOKIE;
         data->value.cookie = XCBQueryExtension(c, strlen(ext->name), ext->name);
-        _xcb_map_put(c->ext.extensions, ext->global_id, data);
     }
     return data;
-}
-
-static void free_lazyreply(void *p)
-{
-    lazyreply *data = p;
-    if(data->tag == LAZY_FORCED)
-        free(data->value.reply);
-    free(data);
 }
 
 /* Public interface */
@@ -107,16 +110,14 @@ int _xcb_ext_init(XCBConnection *c)
 {
     if(pthread_mutex_init(&c->ext.lock, 0))
         return 0;
-
-    c->ext.extensions = _xcb_map_new();
-    if(!c->ext.extensions)
-        return 0;
-
     return 1;
 }
 
 void _xcb_ext_destroy(XCBConnection *c)
 {
     pthread_mutex_destroy(&c->ext.lock);
-    _xcb_map_delete(c->ext.extensions, free_lazyreply);
+    while(c->ext.extensions_size-- > 0)
+        if(c->ext.extensions[c->ext.extensions_size].tag == LAZY_FORCED)
+            free(c->ext.extensions[c->ext.extensions_size].value.reply);
+    free(c->ext.extensions);
 }
