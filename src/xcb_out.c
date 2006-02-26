@@ -79,7 +79,7 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
     return c->out.maximum_request_length;
 }
 
-int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector, const XCBProtocolRequest *req)
+int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct iovec *vector, const XCBProtocolRequest *req)
 {
     static const char pad[3];
     int ret;
@@ -105,7 +105,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
         ((CARD8 *) vector[0].iov_base)[1] = req->opcode;
 
         /* do we need to work around the X server bug described in glx.xml? */
-        if(strcmp(req->ext->name, "GLX") &&
+        if(!req->isvoid && strcmp(req->ext->name, "GLX") &&
                 ((req->opcode == 17 && ((CARD32 *) vector[0].iov_base)[0] == 0x10004) ||
                  req->opcode == 21))
             workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
@@ -172,8 +172,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
 
     *request = ++c->out.request;
 
-    if(!req->isvoid)
-        _xcb_in_expect_reply(c, *request, workaround);
+    _xcb_in_expect_reply(c, *request, workaround, flags);
 
     ret = _xcb_out_write_block(c, padded, padlen);
     pthread_mutex_unlock(&c->iolock);

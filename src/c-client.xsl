@@ -611,7 +611,11 @@ authorization from the authors.
       </xsl:if>;</l>
     </xsl:for-each>
 
-    <l>XCBSendRequest(c, &amp;xcb_ret.sequence, xcb_parts, &amp;xcb_req);</l>
+    <l>XCBSendRequest(c, &amp;xcb_ret.sequence, <!--
+    --><xsl:choose>
+         <xsl:when test="@has-reply">XCB_REQUEST_CHECKED</xsl:when>
+         <xsl:otherwise>0</xsl:otherwise>
+       </xsl:choose>, xcb_parts, &amp;xcb_req);</l>
     <l>return xcb_ret;</l>
   </xsl:template>
 

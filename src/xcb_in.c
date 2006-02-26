@@ -39,20 +39,14 @@
 typedef struct pending_reply {
     unsigned int request;
     enum workarounds workaround;
+    int flags;
     struct pending_reply *next;
 } pending_reply;
 
 typedef struct XCBReplyData {
     unsigned int request;
     void *data;
-    XCBGenericError **error;
 } XCBReplyData;
-
-static int match_request_error(const void *request, const void *data)
-{
-    const XCBGenericError *e = data;
-    return e->response_type == 0 && e->sequence == ((*(unsigned int *) request) & 0xffff);
-}
 
 static int match_reply(const void *request, const void *data)
 {
@@ -75,6 +69,7 @@ static int read_packet(XCBConnection *c)
     XCBGenericRep genrep;
     int length = 32;
     unsigned char *buf;
+    pending_reply *pend = 0;
 
     /* Wait for there to be enough data for us to read a whole packet */
     if(c->in.queue_len < length)
@@ -88,36 +83,40 @@ static int read_packet(XCBConnection *c)
     {
         int lastread = c->in.request_read;
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
-        if(c->in.request_read != lastread && !_xcb_queue_is_empty(c->in.current_reply))
+        if(c->in.request_read != lastread)
         {
-            _xcb_map_put(c->in.replies, lastread, c->in.current_reply);
-            c->in.current_reply = _xcb_queue_new();
+            pending_reply *oldpend = c->in.pending_replies;
+            if(oldpend && oldpend->request == lastread)
+            {
+                c->in.pending_replies = oldpend->next;
+                if(!oldpend->next)
+                    c->in.pending_replies_tail = &c->in.pending_replies;
+                free(oldpend);
+            }
+            if(!_xcb_queue_is_empty(c->in.current_reply))
+            {
+                _xcb_map_put(c->in.replies, lastread, c->in.current_reply);
+                c->in.current_reply = _xcb_queue_new();
+            }
         }
         if(c->in.request_read < lastread)
             c->in.request_read += 0x10000;
     }
 
+    if(genrep.response_type == 0 || genrep.response_type == 1)
+    {
+        pend = c->in.pending_replies;
+        if(pend && pend->request != c->in.request_read)
+            pend = 0;
+    }
+
     /* For reply packets, check that the entire packet is available. */
     if(genrep.response_type == 1)
     {
-        pending_reply *pend = c->in.pending_replies;
-        if(pend && pend->request == c->in.request_read)
+        if(pend && pend->workaround == WORKAROUND_GLX_GET_FB_CONFIGS_BUG)
         {
-            switch(pend->workaround)
-            {
-            case WORKAROUND_NONE:
-                break;
-            case WORKAROUND_GLX_GET_FB_CONFIGS_BUG:
-                {
-                    CARD32 *p = (CARD32 *) c->in.queue;
-                    genrep.length = p[2] * p[3] * 2;
-                }
-                break;
-            }
-            c->in.pending_replies = pend->next;
-            if(!pend->next)
-                c->in.pending_replies_tail = &c->in.pending_replies;
-            free(pend);
+            CARD32 *p = (CARD32 *) c->in.queue;
+            genrep.length = p[2] * p[3] * 2;
         }
         length += genrep.length * 4;
     }
@@ -131,7 +130,8 @@ static int read_packet(XCBConnection *c)
         return 0;
     }
 
-    if(buf[0] == 1) /* response is a reply */
+    /* reply, or checked error */
+    if(genrep.response_type == 1 || (genrep.response_type == 0 && pend && (pend->flags & XCB_REQUEST_CHECKED)))
     {
         XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
         _xcb_queue_enqueue(c->in.current_reply, buf);
@@ -140,18 +140,7 @@ static int read_packet(XCBConnection *c)
         return 1;
     }
 
-    if(buf[0] == 0) /* response is an error */
-    {
-        XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
-        if(reader && reader->error)
-        {
-            *reader->error = (XCBGenericError *) buf;
-            pthread_cond_signal(reader->data);
-            return 1;
-        }
-    }
-
-    /* event, or error without a waiting reader */
+    /* event, or unchecked error */
     _xcb_queue_enqueue(c->in.events, buf);
     pthread_cond_signal(&c->in.event_cond);
     return 1; /* I have something for you... */
@@ -198,20 +187,12 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     if(_xcb_list_find(c->in.readers, match_reply, &request))
         goto done; /* error */
 
-    if(e)
-    {
-        *e = _xcb_list_remove(c->in.events, match_request_error, &request);
-        if(*e)
-            goto done;
-    }
-
     reader.request = request;
     reader.data = &cond;
-    reader.error = e;
     _xcb_list_append(c->in.readers, &reader);
 
     /* If this request has not been read yet, wait for it. */
-    while(!(e && *e) && ((signed int) (c->in.request_read - request) < 0 ||
+    while(((signed int) (c->in.request_read - request) < 0 ||
             (c->in.request_read == request &&
 	     _xcb_queue_is_empty(c->in.current_reply))))
         if(!_xcb_conn_wait(c, /*should_write*/ 0, &cond))
@@ -229,6 +210,15 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     }
     else
         ret = _xcb_queue_dequeue(c->in.current_reply);
+
+    if(ret && ((XCBGenericRep *) ret)->response_type == 0) /* X error */
+    {
+        if(e)
+            *e = ret;
+        else
+            free(ret);
+        ret = 0;
+    }
 
 done:
     _xcb_list_remove(c->in.readers, match_reply, &request);
@@ -328,15 +318,16 @@ void _xcb_in_destroy(_xcb_in *in)
     }
 }
 
-int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround)
+int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround, int flags)
 {
-    if(workaround != WORKAROUND_NONE)
+    if(workaround != WORKAROUND_NONE || flags != 0)
     {
         pending_reply *pend = malloc(sizeof(pending_reply));
         if(!pend)
             return 0;
         pend->request = request;
         pend->workaround = workaround;
+        pend->flags = flags;
         pend->next = 0;
         *c->in.pending_replies_tail = pend;
         c->in.pending_replies_tail = &pend->next;

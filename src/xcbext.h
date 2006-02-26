@@ -51,7 +51,11 @@ typedef struct {
     BOOL isvoid;
 } XCBProtocolRequest;
 
-int XCBSendRequest(XCBConnection *c, unsigned int *sequence, struct iovec *vector, const XCBProtocolRequest *request);
+enum XCBSendRequestFlags {
+    XCB_REQUEST_CHECKED = 1 << 0
+};
+
+int XCBSendRequest(XCBConnection *c, unsigned int *sequence, int flags, struct iovec *vector, const XCBProtocolRequest *request);
 
 
 /* xcb_in.c */
