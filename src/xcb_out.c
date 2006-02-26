@@ -117,17 +117,14 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, struct iovec *vector
     for(i = 0; i < req->count; ++i)
         longlen += (vector[i].iov_len + 3) >> 2;
 
-    if(longlen > c->setup->maximum_request_length)
-    {
-        if(longlen > XCBGetMaximumRequestLength(c))
-            return 0; /* server can't take this; maybe need BIGREQUESTS? */
-    }
-    else
+    if(longlen <= c->setup->maximum_request_length)
     {
         /* we don't need BIGREQUESTS. */
         shortlen = longlen;
         longlen = 0;
     }
+    else if(longlen > XCBGetMaximumRequestLength(c))
+        return 0; /* server can't take this; maybe need BIGREQUESTS? */
 
     padded =
 #ifdef HAVE_ALLOCA
