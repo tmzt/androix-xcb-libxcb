@@ -243,11 +243,6 @@ XCBGenericEvent *XCBWaitEvent(XCBConnection *c)
 XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 {
     XCBGenericEvent *ret;
-
-#if XCBTRACEEVENT
-    fprintf(stderr, "Entering XCBWaitEvent\n");
-#endif
-
     pthread_mutex_lock(&c->iolock);
     /* _xcb_list_remove_head returns 0 on empty list. */
     while(!(ret = _xcb_queue_dequeue(c->in.events)))
@@ -256,11 +251,6 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 
     wake_up_next_reader(c);
     pthread_mutex_unlock(&c->iolock);
-
-#if XCBTRACEEVENT
-    fprintf(stderr, "Leaving XCBWaitEvent, event type %d\n", ret ? ret->response_type : -1);
-#endif
-
     return ret;
 }
 
