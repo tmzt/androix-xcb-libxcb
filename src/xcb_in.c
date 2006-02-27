@@ -36,6 +36,11 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
+struct event_list {
+    XCBGenericEvent *event;
+    struct event_list *next;
+};
+
 typedef struct pending_reply {
     unsigned int request;
     enum workarounds workaround;
@@ -68,8 +73,9 @@ static int read_packet(XCBConnection *c)
 {
     XCBGenericRep genrep;
     int length = 32;
-    unsigned char *buf;
+    void *buf;
     pending_reply *pend = 0;
+    struct event_list *event;
 
     /* Wait for there to be enough data for us to read a whole packet */
     if(c->in.queue_len < length)
@@ -141,9 +147,32 @@ static int read_packet(XCBConnection *c)
     }
 
     /* event, or unchecked error */
-    _xcb_queue_enqueue(c->in.events, buf);
+    event = malloc(sizeof(struct event_list));
+    if(!event)
+    {
+        free(buf);
+        return 0;
+    }
+    event->event = buf;
+    event->next = 0;
+    *c->in.events_tail = event;
+    c->in.events_tail = &event->next;
     pthread_cond_signal(&c->in.event_cond);
     return 1; /* I have something for you... */
+}
+
+static XCBGenericEvent *get_event(XCBConnection *c)
+{
+    struct event_list *cur = c->in.events;
+    XCBGenericEvent *ret;
+    if(!c->in.events)
+        return 0;
+    ret = cur->event;
+    c->in.events = cur->next;
+    if(!cur->next)
+        c->in.events_tail = &c->in.events;
+    free(cur);
+    return ret;
 }
 
 static int read_block(const int fd, void *buf, const size_t len)
@@ -238,8 +267,8 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 {
     XCBGenericEvent *ret;
     pthread_mutex_lock(&c->iolock);
-    /* _xcb_list_remove_head returns 0 on empty list. */
-    while(!(ret = _xcb_queue_dequeue(c->in.events)))
+    /* get_event returns 0 on empty list. */
+    while(!(ret = get_event(c)))
         if(!_xcb_conn_wait(c, /*should_write*/ 0, &c->in.event_cond))
             break;
 
@@ -256,7 +285,7 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
         *error = 0;
     /* FIXME: follow X meets Z architecture changes. */
     if(_xcb_in_read(c))
-        ret = _xcb_queue_dequeue(c->in.events);
+        ret = get_event(c);
     else if(error)
         *error = -1;
     else
@@ -293,11 +322,11 @@ int _xcb_in_init(_xcb_in *in)
     in->current_reply = _xcb_queue_new();
 
     in->replies = _xcb_map_new();
-    in->events = _xcb_queue_new();
     in->readers = _xcb_list_new();
-    if(!in->current_reply || !in->replies || !in->events || !in->readers)
+    if(!in->current_reply || !in->replies || !in->readers)
         return 0;
 
+    in->events_tail = &in->events;
     in->pending_replies_tail = &in->pending_replies;
 
     return 1;
@@ -308,8 +337,14 @@ void _xcb_in_destroy(_xcb_in *in)
     pthread_cond_destroy(&in->event_cond);
     _xcb_queue_delete(in->current_reply, free);
     _xcb_map_delete(in->replies, free);
-    _xcb_queue_delete(in->events, free);
     _xcb_list_delete(in->readers, 0);
+    while(in->events)
+    {
+        struct event_list *e = in->events;
+        in->events = e->next;
+        free(e->event);
+        free(e);
+    }
     while(in->pending_replies)
     {
         pending_reply *pend = in->pending_replies;
