@@ -84,6 +84,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
     static const char pad[3];
     int ret;
     int i;
+    CARD32 prefix[2];
     struct iovec *padded;
     int padlen = 0;
     enum workarounds workaround = WORKAROUND_NONE;
@@ -99,7 +100,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
 #else
         malloc
 #endif
-        ((req->count * 2 + 3) * sizeof(struct iovec));
+        ((req->count * 2 + 2) * sizeof(struct iovec));
 
     if(!(flags & XCB_REQUEST_RAW))
     {
@@ -134,14 +135,13 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         ((CARD16 *) vector[0].iov_base)[1] = shortlen;
         if(!shortlen)
         {
-            padded[0].iov_base = vector[0].iov_base;
-            padded[0].iov_len = sizeof(CARD32);
+            padded[0].iov_base = prefix;
+            padded[0].iov_len = sizeof(prefix);
+            prefix[0] = ((CARD32 *) vector[0].iov_base)[0];
+            prefix[1] = ++longlen;
             vector[0].iov_base = ((char *) vector[0].iov_base) + sizeof(CARD32);
             vector[0].iov_len -= sizeof(CARD32);
-            ++longlen;
-            padded[1].iov_base = &longlen;
-            padded[1].iov_len = sizeof(CARD32);
-            padlen = 2;
+            padlen = 1;
         }
     }
     flags &= ~XCB_REQUEST_RAW;
