@@ -91,9 +91,9 @@ static int read_packet(XCBConnection *c)
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
         if(c->in.request_read != lastread)
         {
-            pending_reply *oldpend = c->in.pending_replies;
-            if(oldpend && oldpend->request == lastread)
+            while(c->in.pending_replies && c->in.pending_replies->request < c->in.request_read)
             {
+                pending_reply *oldpend = c->in.pending_replies;
                 c->in.pending_replies = oldpend->next;
                 if(!oldpend->next)
                     c->in.pending_replies_tail = &c->in.pending_replies;
