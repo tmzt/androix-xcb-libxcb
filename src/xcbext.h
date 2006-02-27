@@ -52,7 +52,8 @@ typedef struct {
 } XCBProtocolRequest;
 
 enum XCBSendRequestFlags {
-    XCB_REQUEST_CHECKED = 1 << 0
+    XCB_REQUEST_CHECKED = 1 << 0,
+    XCB_REQUEST_RAW = 1 << 1
 };
 
 int XCBSendRequest(XCBConnection *c, unsigned int *sequence, int flags, struct iovec *vector, const XCBProtocolRequest *request);

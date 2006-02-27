@@ -86,45 +86,12 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
     int i;
     struct iovec *padded;
     int padlen = 0;
-    CARD16 shortlen = 0;
-    CARD32 longlen = 0;
     enum workarounds workaround = WORKAROUND_NONE;
 
     assert(c != 0);
     assert(request != 0);
     assert(vector != 0);
     assert(req->count > 0);
-
-    /* set the major opcode, and the minor opcode for extensions */
-    if(req->ext)
-    {
-        const XCBQueryExtensionRep *extension = XCBGetExtensionData(c, req->ext);
-        /* TODO: better error handling here, please! */
-        assert(extension && extension->present);
-        ((CARD8 *) vector[0].iov_base)[0] = extension->major_opcode;
-        ((CARD8 *) vector[0].iov_base)[1] = req->opcode;
-
-        /* do we need to work around the X server bug described in glx.xml? */
-        if(!req->isvoid && strcmp(req->ext->name, "GLX") &&
-                ((req->opcode == 17 && ((CARD32 *) vector[0].iov_base)[0] == 0x10004) ||
-                 req->opcode == 21))
-            workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
-    }
-    else
-        ((CARD8 *) vector[0].iov_base)[0] = req->opcode;
-
-    /* put together the length field, possibly using BIGREQUESTS */
-    for(i = 0; i < req->count; ++i)
-        longlen += (vector[i].iov_len + 3) >> 2;
-
-    if(longlen <= c->setup->maximum_request_length)
-    {
-        /* we don't need BIGREQUESTS. */
-        shortlen = longlen;
-        longlen = 0;
-    }
-    else if(longlen > XCBGetMaximumRequestLength(c))
-        return 0; /* server can't take this; maybe need BIGREQUESTS? */
 
     padded =
 #ifdef HAVE_ALLOCA
@@ -133,19 +100,51 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         malloc
 #endif
         ((req->count * 2 + 3) * sizeof(struct iovec));
-    /* set the length field. */
-    ((CARD16 *) vector[0].iov_base)[1] = shortlen;
-    if(!shortlen)
+
+    if(!(flags & XCB_REQUEST_RAW))
     {
-        padded[0].iov_base = vector[0].iov_base;
-        padded[0].iov_len = sizeof(CARD32);
-        vector[0].iov_base = ((char *) vector[0].iov_base) + sizeof(CARD32);
-        vector[0].iov_len -= sizeof(CARD32);
-        ++longlen;
-        padded[1].iov_base = &longlen;
-        padded[1].iov_len = sizeof(CARD32);
-        padlen = 2;
+        CARD16 shortlen = 0;
+        CARD32 longlen = 0;
+        /* set the major opcode, and the minor opcode for extensions */
+        if(req->ext)
+        {
+            const XCBQueryExtensionRep *extension = XCBGetExtensionData(c, req->ext);
+            /* TODO: better error handling here, please! */
+            assert(extension && extension->present);
+            ((CARD8 *) vector[0].iov_base)[0] = extension->major_opcode;
+            ((CARD8 *) vector[0].iov_base)[1] = req->opcode;
+        }
+        else
+            ((CARD8 *) vector[0].iov_base)[0] = req->opcode;
+
+        /* put together the length field, possibly using BIGREQUESTS */
+        for(i = 0; i < req->count; ++i)
+            longlen += (vector[i].iov_len + 3) >> 2;
+
+        if(longlen <= c->setup->maximum_request_length)
+        {
+            /* we don't need BIGREQUESTS. */
+            shortlen = longlen;
+            longlen = 0;
+        }
+        else if(longlen > XCBGetMaximumRequestLength(c))
+            return 0; /* server can't take this; maybe need BIGREQUESTS? */
+
+        /* set the length field. */
+        ((CARD16 *) vector[0].iov_base)[1] = shortlen;
+        if(!shortlen)
+        {
+            padded[0].iov_base = vector[0].iov_base;
+            padded[0].iov_len = sizeof(CARD32);
+            vector[0].iov_base = ((char *) vector[0].iov_base) + sizeof(CARD32);
+            vector[0].iov_len -= sizeof(CARD32);
+            ++longlen;
+            padded[1].iov_base = &longlen;
+            padded[1].iov_len = sizeof(CARD32);
+            padlen = 2;
+        }
     }
+    flags &= ~XCB_REQUEST_RAW;
 
     for(i = 0; i < req->count; ++i)
     {
@@ -158,6 +157,12 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         padded[padlen].iov_base = (caddr_t) pad;
         padded[padlen++].iov_len = XCB_PAD(vector[i].iov_len);
     }
+
+    /* do we need to work around the X server bug described in glx.xml? */
+    if(req->ext && !req->isvoid && strcmp(req->ext->name, "GLX") &&
+            ((req->opcode == 17 && ((CARD32 *) vector[0].iov_base)[0] == 0x10004) ||
+             req->opcode == 21))
+        workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
 
     /* get a sequence number and arrange for delivery. */
     pthread_mutex_lock(&c->iolock);
