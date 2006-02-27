@@ -46,10 +46,8 @@ typedef void (*XCBListFreeFunc)(void *);
 
 _xcb_list *_xcb_list_new(void);
 void _xcb_list_delete(_xcb_list *list, XCBListFreeFunc do_free);
-int _xcb_list_insert(_xcb_list *list, void *data);
 int _xcb_list_append(_xcb_list *list, void *data);
 void *_xcb_list_peek_head(_xcb_list *list);
-void *_xcb_list_remove_head(_xcb_list *list);
 void *_xcb_list_remove(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data);
 void *_xcb_list_find(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data);
 
@@ -58,7 +56,6 @@ typedef _xcb_list _xcb_map;
 _xcb_map *_xcb_map_new(void);
 void _xcb_map_delete(_xcb_map *q, XCBListFreeFunc do_free);
 int _xcb_map_put(_xcb_map *q, unsigned int key, void *data);
-void *_xcb_map_get(_xcb_map *q, unsigned int key);
 void *_xcb_map_remove(_xcb_map *q, unsigned int key);
 
 

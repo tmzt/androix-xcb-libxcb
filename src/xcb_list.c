@@ -53,33 +53,19 @@ _xcb_list *_xcb_list_new()
     return list;
 }
 
-static void _xcb_list_clear(_xcb_list *list, XCBListFreeFunc do_free)
-{
-    void *tmp;
-    while((tmp = _xcb_list_remove_head(list)))
-        if(do_free)
-            do_free(tmp);
-}
-
 void _xcb_list_delete(_xcb_list *list, XCBListFreeFunc do_free)
 {
     if(!list)
         return;
-    _xcb_list_clear(list, do_free);
+    while(list->head)
+    {
+        node *cur = list->head;
+        if(do_free)
+            do_free(cur->data);
+        list->head = cur->next;
+        free(cur);
+    }
     free(list);
-}
-
-int _xcb_list_insert(_xcb_list *list, void *data)
-{
-    node *cur;
-    cur = malloc(sizeof(node));
-    if(!cur)
-        return 0;
-    cur->data = data;
-
-    cur->next = list->head;
-    list->head = cur;
-    return 1;
 }
 
 int _xcb_list_append(_xcb_list *list, void *data)
@@ -101,20 +87,6 @@ void *_xcb_list_peek_head(_xcb_list *list)
     if(!list->head)
         return 0;
     return list->head->data;
-}
-
-void *_xcb_list_remove_head(_xcb_list *list)
-{
-    void *ret;
-    node *tmp = list->head;
-    if(!tmp)
-        return 0;
-    ret = tmp->data;
-    list->head = tmp->next;
-    if(!list->head)
-        list->tail = &list->head;
-    free(tmp);
-    return ret;
 }
 
 void *_xcb_list_remove(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data)
@@ -153,14 +125,17 @@ _xcb_map *_xcb_map_new(void) __attribute__ ((alias ("_xcb_list_new")));
 
 void _xcb_map_delete(_xcb_map *q, XCBListFreeFunc do_free)
 {
-    map_pair *tmp;
     if(!q)
         return;
-    while((tmp = _xcb_list_remove_head(q)))
+    while(q->head)
     {
+        node *cur = q->head;
+        map_pair *pair = cur->data;
         if(do_free)
-            do_free(tmp->value);
-        free(tmp);
+            do_free(pair->value);
+        q->head = cur->next;
+        free(pair);
+        free(cur);
     }
     free(q);
 }
@@ -183,14 +158,6 @@ int _xcb_map_put(_xcb_map *q, unsigned int key, void *data)
 static int match_map_pair(const void *key, const void *pair)
 {
     return ((map_pair *) pair)->key == *(unsigned int *) key;
-}
-
-void *_xcb_map_get(_xcb_map *q, unsigned int key)
-{
-    map_pair *cur = _xcb_list_find(q, match_map_pair, &key);
-    if(!cur)
-        return 0;
-    return cur->value;
 }
 
 void *_xcb_map_remove(_xcb_map *q, unsigned int key)
