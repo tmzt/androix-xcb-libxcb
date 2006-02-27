@@ -41,6 +41,11 @@ struct event_list {
     struct event_list *next;
 };
 
+struct reply_list {
+    void *reply;
+    struct reply_list *next;
+};
+
 typedef struct pending_reply {
     unsigned int request;
     enum workarounds workaround;
@@ -99,10 +104,11 @@ static int read_packet(XCBConnection *c)
                     c->in.pending_replies_tail = &c->in.pending_replies;
                 free(oldpend);
             }
-            if(!_xcb_queue_is_empty(c->in.current_reply))
+            if(c->in.current_reply)
             {
                 _xcb_map_put(c->in.replies, lastread, c->in.current_reply);
-                c->in.current_reply = _xcb_queue_new();
+                c->in.current_reply = 0;
+                c->in.current_reply_tail = &c->in.current_reply;
             }
         }
         if(c->in.request_read < lastread)
@@ -140,7 +146,13 @@ static int read_packet(XCBConnection *c)
     if(genrep.response_type == 1 || (genrep.response_type == 0 && pend && (pend->flags & XCB_REQUEST_CHECKED)))
     {
         XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
-        _xcb_queue_enqueue(c->in.current_reply, buf);
+        struct reply_list *cur = malloc(sizeof(struct reply_list));
+        if(!cur)
+            return 0;
+        cur->reply = buf;
+        cur->next = 0;
+        *c->in.current_reply_tail = cur;
+        c->in.current_reply_tail = &cur->next;
         if(reader)
             pthread_cond_signal(reader->data);
         return 1;
@@ -175,6 +187,17 @@ static XCBGenericEvent *get_event(XCBConnection *c)
     return ret;
 }
 
+static void free_reply_list(struct reply_list *head)
+{
+    while(head)
+    {
+        struct reply_list *cur = head;
+        head = cur->next;
+        free(cur->reply);
+        free(cur);
+    }
+}
+
 static int read_block(const int fd, void *buf, const size_t len)
 {
     int done = 0;
@@ -202,6 +225,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
 {
     pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
     XCBReplyData reader;
+    struct reply_list *head;
     void *ret = 0;
     if(e)
         *e = 0;
@@ -222,31 +246,40 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
 
     /* If this request has not been read yet, wait for it. */
     while(((signed int) (c->in.request_read - request) < 0 ||
-            (c->in.request_read == request &&
-	     _xcb_queue_is_empty(c->in.current_reply))))
+            (c->in.request_read == request && !c->in.current_reply)))
         if(!_xcb_conn_wait(c, /*should_write*/ 0, &cond))
             goto done;
 
     if(c->in.request_read != request)
     {
-        _xcb_queue *q = _xcb_map_get(c->in.replies, request);
-        if(q)
-        {
-            ret = _xcb_queue_dequeue(q);
-            if(_xcb_queue_is_empty(q))
-                _xcb_queue_delete(_xcb_map_remove(c->in.replies, request), free);
-        }
+        head = _xcb_map_remove(c->in.replies, request);
+        if(head && head->next)
+            _xcb_map_put(c->in.replies, request, head->next);
     }
     else
-        ret = _xcb_queue_dequeue(c->in.current_reply);
-
-    if(ret && ((XCBGenericRep *) ret)->response_type == 0) /* X error */
     {
-        if(e)
-            *e = ret;
-        else
-            free(ret);
-        ret = 0;
+        head = c->in.current_reply;
+        if(head)
+        {
+            c->in.current_reply = head->next;
+            if(!head->next)
+                c->in.current_reply_tail = &c->in.current_reply;
+        }
+    }
+
+    if(head)
+    {
+        ret = head->reply;
+        free(head);
+
+        if(((XCBGenericRep *) ret)->response_type == 0) /* X error */
+        {
+            if(e)
+                *e = ret;
+            else
+                free(ret);
+            ret = 0;
+        }
     }
 
 done:
@@ -319,13 +352,13 @@ int _xcb_in_init(_xcb_in *in)
     in->queue_len = 0;
 
     in->request_read = 0;
-    in->current_reply = _xcb_queue_new();
 
     in->replies = _xcb_map_new();
     in->readers = _xcb_list_new();
-    if(!in->current_reply || !in->replies || !in->readers)
+    if(!in->replies || !in->readers)
         return 0;
 
+    in->current_reply_tail = &in->current_reply;
     in->events_tail = &in->events;
     in->pending_replies_tail = &in->pending_replies;
 
@@ -335,8 +368,8 @@ int _xcb_in_init(_xcb_in *in)
 void _xcb_in_destroy(_xcb_in *in)
 {
     pthread_cond_destroy(&in->event_cond);
-    _xcb_queue_delete(in->current_reply, free);
-    _xcb_map_delete(in->replies, free);
+    free_reply_list(in->current_reply);
+    _xcb_map_delete(in->replies, (void (*)(void *)) free_reply_list);
     _xcb_list_delete(in->readers, 0);
     while(in->events)
     {

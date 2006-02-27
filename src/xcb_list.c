@@ -144,16 +144,6 @@ void *_xcb_list_find(_xcb_list *list, int (*cmp)(const void *, const void *), co
     return 0;
 }
 
-_xcb_queue *_xcb_queue_new(void) __attribute__ ((alias ("_xcb_list_new")));
-void _xcb_queue_delete(_xcb_queue *q, XCBListFreeFunc do_free) __attribute__ ((alias ("_xcb_list_delete")));
-int _xcb_queue_enqueue(_xcb_queue *q, void *data) __attribute__ ((alias ("_xcb_list_append")));
-void *_xcb_queue_dequeue(_xcb_queue *q) __attribute__ ((alias ("_xcb_list_remove_head")));
-
-int _xcb_queue_is_empty(_xcb_queue *q)
-{
-    return q->head == 0;
-}
-
 typedef struct {
     unsigned int key;
     void *value;

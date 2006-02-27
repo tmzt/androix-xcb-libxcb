@@ -53,14 +53,6 @@ void *_xcb_list_remove_head(_xcb_list *list);
 void *_xcb_list_remove(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data);
 void *_xcb_list_find(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data);
 
-typedef _xcb_list _xcb_queue;
-
-_xcb_queue *_xcb_queue_new(void);
-void _xcb_queue_delete(_xcb_queue *q, XCBListFreeFunc do_free);
-int _xcb_queue_enqueue(_xcb_queue *q, void *data);
-void *_xcb_queue_dequeue(_xcb_queue *q);
-int _xcb_queue_is_empty(_xcb_queue *q);
-
 typedef _xcb_list _xcb_map;
 
 _xcb_map *_xcb_map_new(void);
@@ -106,7 +98,8 @@ typedef struct _xcb_in {
     int queue_len;
 
     unsigned int request_read;
-    _xcb_queue *current_reply;
+    struct reply_list *current_reply;
+    struct reply_list **current_reply_tail;
 
     _xcb_map *replies;
     struct event_list *events;
