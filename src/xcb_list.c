@@ -32,20 +32,21 @@
 
 typedef struct node {
     struct node *next;
+    unsigned int key;
     void *data;
 } node;
 
-struct _xcb_list {
+struct _xcb_map {
     node *head;
     node **tail;
 };
 
 /* Private interface */
 
-_xcb_list *_xcb_list_new()
+_xcb_map *_xcb_map_new()
 {
-    _xcb_list *list;
-    list = malloc(sizeof(_xcb_list));
+    _xcb_map *list;
+    list = malloc(sizeof(_xcb_map));
     if(!list)
         return 0;
     list->head = 0;
@@ -53,7 +54,7 @@ _xcb_list *_xcb_list_new()
     return list;
 }
 
-void _xcb_list_delete(_xcb_list *list, XCBListFreeFunc do_free)
+void _xcb_map_delete(_xcb_map *list, XCBListFreeFunc do_free)
 {
     if(!list)
         return;
@@ -68,32 +69,24 @@ void _xcb_list_delete(_xcb_list *list, XCBListFreeFunc do_free)
     free(list);
 }
 
-int _xcb_list_append(_xcb_list *list, void *data)
+int _xcb_map_put(_xcb_map *list, unsigned int key, void *data)
 {
-    node *cur;
-    cur = malloc(sizeof(node));
+    node *cur = malloc(sizeof(node));
     if(!cur)
         return 0;
+    cur->key = key;
     cur->data = data;
     cur->next = 0;
-
     *list->tail = cur;
     list->tail = &cur->next;
     return 1;
 }
 
-void *_xcb_list_peek_head(_xcb_list *list)
-{
-    if(!list->head)
-        return 0;
-    return list->head->data;
-}
-
-void *_xcb_list_remove(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data)
+void *_xcb_map_remove(_xcb_map *list, unsigned int key)
 {
     node **cur;
     for(cur = &list->head; *cur; cur = &(*cur)->next)
-        if(cmp(data, (*cur)->data))
+        if((*cur)->key == key)
         {
             node *tmp = *cur;
             void *ret = (*cur)->data;
@@ -105,68 +98,4 @@ void *_xcb_list_remove(_xcb_list *list, int (*cmp)(const void *, const void *), 
             return ret;
         }
     return 0;
-}
-
-void *_xcb_list_find(_xcb_list *list, int (*cmp)(const void *, const void *), const void *data)
-{
-    node *cur;
-    for(cur = list->head; cur; cur = cur->next)
-        if(cmp(data, cur->data))
-            return cur->data;
-    return 0;
-}
-
-typedef struct {
-    unsigned int key;
-    void *value;
-} map_pair;
-
-_xcb_map *_xcb_map_new(void) __attribute__ ((alias ("_xcb_list_new")));
-
-void _xcb_map_delete(_xcb_map *q, XCBListFreeFunc do_free)
-{
-    if(!q)
-        return;
-    while(q->head)
-    {
-        node *cur = q->head;
-        map_pair *pair = cur->data;
-        if(do_free)
-            do_free(pair->value);
-        q->head = cur->next;
-        free(pair);
-        free(cur);
-    }
-    free(q);
-}
-
-int _xcb_map_put(_xcb_map *q, unsigned int key, void *data)
-{
-    map_pair *cur = malloc(sizeof(map_pair));
-    if(!cur)
-        return 0;
-    cur->key = key;
-    cur->value = data;
-    if(!_xcb_list_append(q, cur))
-    {
-        free(cur);
-        return 0;
-    }
-    return 1;
-}
-
-static int match_map_pair(const void *key, const void *pair)
-{
-    return ((map_pair *) pair)->key == *(unsigned int *) key;
-}
-
-void *_xcb_map_remove(_xcb_map *q, unsigned int key)
-{
-    map_pair *cur = _xcb_list_remove(q, match_map_pair, &key);
-    void *ret;
-    if(!cur)
-        return 0;
-    ret = cur->value;
-    free(cur);
-    return ret;
 }
