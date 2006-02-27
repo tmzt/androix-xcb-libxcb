@@ -53,19 +53,19 @@ typedef struct pending_reply {
     struct pending_reply *next;
 } pending_reply;
 
-typedef struct XCBReplyData {
+typedef struct reader_list {
     unsigned int request;
     pthread_cond_t *data;
-} XCBReplyData;
+} reader_list;
 
 static int match_reply(const void *request, const void *data)
 {
-    return ((XCBReplyData *) data)->request == *(unsigned int *) request;
+    return ((reader_list *) data)->request == *(unsigned int *) request;
 }
 
 static void wake_up_next_reader(XCBConnection *c)
 {
-    XCBReplyData *cur = _xcb_list_peek_head(c->in.readers);
+    reader_list *cur = _xcb_list_peek_head(c->in.readers);
     int pthreadret;
     if(cur)
         pthreadret = pthread_cond_signal(cur->data);
@@ -145,7 +145,7 @@ static int read_packet(XCBConnection *c)
     /* reply, or checked error */
     if(genrep.response_type == 1 || (genrep.response_type == 0 && pend && (pend->flags & XCB_REQUEST_CHECKED)))
     {
-        XCBReplyData *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
+        reader_list *reader = _xcb_list_find(c->in.readers, match_reply, &c->in.request_read);
         struct reply_list *cur = malloc(sizeof(struct reply_list));
         if(!cur)
             return 0;
@@ -224,7 +224,7 @@ static int read_block(const int fd, void *buf, const size_t len)
 void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
 {
     pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-    XCBReplyData reader;
+    reader_list reader;
     struct reply_list *head;
     void *ret = 0;
     if(e)
