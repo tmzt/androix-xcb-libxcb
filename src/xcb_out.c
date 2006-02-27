@@ -170,6 +170,10 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         return -1;
     }
 
+    /* wait for other writing threads to get out of my way. */
+    while(c->out.writing)
+        pthread_cond_wait(&c->out.cond, &c->iolock);
+
     *request = ++c->out.request;
 
     _xcb_in_expect_reply(c, *request, workaround, flags);
@@ -250,8 +254,6 @@ int _xcb_out_write(XCBConnection *c)
 
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
 {
-    while(c->out.writing)
-        pthread_cond_wait(&c->out.cond, &c->iolock);
     assert(!c->out.vec && !c->out.vec_len);
     while(count && c->out.queue_len + vector[0].iov_len < sizeof(c->out.queue))
     {
