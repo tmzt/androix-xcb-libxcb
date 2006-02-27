@@ -55,7 +55,7 @@ typedef struct pending_reply {
 
 typedef struct XCBReplyData {
     unsigned int request;
-    void *data;
+    pthread_cond_t *data;
 } XCBReplyData;
 
 static int match_reply(const void *request, const void *data)
