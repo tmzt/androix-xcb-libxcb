@@ -31,16 +31,6 @@
 #include <string.h>
 #include <errno.h>
 
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
- #pragma alloca
-#  endif
-# endif
-#endif
-
 #include "xcb.h"
 #include "xcbext.h"
 #include "xcbint.h"
@@ -81,12 +71,9 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
 
 int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct iovec *vector, const XCBProtocolRequest *req)
 {
-    static const char pad[3];
     int ret;
-    int i;
     CARD32 prefix[2];
-    struct iovec *padded;
-    int padlen = 0;
+    int veclen = req->count;
     enum workarounds workaround = WORKAROUND_NONE;
 
     assert(c != 0);
@@ -94,18 +81,12 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
     assert(vector != 0);
     assert(req->count > 0);
 
-    padded =
-#ifdef HAVE_ALLOCA
-        alloca
-#else
-        malloc
-#endif
-        ((req->count * 2 + 2) * sizeof(struct iovec));
-
     if(!(flags & XCB_REQUEST_RAW))
     {
+        static const char pad[3];
+        int i;
         CARD16 shortlen = 0;
-        CARD32 longlen = 0;
+        size_t longlen = 0;
         /* set the major opcode, and the minor opcode for extensions */
         if(req->ext)
         {
@@ -120,7 +101,16 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
 
         /* put together the length field, possibly using BIGREQUESTS */
         for(i = 0; i < req->count; ++i)
-            longlen += (vector[i].iov_len + 3) >> 2;
+        {
+            longlen += vector[i].iov_len;
+            if(!vector[i].iov_base)
+            {
+                vector[i].iov_base = (caddr_t) pad;
+                assert(vector[i].iov_len <= sizeof(pad));
+            }
+        }
+        assert((longlen & 3) == 0);
+        longlen >>= 2;
 
         if(longlen <= c->setup->maximum_request_length)
         {
@@ -135,28 +125,17 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         ((CARD16 *) vector[0].iov_base)[1] = shortlen;
         if(!shortlen)
         {
-            padded[0].iov_base = prefix;
-            padded[0].iov_len = sizeof(prefix);
+            memmove(vector + 1, vector, veclen++ * sizeof(*vector));
+            ++veclen;
+            vector[0].iov_base = prefix;
+            vector[0].iov_len = sizeof(prefix);
             prefix[0] = ((CARD32 *) vector[0].iov_base)[0];
             prefix[1] = ++longlen;
-            vector[0].iov_base = ((char *) vector[0].iov_base) + sizeof(CARD32);
-            vector[0].iov_len -= sizeof(CARD32);
-            padlen = 1;
+            vector[1].iov_base = ((char *) vector[1].iov_base) + sizeof(CARD32);
+            vector[1].iov_len -= sizeof(CARD32);
         }
     }
     flags &= ~XCB_REQUEST_RAW;
-
-    for(i = 0; i < req->count; ++i)
-    {
-        if(!vector[i].iov_len)
-            continue;
-        padded[padlen].iov_base = vector[i].iov_base;
-        padded[padlen++].iov_len = vector[i].iov_len;
-        if(!XCB_PAD(vector[i].iov_len))
-            continue;
-        padded[padlen].iov_base = (caddr_t) pad;
-        padded[padlen++].iov_len = XCB_PAD(vector[i].iov_len);
-    }
 
     /* do we need to work around the X server bug described in glx.xml? */
     if(req->ext && !req->isvoid && strcmp(req->ext->name, "GLX") &&
@@ -169,9 +148,6 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
     if(req->isvoid && !force_sequence_wrap(c))
     {
         pthread_mutex_unlock(&c->iolock);
-#ifndef HAVE_ALLOCA
-        free(padded);
-#endif
         return -1;
     }
 
@@ -183,12 +159,8 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
 
     _xcb_in_expect_reply(c, *request, workaround, flags);
 
-    ret = _xcb_out_write_block(c, padded, padlen);
+    ret = _xcb_out_write_block(c, vector, veclen);
     pthread_mutex_unlock(&c->iolock);
-#ifndef HAVE_ALLOCA
-    free(padded);
-#endif
-
     return ret;
 }
 

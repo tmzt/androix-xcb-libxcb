@@ -567,7 +567,7 @@ authorization from the authors.
     <xsl:variable name="struct"
                   select="$pass1/xcb/struct[@name=current()/@ref]" />
 
-    <xsl:variable name="num-parts" select="1+count($struct/list)" />
+    <xsl:variable name="num-parts" select="1+count($struct/list)*2" />
 
     <l>static const XCBProtocolRequest xcb_req = {</l>
     <indent>
@@ -586,7 +586,7 @@ authorization from the authors.
     <l>};</l>
 
     <l />
-    <l>struct iovec xcb_parts[<xsl:value-of select="$num-parts" />];</l>
+    <l>struct iovec xcb_parts[<xsl:value-of select="$num-parts+2" />];</l>
     <l><xsl:value-of select="../@type" /> xcb_ret;</l>
     <l><xsl:value-of select="@ref" /> xcb_out;</l>
 
@@ -598,17 +598,21 @@ authorization from the authors.
     <l />
     <l>xcb_parts[0].iov_base = &amp;xcb_out;</l>
     <l>xcb_parts[0].iov_len = sizeof(xcb_out);</l>
+    <l>xcb_parts[1].iov_base = 0;</l>
+    <l>xcb_parts[1].iov_len = -xcb_parts[0].iov_len &amp; 3;</l>
 
     <xsl:for-each select="$struct/list">
-      <l>xcb_parts[<xsl:number />].iov_base = (void *) <!--
+      <l>xcb_parts[<xsl:number /> * 2].iov_base = (void *) <!--
       --><xsl:value-of select="@name" />;</l>
-      <l>xcb_parts[<xsl:number />].iov_len = <!--
+      <l>xcb_parts[<xsl:number /> * 2].iov_len = <!--
       --><xsl:apply-templates mode="output-expression" /><!--
       --><xsl:if test="not(@type = 'void')">
         <xsl:text> * sizeof(</xsl:text>
         <xsl:value-of select="@type" />
         <xsl:text>)</xsl:text>
       </xsl:if>;</l>
+      <l>xcb_parts[<xsl:number /> * 2 + 1].iov_base = 0;</l>
+      <l>xcb_parts[<xsl:number /> * 2 + 1].iov_len = -xcb_parts[<xsl:number /> * 2].iov_len &amp; 3;</l>
     </xsl:for-each>
 
     <l>XCBSendRequest(c, &amp;xcb_ret.sequence, <!--
