@@ -89,25 +89,30 @@ static int read_packet(XCBConnection *c)
     {
         int lastread = c->in.request_read;
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
+        if(c->in.request_read < lastread)
+            c->in.request_read += 0x10000;
+
         if(c->in.request_read != lastread)
         {
-            while(c->in.pending_replies && c->in.pending_replies->request < c->in.request_read)
-            {
-                pending_reply *oldpend = c->in.pending_replies;
-                c->in.pending_replies = oldpend->next;
-                if(!oldpend->next)
-                    c->in.pending_replies_tail = &c->in.pending_replies;
-                free(oldpend);
-            }
             if(c->in.current_reply)
             {
                 _xcb_map_put(c->in.replies, lastread, c->in.current_reply);
                 c->in.current_reply = 0;
                 c->in.current_reply_tail = &c->in.current_reply;
             }
+            c->in.request_completed = c->in.request_read - 1;
         }
-        if(c->in.request_read < lastread)
-            c->in.request_read += 0x10000;
+        if(genrep.response_type != 1) /* not reply: error or event */
+            c->in.request_completed = c->in.request_read; /* XXX: does event/error imply no more replies? */
+
+        while(c->in.pending_replies && c->in.pending_replies->request <= c->in.request_completed)
+        {
+            pending_reply *oldpend = c->in.pending_replies;
+            c->in.pending_replies = oldpend->next;
+            if(!oldpend->next)
+                c->in.pending_replies_tail = &c->in.pending_replies;
+            free(oldpend);
+        }
     }
 
     if(genrep.response_type == 0 || genrep.response_type == 1)
@@ -246,9 +251,10 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     reader.next = *prev_reader;
     *prev_reader = &reader;
 
-    /* If this request has not been read yet, wait for it. */
-    while(((signed int) (c->in.request_read - request) < 0 ||
-            (c->in.request_read == request && !c->in.current_reply)))
+    /* If this request has not completed yet and has no reply waiting,
+     * wait for one. */
+    while(c->in.request_completed < request &&
+            !(c->in.request_read == request && c->in.current_reply))
         if(!_xcb_conn_wait(c, /*should_write*/ 0, &cond))
             goto done;
 
@@ -359,6 +365,7 @@ int _xcb_in_init(_xcb_in *in)
     in->queue_len = 0;
 
     in->request_read = 0;
+    in->request_completed = 0;
 
     in->replies = _xcb_map_new();
     if(!in->replies)

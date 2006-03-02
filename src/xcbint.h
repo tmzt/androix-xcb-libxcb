@@ -87,6 +87,7 @@ typedef struct _xcb_in {
     int queue_len;
 
     unsigned int request_read;
+    unsigned int request_completed;
     struct reply_list *current_reply;
     struct reply_list **current_reply_tail;
 
