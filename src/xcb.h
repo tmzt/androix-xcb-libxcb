@@ -80,12 +80,16 @@ typedef struct {
     BYTE response_type;
     CARD8 pad0;
     CARD16 sequence;
+    CARD32 pad[7];
+    CARD32 full_sequence;
 } XCBGenericEvent;
 
 typedef struct {
     BYTE response_type;
     BYTE error_code;
     CARD16 sequence;
+    CARD32 pad[7];
+    CARD32 full_sequence;
 } XCBGenericError;
 
 typedef struct {

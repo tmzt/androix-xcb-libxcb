@@ -133,7 +133,7 @@ static int read_packet(XCBConnection *c)
         length += genrep.length * 4;
     }
 
-    buf = malloc(length);
+    buf = malloc(length + (genrep.response_type == 1 ? 0 : sizeof(CARD32)));
     if(!buf)
         return 0;
     if(_xcb_in_read_block(c, buf, length) <= 0)
@@ -141,6 +141,9 @@ static int read_packet(XCBConnection *c)
         free(buf);
         return 0;
     }
+
+    if(genrep.response_type != 1)
+        ((XCBGenericEvent *) buf)->full_sequence = c->in.request_read;
 
     /* reply, or checked error */
     if(genrep.response_type == 1 || (genrep.response_type == 0 && pend && (pend->flags & XCB_REQUEST_CHECKED)))
