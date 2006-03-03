@@ -238,6 +238,10 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     if(e)
         *e = 0;
 
+    /* If an error occurred when issuing the request, fail immediately. */
+    if(!request)
+        return 0;
+
     pthread_mutex_lock(&c->iolock);
 
     /* If this request has not been written yet, write it. */

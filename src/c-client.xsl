@@ -615,7 +615,7 @@ authorization from the authors.
       <l>xcb_parts[<xsl:value-of select="3 + position() * 2"/>].iov_len = -xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_len &amp; 3;</l>
     </xsl:for-each>
 
-    <l>XCBSendRequest(c, &amp;xcb_ret.sequence, <!--
+    <l>xcb_ret.sequence = XCBSendRequest(c, <!--
     --><xsl:choose>
          <xsl:when test="@has-reply">XCB_REQUEST_CHECKED</xsl:when>
          <xsl:otherwise>0</xsl:otherwise>

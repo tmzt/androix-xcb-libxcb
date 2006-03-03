@@ -56,7 +56,7 @@ enum XCBSendRequestFlags {
     XCB_REQUEST_RAW = 1 << 1
 };
 
-int XCBSendRequest(XCBConnection *c, unsigned int *sequence, int flags, struct iovec *vector, const XCBProtocolRequest *request);
+unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, const XCBProtocolRequest *request);
 
 
 /* xcb_in.c */

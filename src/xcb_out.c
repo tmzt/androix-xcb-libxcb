@@ -69,15 +69,14 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
     return c->out.maximum_request_length;
 }
 
-int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct iovec *vector, const XCBProtocolRequest *req)
+unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, const XCBProtocolRequest *req)
 {
-    int ret;
+    unsigned int request;
     CARD32 prefix[2];
     int veclen = req->count;
     enum workarounds workaround = WORKAROUND_NONE;
 
     assert(c != 0);
-    assert(request != 0);
     assert(vector != 0);
     assert(req->count > 0);
 
@@ -92,8 +91,8 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         if(req->ext)
         {
             const XCBQueryExtensionRep *extension = XCBGetExtensionData(c, req->ext);
-            /* TODO: better error handling here, please! */
-            assert(extension && extension->present);
+            if(!(extension && extension->present))
+                return 0;
             ((CARD8 *) vector[0].iov_base)[0] = extension->major_opcode;
             ((CARD8 *) vector[0].iov_base)[1] = req->opcode;
         }
@@ -148,20 +147,22 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
     if(req->isvoid && !force_sequence_wrap(c))
     {
         pthread_mutex_unlock(&c->iolock);
-        return -1;
+        return 0;
     }
 
     /* wait for other writing threads to get out of my way. */
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
 
-    *request = ++c->out.request;
+    request = ++c->out.request;
+    assert(request != 0);
 
-    _xcb_in_expect_reply(c, *request, workaround, flags);
+    _xcb_in_expect_reply(c, request, workaround, flags);
 
-    ret = _xcb_out_write_block(c, vector, veclen);
+    if(!_xcb_out_write_block(c, vector, veclen))
+        request = 0;
     pthread_mutex_unlock(&c->iolock);
-    return ret;
+    return request;
 }
 
 int XCBFlush(XCBConnection *c)
