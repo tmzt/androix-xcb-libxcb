@@ -87,6 +87,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         int i;
         CARD16 shortlen = 0;
         size_t longlen = 0;
+        assert(vector[0].iov_len >= 4);
         /* set the major opcode, and the minor opcode for extensions */
         if(req->ext)
         {
