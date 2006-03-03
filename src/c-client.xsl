@@ -567,7 +567,7 @@ authorization from the authors.
     <xsl:variable name="struct"
                   select="$pass1/xcb/struct[@name=current()/@ref]" />
 
-    <xsl:variable name="num-parts" select="1+count($struct/list)*2" />
+    <xsl:variable name="num-parts" select="(1+count($struct/list))*2" />
 
     <l>static const XCBProtocolRequest xcb_req = {</l>
     <indent>
