@@ -126,8 +126,7 @@ int XCBSendRequest(XCBConnection *c, unsigned int *request, int flags, struct io
         ((CARD16 *) vector[0].iov_base)[1] = shortlen;
         if(!shortlen)
         {
-            memmove(vector + 1, vector, veclen++ * sizeof(*vector));
-            ++veclen;
+            --vector, ++veclen;
             vector[0].iov_base = prefix;
             vector[0].iov_len = sizeof(prefix);
             prefix[0] = ((CARD32 *) vector[0].iov_base)[0];
@@ -237,12 +236,14 @@ int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
     {
         memcpy(c->out.queue + c->out.queue_len, vector[0].iov_base, vector[0].iov_len);
         c->out.queue_len += vector[0].iov_len;
+        vector[0].iov_base = (char *) vector[0].iov_base + vector[0].iov_len;
+        vector[0].iov_len = 0;
         ++vector, --count;
     }
     if(!count)
         return 1;
 
-    memmove(vector + 1, vector, count++ * sizeof(struct iovec));
+    --vector, ++count;
     vector[0].iov_base = c->out.queue;
     vector[0].iov_len = c->out.queue_len;
     c->out.queue_len = 0;

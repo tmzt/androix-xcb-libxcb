@@ -596,30 +596,30 @@ authorization from the authors.
                          mode="assign" />
 
     <l />
-    <l>xcb_parts[0].iov_base = &amp;xcb_out;</l>
-    <l>xcb_parts[0].iov_len = sizeof(xcb_out);</l>
-    <l>xcb_parts[1].iov_base = 0;</l>
-    <l>xcb_parts[1].iov_len = -xcb_parts[0].iov_len &amp; 3;</l>
+    <l>xcb_parts[2].iov_base = &amp;xcb_out;</l>
+    <l>xcb_parts[2].iov_len = sizeof(xcb_out);</l>
+    <l>xcb_parts[3].iov_base = 0;</l>
+    <l>xcb_parts[3].iov_len = -xcb_parts[2].iov_len &amp; 3;</l>
 
     <xsl:for-each select="$struct/list">
-      <l>xcb_parts[<xsl:value-of select="position() * 2"/>].iov_base = (void *) <!--
+      <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_base = (void *) <!--
       --><xsl:value-of select="@name" />;</l>
-      <l>xcb_parts[<xsl:value-of select="position() * 2"/>].iov_len = <!--
+      <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_len = <!--
       --><xsl:apply-templates mode="output-expression" /><!--
       --><xsl:if test="not(@type = 'void')">
         <xsl:text> * sizeof(</xsl:text>
         <xsl:value-of select="@type" />
         <xsl:text>)</xsl:text>
       </xsl:if>;</l>
-      <l>xcb_parts[<xsl:value-of select="1 + position() * 2"/>].iov_base = 0;</l>
-      <l>xcb_parts[<xsl:value-of select="1 + position() * 2"/>].iov_len = -xcb_parts[<xsl:value-of select="position() * 2"/>].iov_len &amp; 3;</l>
+      <l>xcb_parts[<xsl:value-of select="3 + position() * 2"/>].iov_base = 0;</l>
+      <l>xcb_parts[<xsl:value-of select="3 + position() * 2"/>].iov_len = -xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_len &amp; 3;</l>
     </xsl:for-each>
 
     <l>XCBSendRequest(c, &amp;xcb_ret.sequence, <!--
     --><xsl:choose>
          <xsl:when test="@has-reply">XCB_REQUEST_CHECKED</xsl:when>
          <xsl:otherwise>0</xsl:otherwise>
-       </xsl:choose>, xcb_parts, &amp;xcb_req);</l>
+       </xsl:choose>, xcb_parts + 2, &amp;xcb_req);</l>
     <l>return xcb_ret;</l>
   </xsl:template>
 
