@@ -21,6 +21,18 @@ div.section li.title
   font-weight: bold;
   font-size: 22px;
 }
+div.section li.title p
+{
+  font-size: 18px;
+}
+div.section li.title ul
+{
+  font-size: 18px;
+}
+div.section li.title ol
+{
+  font-size: 18px;
+}
 div.section li.subtitle
 {
   font-weight: bold;
@@ -34,6 +46,7 @@ div.section li.subsubtitle
 div.comp
 {
   border: thin solid #000000;
+  color: #000000;
   background-color: #ffffe0;
   padding: 14px;
 }
@@ -46,6 +59,7 @@ div.comp div.title
 div.comp div.xlib
 {
   font-family: monospace;
+  font-size: 10px;
   position: absolute;
   width: 49%;
   margin-left: 0px; 
@@ -54,6 +68,7 @@ div.comp div.xlib
 div.comp div.xcb
 {
   font-family: monospace;
+  font-size: 10px;
   position: relative;
   margin-left: 51%;
   margin-top: 10px;
@@ -61,22 +76,24 @@ div.comp div.xcb
 pre.code
 {
   border: thin solid #000000;
+  color: #000000;
   background-color: #efefef;
   padding: 4px;
   text-align: left;
-  font-size: 10;
+  font-size: 10px;
 }
 pre.text
 {
   border: thin solid #000000;
+  color: #000000;
   background-color: #efefef;
   padding: 4px;
   text-align: left;
-  font-size: 10;
+  font-size: 10px;
 }
 span.code
 {
   font-family: monospace;
-  font-size: 10;
+  font-size: 10px;
 }
 
