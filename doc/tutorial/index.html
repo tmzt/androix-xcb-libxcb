@@ -167,25 +167,28 @@
       <p>
       This tutorial is intended to people who want to start to program
       with the <a href="http://xcb.freedesktop.org">XCB</a>
-      library. As for the <a href="http://tronche.com/gui/x/xlib/introduction">Xlib</a>
-      library, it is useless and a real X 
-      programmer should use a much higher level of abstraction, such
-      as using Motif,
+      library. keep in mind that XCB, like the
+      <a href="http://tronche.com/gui/x/xlib/introduction">Xlib</a>
+      library, isn't what post programmers wanting to write X
+      applications are looking for. They should use a much higher
+      level GUI toolkit like Motif,
       <a href="http://www.lesstif.org">LessTiff</a>,
       <a href="http://www.gtk.org">GTK</a>,
       <a href="http://www.trolltech.com">QT</a> or
-      <a href="http://www.enlightenment.org">EWL</a>. However,
+      <a href="http://www.enlightenment.org">EWL</a>, or use
+      <a href="http://cairographics.org">Cairo</a>.
+      However,
       we need to start somewhere. More than this, knowing how things
       work down below is never a bad idea.
       </p>
       <p>
       After reading this tutorial, one should be able to write very
-      simple graphical programs, but not programs with a descent user
-      interface. For such programs, one of the previously mentioned
+      simple graphical programs, but not programs with descent user
+      interfaces. For such programs, one of the previously mentioned
       library should be used.
       </p>
       <p>
-      But what is XCB ? Xlib has been
+      But what is XCB? Xlib has been
       the standard C binding for the <a href="http://www.xfree86.org">X
       Window System</a> protocol for many years now. It is an
       excellent piece of work, but there are applications for which it
@@ -255,8 +258,8 @@
       X servers were extended to allow clients running on the local
       machine with more optimized access to the server (note that an X
       protocol message may be several hundreds of KB in size), such as
-      using shred memory, or using Unix domain sockets (a method for
-      creating a logical channel on a Unix system between two processors).
+      using shared memory, or using Unix domain sockets (a method for
+      creating a logical channel on a Unix system between two processes).
       </p>
       <li class="title"><a name="asynch">GUI programming: the asynchronous model</a></li>
       <p>
@@ -266,7 +269,7 @@
       that program mostly sits idle, waiting for events sent by the X
       server, and then acts upon these events. An event may say "The
       user pressed the 1st button mouse in spot (x,y)", or "The window
-      you control needs to be redrawn". In order for the program to e
+      you control needs to be redrawn". In order for the program to be
       responsive to the user input, as well as to refresh requests, it
       needs to handle each event in a rather short period of time
       (e.g. less that 200 milliseconds, as a rule of thumb).
@@ -505,7 +508,7 @@ main ()
 	drawing some text, etc). In order to avoid the need to supply
 	hundreds of parameters to each drawing function, a graphical
 	context structure is used. We set the various drawing options
-	in this structure, and then, we pass a pointer to this
+	in this structure, and then we pass a pointer to this
 	structure to any drawing routines. This is rather handy, as we
 	often need to perform several drawing requests with the same
 	options. Thus, we would initialize a graphical context, set
@@ -2082,7 +2085,7 @@ main (int argc, char *argv[])
       text. Text strings have two major properties: the characters to
       be drawn and the font with which they are drawn. In order to
       draw text, we need to first request the X server to load a
-      font. We the assign a font to a Graphic Context, and finally, we
+      font. We then assign a font to a Graphic Context, and finally, we
       draw the text in a window, using the Graphic Context.
       </p>
       <ol>
@@ -2298,7 +2301,7 @@ XCBVoidCookie XCBUnmapWindow(XCBConnection *c, XCBWINDOW window);
 	X Events subsection, we can set some attributes to the window
 	(that is, the position, the size, the events the window will
 	receive, etc). If we want to modify them, but the window is
-	already created, we can change them by using hte following
+	already created, we can change them by using the following
 	function:
 	</p>
 	<pre class="code">
@@ -2401,8 +2404,8 @@ XCBConfigureWindow (c, win, CWStackMode, values);
 	<p>
 	Just like we can set various attributes of our windows, we can
 	also ask the X server supply the current values of these
-	attributes. For example, we can chewk where a window is
-	located on the screen, what is its current size, wheter it is
+	attributes. For example, we can check where a window is
+	located on the screen, what is its current size, whether it is
 	mapped or not, etc. The structure that contains some of this
 	information is
 	</p>
@@ -2811,7 +2814,7 @@ XCBVoidCookie XCBFreeColormap (XCBConnection *c,   /* The connection */
 	<p></p>
         <li class="subtitle"><a name="alloccolor">Allocating and freeing a color entry</a></li>
 	<p>
-	Once we got access to some color map, we can strat allocating
+	Once we got access to some color map, we can start allocating
 	colors. The informations related to a color are stored in the
 	following structure:
 	</p>
@@ -2891,7 +2894,7 @@ main (int argc, char *argv[])
       </ol>
       <li class="title"><a name="pixmaps">X Bitmaps and Pixmaps</a></li>
       <p>
-      One thing many so-called "Multi-Media" applications need to od,
+      One thing many so-called "Multi-Media" applications need to do,
       is display images. In the X world, this is done using bitmaps
       and pixmaps. We have already seen some usage of them when
       setting an icon for our application. Lets study them further,
@@ -2907,7 +2910,7 @@ main (int argc, char *argv[])
       pixmaps).
       </p>
       <ol>
-        <li class="subtitle"><a name="pixmapswhat">What is a X Bitmap ? An X Pixmap ?</a></li>
+        <li class="subtitle"><a name="pixmapswhat">What is a X Bitmap? An X Pixmap?</a></li>
 	<p>
 	An X bitmap is a two-color image stored in a format specific
 	to the X window system. When stored in a file, the bitmap data
@@ -2946,7 +2949,7 @@ typedef union {
 } XCBDRAWABLE;
 </pre>
         <p>
-	in order to avoid confusion between a window and a pixmap.The
+	in order to avoid confusion between a window and a pixmap. The
 	operations that will work indifferently on a window or a pixmap
 	will require a <span class="code">XCBDRAWABLE</span>
 	</p>
@@ -3017,7 +3020,7 @@ XCBVoidCookie XCBCopyArea (XCBConnection *c,             /* Pointer to the XCBCo
 	<p>
 	<b>One important note should be made</b>: it is possible to
 	create pixmaps with different depths on the same screen. When
-	we perform copy operations (a pixmaap onto a window, etc), we
+	we perform copy operations (a pixmap onto a window, etc), we
 	should make sure that both source and target have the same
 	depth. If they have a different depth, the operation would
 	fail. The exception to this is if we copy a specific bit plane
@@ -3026,7 +3029,7 @@ XCBVoidCookie XCBCopyArea (XCBConnection *c,             /* Pointer to the XCBCo
 	event, we can copy a specific plain to the target window (in
 	actuality, setting a specific bit in the color of each pixel
 	copied). This can be used to generate strange graphic effects
-	in widow, but beyond the scope of this tutorial.
+	in widow, but that is beyond the scope of this tutorial.
 	</p>
         <li class="subtitle"><a name="pixmapsfree"></a>Freeing a pixmap</li>
 	<p>
@@ -3057,8 +3060,8 @@ XCBVoidCookie XCBFreePixmap (XCBConnection *c,        /* Pointer to the XCBConne
       <ol>
         <li class="subtitle"><a name="displaystructure">Members of the Display structure</a></li>
         In this section, we look at how to translate the macros that
-        returns some members of the <span class="code">Display</span>
-        structure. They are obtain by using a function that requires a
+        return some members of the <span class="code">Display</span>
+        structure. They are obtained by using a function that requires a
         <span class="code">XCBConnection *</span> or a member of the
         <span class="code">XCBConnSetupSuccessRep</span> structure
         (via the function <span class="code">XCBGetSetup</span>), or
@@ -3283,8 +3286,8 @@ image_byte_order = XCBGetSetup (c)-&gt;image_byte_order;
       Xlib, you just provide the number of the screen and you grab it
       from an array. With XCB, you iterate over all the screens to
       obtain the one you want. The complexity of this operation is
-      O(n). So the best is to store this structure if you often use
-      it. See <a href="#ScreenOfDisplay">ScreenOfDisplay</a> just below.
+      O(n). So the best is to store this structure if you use
+      it often. See <a href="#ScreenOfDisplay">ScreenOfDisplay</a> just below.
       </p>
       <p>
       Xlib provides generally two functions to obtain the characteristics
@@ -3301,7 +3304,7 @@ image_byte_order = XCBGetSetup (c)-&gt;image_byte_order;
           <li class="subtitle"><a name="ScreenOfDisplay">ScreenOfDisplay</a></li>
           <p>
           This function returns the Xlib <span class="code">Screen</span>
-          structure. With XCB, you iterate over all thee screens and
+          structure. With XCB, you iterate over all the screens and
           once you get the one you want, you return it:
           </p>
           <pre class="code"><a name="ScreenOfDisplay"></a>
@@ -3324,7 +3327,7 @@ XCBSCREEN *ScreenOfDisplay (XCBConnection *c,
           </p>
           <p>
           All the functions below will use the result of that
-          fonction, as they just grab a specific member of the
+          function, as they just grab a specific member of the
           <span class="code">XCBSCREEN</span> structure.
           </p>
           <li class="subtitle"><a name="DefaultScreenOfDisplay"></a>DefaultScreenOfDisplay</li>
@@ -3411,10 +3414,10 @@ if (screen)
 </pre>
           <p>
           To get the <span class="code">XCBVISUALTYPE</span>
-          structure, it's a bit less easier. You have to get the
+          structure, it's a bit less easy. You have to get the
           <span class="code">XCBSCREEN</span> structure that you want,
           get its <span class="code">root_visual</span> member,
-          then iterate on the <span class="code">XCBDEPTH</span>s
+          then iterate over the <span class="code">XCBDEPTH</span>s
           and the <span class="code">XCBVISUALTYPE</span>s, and compare
           the <span class="code">XCBVISUALID</span> of these <span class="code">XCBVISUALTYPE</span>s:
           with <span class="code">root_visual</span>:
