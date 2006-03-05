@@ -785,12 +785,12 @@ main (int argc, char *argv[])
   XCBCreateWindow (c,                        /* Connection          */
                    0,                        /* depth               */
                    win.window,               /* window Id           */
-                   screen-&gt;root,          /* parent window       */
+                   screen-&gt;root,             /* parent window       */
                    0, 0,                     /* x, y                */
                    150, 150,                 /* width, height       */
                    10,                       /* border_width        */
                    InputOutput,              /* class               */
-                   screen-&gt;root_visual,   /* visual              */
+                   screen-&gt;root_visual,      /* visual              */
                    0, NULL);                 /* masks, not used yet */
 
   /* Map the window on the screen */
@@ -1320,12 +1320,12 @@ main (int argc, char *argv[])
   XCBCreateWindow (c,                        /* Connection          */
                    0,                        /* depth               */
                    win.window,               /* window Id           */
-                   screen-&gt;root,          /* parent window       */
+                   screen-&gt;root,             /* parent window       */
                    0, 0,                     /* x, y                */
                    150, 150,                 /* width, height       */
                    10,                       /* border_width        */
                    InputOutput,              /* class               */
-                   screen-&gt;root_visual,   /* visual              */
+                   screen-&gt;root_visual,      /* visual              */
                    mask, values);            /* masks */
 
   /* Map the window on the screen */
@@ -1946,12 +1946,12 @@ main (int argc, char *argv[])
   XCBCreateWindow (c,                        /* Connection          */
                    0,                        /* depth               */
                    win.window,               /* window Id           */
-                   screen-&gt;root,          /* parent window       */
+                   screen-&gt;root,             /* parent window       */
                    0, 0,                     /* x, y                */
                    150, 150,                 /* width, height       */
                    10,                       /* border_width        */
                    InputOutput,              /* class               */
-                   screen-&gt;root_visual,   /* visual              */
+                   screen-&gt;root_visual,      /* visual              */
                    mask, values);            /* masks */
 
   /* Map the window on the screen */
@@ -2203,7 +2203,7 @@ main (int argc, char *argv[])
 
   /* Create the window */
   XCBCreateWindow (c,                        /* Connection          */
-                    0,                        /* depth               */
+                   0,                        /* depth               */
                    win.window,               /* window Id           */
                    screen-&gt;root,             /* parent window       */
                    0, 0,                     /* x, y                */
