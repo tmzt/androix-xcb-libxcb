@@ -36,18 +36,6 @@
 #include "xcbint.h"
 #include "extensions/bigreq.h"
 
-static int force_sequence_wrap(XCBConnection *c)
-{
-    int ret = 1;
-    if((c->out.request - c->in.request_read) > 65530)
-    {
-        pthread_mutex_unlock(&c->iolock);
-        ret = XCBSync(c, 0);
-        pthread_mutex_lock(&c->iolock);
-    }
-    return ret;
-}
-
 /* Public interface */
 
 CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
@@ -71,8 +59,16 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
 
 unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, const XCBProtocolRequest *req)
 {
+    static const union {
+        struct {
+            CARD8 major;
+            CARD8 pad;
+            CARD16 len;
+        } fields;
+        CARD32 packet;
+    } sync = { { /* GetInputFocus */ 43, 0, 1 } };
     unsigned int request;
-    CARD32 prefix[2];
+    CARD32 prefix[3] = { 0 };
     int veclen = req->count;
     enum workarounds workaround = WORKAROUND_NONE;
 
@@ -124,15 +120,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
         /* set the length field. */
         ((CARD16 *) vector[0].iov_base)[1] = shortlen;
         if(!shortlen)
-        {
-            --vector, ++veclen;
-            vector[0].iov_base = prefix;
-            vector[0].iov_len = sizeof(prefix);
-            prefix[0] = ((CARD32 *) vector[0].iov_base)[0];
-            prefix[1] = ++longlen;
-            vector[1].iov_base = ((char *) vector[1].iov_base) + sizeof(CARD32);
-            vector[1].iov_len -= sizeof(CARD32);
-        }
+            prefix[2] = ++longlen;
     }
     flags &= ~XCB_REQUEST_RAW;
 
@@ -144,20 +132,36 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
 
     /* get a sequence number and arrange for delivery. */
     pthread_mutex_lock(&c->iolock);
-    if(req->isvoid && !force_sequence_wrap(c))
-    {
-        pthread_mutex_unlock(&c->iolock);
-        return 0;
-    }
-
     /* wait for other writing threads to get out of my way. */
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
 
+    if(req->isvoid && c->out.request == c->in.request_expected + (1 << 16) - 1)
+    {
+        prefix[0] = sync.packet;
+        request = ++c->out.request;
+        _xcb_in_expect_reply(c, request, WORKAROUND_NONE, XCB_REQUEST_DISCARD_REPLY);
+        c->in.request_expected = c->out.request;
+    }
+
     request = ++c->out.request;
     assert(request != 0);
-
     _xcb_in_expect_reply(c, request, workaround, flags);
+    if(!req->isvoid)
+        c->in.request_expected = c->out.request;
+
+    if(prefix[0] || prefix[2])
+    {
+        --vector, ++veclen;
+        if(prefix[2])
+        {
+            prefix[1] = ((CARD32 *) vector[1].iov_base)[0];
+            vector[1].iov_base = (CARD32 *) vector[1].iov_base + 1;
+            vector[1].iov_len -= sizeof(CARD32);
+        }
+        vector[0].iov_len = sizeof(CARD32) * (prefix[0] ? 1 : 0 | prefix[2] ? 2 : 0);
+        vector[0].iov_base = prefix + !prefix[0];
+    }
 
     if(!_xcb_out_write_block(c, vector, veclen))
         request = 0;
