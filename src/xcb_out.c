@@ -136,7 +136,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
 
-    if(req->isvoid && c->out.request == c->in.request_expected + (1 << 16) - 1)
+    if(req->isvoid && c->out.request == c->in.request_expected + (1 << 16) - 2)
     {
         prefix[0] = sync.packet;
         request = ++c->out.request;
