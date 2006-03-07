@@ -32,6 +32,10 @@
 #include "config.h"
 #endif
 
+#ifdef GCC_HAS_VISIBILITY
+#pragma GCC visibility push(hidden)
+#endif
+
 enum workarounds {
     WORKAROUND_NONE,
     WORKAROUND_GLX_GET_FB_CONFIGS_BUG
@@ -154,4 +158,9 @@ struct XCBConnection {
 };
 
 int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *cond);
+
+#ifdef GCC_HAS_VISIBILITY
+#pragma GCC visibility pop
+#endif
+
 #endif

@@ -99,6 +99,8 @@ CWARNFLAGS="-Wall -pedantic -Wpointer-arith \
 	-Wstrict-prototypes -Wmissing-declarations -Wnested-externs"
 AC_SUBST(CWARNFLAGS)
 
+GCC_CHECK_VISIBILITY()
+
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_CONFIG_FILES([xcb.pc])
 
