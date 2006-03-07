@@ -86,6 +86,7 @@ typedef struct _xcb_in {
     char queue[4096];
     int queue_len;
 
+    unsigned int request_expected;
     unsigned int request_read;
     unsigned int request_completed;
     struct reply_list *current_reply;

@@ -91,6 +91,8 @@ static int read_packet(XCBConnection *c)
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
         if(c->in.request_read < lastread)
             c->in.request_read += 0x10000;
+        if(c->in.request_read > c->in.request_expected)
+            c->in.request_expected = c->in.request_read;
 
         if(c->in.request_read != lastread)
         {
@@ -140,6 +142,11 @@ static int read_packet(XCBConnection *c)
     {
         free(buf);
         return 0;
+    }
+    if(pend && (pend->flags & XCB_REQUEST_DISCARD_REPLY))
+    {
+        free(buf);
+        return 1;
     }
 
     if(genrep.response_type != 1)
