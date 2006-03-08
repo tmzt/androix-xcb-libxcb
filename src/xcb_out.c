@@ -237,7 +237,7 @@ int _xcb_out_write(XCBConnection *c)
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
 {
     assert(!c->out.vec && !c->out.vec_len);
-    while(count && c->out.queue_len + vector[0].iov_len < sizeof(c->out.queue))
+    while(count && c->out.queue_len + vector[0].iov_len <= sizeof(c->out.queue))
     {
         memcpy(c->out.queue + c->out.queue_len, vector[0].iov_base, vector[0].iov_len);
         c->out.queue_len += vector[0].iov_len;
