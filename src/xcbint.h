@@ -76,7 +76,7 @@ typedef struct _xcb_out {
 int _xcb_out_init(_xcb_out *out);
 void _xcb_out_destroy(_xcb_out *out);
 
-int _xcb_out_write(XCBConnection *c);
+int _xcb_out_write(XCBConnection *c, struct iovec **vector, int *count);
 int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count);
 int _xcb_out_flush(XCBConnection *c);
 

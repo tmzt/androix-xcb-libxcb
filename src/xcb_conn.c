@@ -231,7 +231,7 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
             ret = ret && _xcb_in_read(c);
 
         if(FD_ISSET(c->fd, &wfds))
-            ret = ret && _xcb_out_write(c);
+            ret = ret && _xcb_out_write(c, &c->out.vec, &c->out.vec_len);
     }
 
     if(should_write)

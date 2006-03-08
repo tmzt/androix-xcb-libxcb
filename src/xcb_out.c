@@ -207,29 +207,29 @@ void _xcb_out_destroy(_xcb_out *out)
 }
 
 /* precondition: there must be something for us to write. */
-int _xcb_out_write(XCBConnection *c)
+int _xcb_out_write(XCBConnection *c, struct iovec **vector, int *count)
 {
     int n;
     assert(!c->out.queue_len);
-    n = writev(c->fd, c->out.vec, c->out.vec_len);
+    n = writev(c->fd, *vector, *count);
     if(n < 0 && errno == EAGAIN)
         return 1;
     if(n <= 0)
         return 0;
 
-    for(; c->out.vec_len; --c->out.vec_len, ++c->out.vec)
+    for(; *count; --*count, ++*vector)
     {
-        int cur = c->out.vec->iov_len;
+        int cur = (*vector)->iov_len;
         if(cur > n)
             cur = n;
-        c->out.vec->iov_len -= cur;
-        c->out.vec->iov_base = (char *) c->out.vec->iov_base + cur;
+        (*vector)->iov_len -= cur;
+        (*vector)->iov_base = (char *) (*vector)->iov_base + cur;
         n -= cur;
-        if(c->out.vec->iov_len)
+        if((*vector)->iov_len)
             break;
     }
-    if(!c->out.vec_len)
-        c->out.vec = 0;
+    if(!*count)
+        *vector = 0;
     assert(n == 0);
     return 1;
 }
