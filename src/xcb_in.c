@@ -269,7 +269,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
      * wait for one. */
     while(c->in.request_completed < request &&
             !(c->in.request_read == request && c->in.current_reply))
-        if(!_xcb_conn_wait(c, /*should_write*/ 0, &cond))
+        if(!_xcb_conn_wait(c, &cond, 0, 0))
             goto done;
 
     if(c->in.request_read != request)
@@ -329,7 +329,7 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
     pthread_mutex_lock(&c->iolock);
     /* get_event returns 0 on empty list. */
     while(!(ret = get_event(c)))
-        if(!_xcb_conn_wait(c, /*should_write*/ 0, &c->in.event_cond))
+        if(!_xcb_conn_wait(c, &c->in.event_cond, 0, 0))
             break;
 
     wake_up_next_reader(c);

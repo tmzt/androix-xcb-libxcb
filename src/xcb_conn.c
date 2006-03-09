@@ -198,13 +198,13 @@ void XCBDisconnect(XCBConnection *c)
 
 /* Private interface */
 
-int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *cond)
+int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count)
 {
     int ret;
     fd_set rfds, wfds;
 
     /* If the thing I should be doing is already being done, wait for it. */
-    if(should_write ? c->out.writing : c->in.reading)
+    if(count ? c->out.writing : c->in.reading)
     {
         pthread_cond_wait(cond, &c->iolock);
         return 1;
@@ -215,7 +215,7 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
     ++c->in.reading;
 
     FD_ZERO(&wfds);
-    if(should_write)
+    if(count)
     {
         FD_SET(c->fd, &wfds);
         ++c->out.writing;
@@ -231,10 +231,10 @@ int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *con
             ret = ret && _xcb_in_read(c);
 
         if(FD_ISSET(c->fd, &wfds))
-            ret = ret && _xcb_out_write(c, &c->out.vec, &c->out.vec_len);
+            ret = ret && _xcb_out_write(c, vector, count);
     }
 
-    if(should_write)
+    if(count)
         --c->out.writing;
     --c->in.reading;
 

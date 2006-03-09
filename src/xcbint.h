@@ -157,7 +157,7 @@ struct XCBConnection {
     _xcb_xid xid;
 };
 
-int _xcb_conn_wait(XCBConnection *c, const int should_write, pthread_cond_t *cond);
+int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count);
 
 #ifdef GCC_HAS_VISIBILITY
 #pragma GCC visibility pop
