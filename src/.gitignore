@@ -1,14 +1,3 @@
-.deps
-.libs
-Makefile
-Makefile.in
-config.h
-config.h.in
-stamp-h1
-*.lo
-*.loT
-*.la
-*.o
 xproto.c
 xproto.h
 xcb_des.c
@@ -16,4 +5,3 @@ xcb_types.c
 xcb_types.h
 extensions
 X11
-check_all
