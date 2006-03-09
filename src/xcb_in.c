@@ -36,6 +36,9 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
+#define XCBError 0
+#define XCBReply 1
+
 struct event_list {
     XCBGenericEvent *event;
     struct event_list *next;
@@ -85,7 +88,7 @@ static int read_packet(XCBConnection *c)
     memcpy(&genrep, c->in.queue, sizeof(genrep));
 
     /* Compute 32-bit sequence number of this packet. */
-    if((genrep.response_type & 0x7f) != KeymapNotify)
+    if((genrep.response_type & 0x7f) != XCBKeymapNotify)
     {
         int lastread = c->in.request_read;
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
@@ -104,7 +107,7 @@ static int read_packet(XCBConnection *c)
             }
             c->in.request_completed = c->in.request_read - 1;
         }
-        if(genrep.response_type != 1) /* not reply: error or event */
+        if(genrep.response_type != XCBReply) /* error or event */
             c->in.request_completed = c->in.request_read; /* XXX: does event/error imply no more replies? */
 
         while(c->in.pending_replies && c->in.pending_replies->request <= c->in.request_completed)
@@ -117,7 +120,7 @@ static int read_packet(XCBConnection *c)
         }
     }
 
-    if(genrep.response_type == 0 || genrep.response_type == 1)
+    if(genrep.response_type == XCBError || genrep.response_type == XCBReply)
     {
         pend = c->in.pending_replies;
         if(pend && pend->request != c->in.request_read)
@@ -125,7 +128,7 @@ static int read_packet(XCBConnection *c)
     }
 
     /* For reply packets, check that the entire packet is available. */
-    if(genrep.response_type == 1)
+    if(genrep.response_type == XCBReply)
     {
         if(pend && pend->workaround == WORKAROUND_GLX_GET_FB_CONFIGS_BUG)
         {
@@ -135,7 +138,7 @@ static int read_packet(XCBConnection *c)
         length += genrep.length * 4;
     }
 
-    buf = malloc(length + (genrep.response_type == 1 ? 0 : sizeof(CARD32)));
+    buf = malloc(length + (genrep.response_type == XCBReply ? 0 : sizeof(CARD32)));
     if(!buf)
         return 0;
     if(_xcb_in_read_block(c, buf, length) <= 0)
@@ -149,11 +152,12 @@ static int read_packet(XCBConnection *c)
         return 1;
     }
 
-    if(genrep.response_type != 1)
+    if(genrep.response_type != XCBReply)
         ((XCBGenericEvent *) buf)->full_sequence = c->in.request_read;
 
     /* reply, or checked error */
-    if(genrep.response_type == 1 || (genrep.response_type == 0 && pend && (pend->flags & XCB_REQUEST_CHECKED)))
+    if( genrep.response_type == XCBReply ||
+       (genrep.response_type == XCBError && pend && (pend->flags & XCB_REQUEST_CHECKED)))
     {
         reader_list *reader;
         struct reply_list *cur = malloc(sizeof(struct reply_list));
@@ -294,7 +298,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
         ret = head->reply;
         free(head);
 
-        if(((XCBGenericRep *) ret)->response_type == 0) /* X error */
+        if(((XCBGenericRep *) ret)->response_type == XCBError)
         {
             if(e)
                 *e = ret;
