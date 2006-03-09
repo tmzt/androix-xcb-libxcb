@@ -168,7 +168,9 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen)
     case AF_UNIX:
 	/*block*/ { 
 	    struct sockaddr_un *su = (struct sockaddr_un *) sockname;
+	    char *sockbuf = (char *) sockname;
 	    assert(sizeof(*su) >= socknamelen);
+	    sockbuf[socknamelen] = 0;	/* null-terminate path */
 	    display = strrchr(su->sun_path, 'X');
 	    if (display == 0)
 		return 0;   /* sockname is mangled somehow */
