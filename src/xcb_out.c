@@ -120,7 +120,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
             longlen += vector[i].iov_len;
             if(!vector[i].iov_base)
             {
-                vector[i].iov_base = (caddr_t) pad;
+                vector[i].iov_base = (char *) pad;
                 assert(vector[i].iov_len <= sizeof(pad));
             }
         }
