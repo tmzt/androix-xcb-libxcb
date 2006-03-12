@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <errno.h>
 
 #include "xcb.h"
 #include "xcbext.h"
@@ -222,34 +221,6 @@ void _xcb_out_destroy(_xcb_out *out)
 {
     pthread_cond_destroy(&out->cond);
     pthread_mutex_destroy(&out->reqlenlock);
-}
-
-/* precondition: there must be something for us to write. */
-int _xcb_out_write(XCBConnection *c, struct iovec **vector, int *count)
-{
-    int n;
-    assert(!c->out.queue_len);
-    n = writev(c->fd, *vector, *count);
-    if(n < 0 && errno == EAGAIN)
-        return 1;
-    if(n <= 0)
-        return 0;
-
-    for(; *count; --*count, ++*vector)
-    {
-        int cur = (*vector)->iov_len;
-        if(cur > n)
-            cur = n;
-        (*vector)->iov_len -= cur;
-        (*vector)->iov_base = (char *) (*vector)->iov_base + cur;
-        n -= cur;
-        if((*vector)->iov_len)
-            break;
-    }
-    if(!*count)
-        *vector = 0;
-    assert(n == 0);
-    return 1;
 }
 
 int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count)

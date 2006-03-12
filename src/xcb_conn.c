@@ -33,6 +33,7 @@
 #include <netinet/in.h>
 #include <sys/select.h>
 #include <sys/fcntl.h>
+#include <errno.h>
 
 #include "xcb.h"
 #include "xcbint.h"
@@ -138,6 +139,34 @@ static int read_setup(XCBConnection *c)
     return 1;
 }
 
+/* precondition: there must be something for us to write. */
+static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
+{
+    int n;
+    assert(!c->out.queue_len);
+    n = writev(c->fd, *vector, *count);
+    if(n < 0 && errno == EAGAIN)
+        return 1;
+    if(n <= 0)
+        return 0;
+
+    for(; *count; --*count, ++*vector)
+    {
+        int cur = (*vector)->iov_len;
+        if(cur > n)
+            cur = n;
+        (*vector)->iov_len -= cur;
+        (*vector)->iov_base = (char *) (*vector)->iov_base + cur;
+        n -= cur;
+        if((*vector)->iov_len)
+            break;
+    }
+    if(!*count)
+        *vector = 0;
+    assert(n == 0);
+    return 1;
+}
+
 /* Public interface */
 
 XCBConnSetupSuccessRep *XCBGetSetup(XCBConnection *c)
@@ -233,7 +262,7 @@ int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector
             ret = ret && _xcb_in_read(c);
 
         if(FD_ISSET(c->fd, &wfds))
-            ret = ret && _xcb_out_write(c, vector, count);
+            ret = ret && write_vec(c, vector, count);
     }
 
     if(count)
