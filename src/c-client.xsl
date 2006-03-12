@@ -596,13 +596,13 @@ authorization from the authors.
                          mode="assign" />
 
     <l />
-    <l>xcb_parts[2].iov_base = &amp;xcb_out;</l>
+    <l>xcb_parts[2].iov_base = (char *) &amp;xcb_out;</l>
     <l>xcb_parts[2].iov_len = sizeof(xcb_out);</l>
     <l>xcb_parts[3].iov_base = 0;</l>
     <l>xcb_parts[3].iov_len = -xcb_parts[2].iov_len &amp; 3;</l>
 
     <xsl:for-each select="$struct/list">
-      <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_base = (void *) <!--
+      <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_base = (char *) <!--
       --><xsl:value-of select="@name" />;</l>
       <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_len = <!--
       --><xsl:apply-templates mode="output-expression" /><!--

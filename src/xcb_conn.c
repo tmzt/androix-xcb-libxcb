@@ -73,18 +73,18 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     parts[count].iov_len = sizeof(XCBConnSetupReq);
     parts[count++].iov_base = &out;
     parts[count].iov_len = XCB_PAD(sizeof(XCBConnSetupReq));
-    parts[count++].iov_base = (caddr_t) pad;
+    parts[count++].iov_base = (char *) pad;
 
     if(auth_info)
     {
         parts[count].iov_len = out.authorization_protocol_name_len = auth_info->namelen;
         parts[count++].iov_base = auth_info->name;
         parts[count].iov_len = XCB_PAD(out.authorization_protocol_name_len);
-        parts[count++].iov_base = (caddr_t) pad;
+        parts[count++].iov_base = (char *) pad;
         parts[count].iov_len = out.authorization_protocol_data_len = auth_info->datalen;
         parts[count++].iov_base = auth_info->data;
         parts[count].iov_len = XCB_PAD(out.authorization_protocol_data_len);
-        parts[count++].iov_base = (caddr_t) pad;
+        parts[count++].iov_base = (char *) pad;
     }
     assert(count <= sizeof(parts) / sizeof(*parts));
 

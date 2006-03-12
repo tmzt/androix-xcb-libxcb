@@ -27,6 +27,7 @@
 
 #ifndef __XCB_H
 #define __XCB_H
+#include <sys/types.h>
 #include <X11/Xmd.h>
 #include <X11/X.h>
 #include <sys/uio.h>
