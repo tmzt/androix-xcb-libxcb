@@ -36,6 +36,26 @@
 #include "xcbint.h"
 #include "extensions/bigreq.h"
 
+static int write_block(XCBConnection *c, struct iovec *vector, int count)
+{
+    while(count && c->out.queue_len + vector[0].iov_len <= sizeof(c->out.queue))
+    {
+        memcpy(c->out.queue + c->out.queue_len, vector[0].iov_base, vector[0].iov_len);
+        c->out.queue_len += vector[0].iov_len;
+        vector[0].iov_base = (char *) vector[0].iov_base + vector[0].iov_len;
+        vector[0].iov_len = 0;
+        ++vector, --count;
+    }
+    if(!count)
+        return 1;
+
+    --vector, ++count;
+    vector[0].iov_base = c->out.queue;
+    vector[0].iov_len = c->out.queue_len;
+    c->out.queue_len = 0;
+    return _xcb_out_send(c, &vector, &count);
+}
+
 /* Public interface */
 
 CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
@@ -163,7 +183,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
         vector[0].iov_base = prefix + !prefix[0];
     }
 
-    if(!_xcb_out_write_block(c, vector, veclen))
+    if(!write_block(c, vector, veclen))
         request = 0;
     pthread_mutex_unlock(&c->iolock);
     return request;
@@ -173,7 +193,7 @@ int XCBFlush(XCBConnection *c)
 {
     int ret;
     pthread_mutex_lock(&c->iolock);
-    ret = _xcb_out_flush(c);
+    ret = _xcb_out_flush_to(c, c->out.request);
     pthread_mutex_unlock(&c->iolock);
     return ret;
 }
@@ -187,8 +207,6 @@ int _xcb_out_init(_xcb_out *out)
     out->writing = 0;
 
     out->queue_len = 0;
-    out->vec = 0;
-    out->vec_len = 0;
 
     out->request = 0;
     out->request_written = 0;
@@ -234,46 +252,32 @@ int _xcb_out_write(XCBConnection *c, struct iovec **vector, int *count)
     return 1;
 }
 
-int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count)
-{
-    assert(!c->out.vec && !c->out.vec_len);
-    while(count && c->out.queue_len + vector[0].iov_len <= sizeof(c->out.queue))
-    {
-        memcpy(c->out.queue + c->out.queue_len, vector[0].iov_base, vector[0].iov_len);
-        c->out.queue_len += vector[0].iov_len;
-        vector[0].iov_base = (char *) vector[0].iov_base + vector[0].iov_len;
-        vector[0].iov_len = 0;
-        ++vector, --count;
-    }
-    if(!count)
-        return 1;
-
-    --vector, ++count;
-    vector[0].iov_base = c->out.queue;
-    vector[0].iov_len = c->out.queue_len;
-    c->out.queue_len = 0;
-
-    c->out.vec_len = count;
-    c->out.vec = vector;
-    return _xcb_out_flush(c);
-}
-
-int _xcb_out_flush(XCBConnection *c)
+int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count)
 {
     int ret = 1;
-    struct iovec vec;
-    if(c->out.queue_len)
-    {
-        assert(!c->out.vec && !c->out.vec_len);
-        vec.iov_base = c->out.queue;
-        vec.iov_len = c->out.queue_len;
-        c->out.vec = &vec;
-        c->out.vec_len = 1;
-        c->out.queue_len = 0;
-    }
-    while(ret && c->out.vec_len)
-        ret = _xcb_conn_wait(c, &c->out.cond, &c->out.vec, &c->out.vec_len);
+    while(ret && *count)
+        ret = _xcb_conn_wait(c, &c->out.cond, vector, count);
     c->out.request_written = c->out.request;
     pthread_cond_broadcast(&c->out.cond);
     return ret;
+}
+
+int _xcb_out_flush_to(XCBConnection *c, unsigned int request)
+{
+    assert(request <= c->out.request);
+    if(c->out.request_written >= request)
+        return 1;
+    if(c->out.queue_len)
+    {
+        struct iovec vec, *vec_ptr = &vec;
+        int count = 1;
+        vec.iov_base = c->out.queue;
+        vec.iov_len = c->out.queue_len;
+        c->out.queue_len = 0;
+        return _xcb_out_send(c, &vec_ptr, &count);
+    }
+    while(c->out.writing)
+        pthread_cond_wait(&c->out.cond, &c->iolock);
+    assert(c->out.request_written >= request);
+    return 1;
 }

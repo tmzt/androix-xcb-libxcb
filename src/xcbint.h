@@ -63,8 +63,6 @@ typedef struct _xcb_out {
 
     char queue[4096];
     int queue_len;
-    struct iovec *vec;
-    int vec_len;
 
     unsigned int request;
     unsigned int request_written;
@@ -77,8 +75,8 @@ int _xcb_out_init(_xcb_out *out);
 void _xcb_out_destroy(_xcb_out *out);
 
 int _xcb_out_write(XCBConnection *c, struct iovec **vector, int *count);
-int _xcb_out_write_block(XCBConnection *c, struct iovec *vector, size_t count);
-int _xcb_out_flush(XCBConnection *c);
+int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count);
+int _xcb_out_flush_to(XCBConnection *c, unsigned int request);
 
 
 /* xcb_in.c */

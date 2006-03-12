@@ -252,9 +252,8 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     pthread_mutex_lock(&c->iolock);
 
     /* If this request has not been written yet, write it. */
-    if((signed int) (c->out.request_written - request) < 0)
-        if(!_xcb_out_flush(c))
-            goto done; /* error */
+    if(!_xcb_out_flush_to(c, request))
+        goto done; /* error */
 
     for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
         if((*prev_reader)->request == request)

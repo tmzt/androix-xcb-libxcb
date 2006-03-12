@@ -89,8 +89,10 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     assert(count <= sizeof(parts) / sizeof(*parts));
 
     pthread_mutex_lock(&c->iolock);
-    _xcb_out_write_block(c, parts, count);
-    ret = _xcb_out_flush(c);
+    {
+        struct iovec *parts_ptr = parts;
+        ret = _xcb_out_send(c, &parts_ptr, &count);
+    }
     pthread_mutex_unlock(&c->iolock);
     return ret;
 }
