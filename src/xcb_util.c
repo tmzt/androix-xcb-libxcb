@@ -89,7 +89,10 @@ int XCBParseDisplay(const char *name, char **host, int *displayp, int *screenp)
     return 1;
 }
 
-int XCBOpen(const char *host, const int display)
+static int _xcb_open_tcp(const char *host, const unsigned short port);
+static int _xcb_open_unix(const char *file);
+
+static int _xcb_open(const char *host, const int display)
 {
     int fd;
 
@@ -97,7 +100,7 @@ int XCBOpen(const char *host, const int display)
     {
         /* display specifies TCP */
         unsigned short port = X_TCP_PORT + display;
-        fd = XCBOpenTCP(host, port);
+        fd = _xcb_open_tcp(host, port);
     }
     else
     {
@@ -105,13 +108,13 @@ int XCBOpen(const char *host, const int display)
         static const char base[] = "/tmp/.X11-unix/X";
         char file[sizeof(base) + 20];
         snprintf(file, sizeof(file), "%s%d", base, display);
-        fd = XCBOpenUnix(file);
+        fd = _xcb_open_unix(file);
     }
 
     return fd;
 }
 
-int XCBOpenTCP(const char *host, const unsigned short port)
+static int _xcb_open_tcp(const char *host, const unsigned short port)
 {
     int fd;
     struct sockaddr_in addr;
@@ -130,7 +133,7 @@ int XCBOpenTCP(const char *host, const unsigned short port)
     return fd;
 }
 
-int XCBOpenUnix(const char *file)
+static int _xcb_open_unix(const char *file)
 {
     int fd;
     struct sockaddr_un addr = { AF_UNIX };
@@ -153,7 +156,7 @@ XCBConnection *XCBConnect(const char *displayname, int *screenp)
 
     if(!XCBParseDisplay(displayname, &host, &display, screenp))
         return 0;
-    fd = XCBOpen(host, display);
+    fd = _xcb_open(host, display);
     free(host);
     if(fd == -1)
         return 0;
@@ -172,7 +175,7 @@ XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *displayname, XCBAuthI
 
     if(!XCBParseDisplay(displayname, &host, &display, screenp))
         return 0;
-    fd = XCBOpen(host, display);
+    fd = _xcb_open(host, display);
     free(host);
     if(fd == -1)
         return 0;
@@ -180,7 +183,17 @@ XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *displayname, XCBAuthI
     return XCBConnectToFD(fd, auth);
 }
 
-/* backwards compatible interface: remove before 1.0 release */
+int XCBSync(XCBConnection *c, XCBGenericError **e)
+{
+    XCBGetInputFocusRep *reply = XCBGetInputFocusReply(c, XCBGetInputFocus(c), e);
+    free(reply);
+    return reply != 0;
+}
+
+
+
+
+/* backwards compatible interfaces: remove before 1.0 release */
 XCBConnection *XCBConnectBasic()
 {
     XCBConnection *c = XCBConnect(0, 0);
@@ -190,9 +203,17 @@ XCBConnection *XCBConnectBasic()
     abort();
 }
 
-int XCBSync(XCBConnection *c, XCBGenericError **e)
+int XCBOpen(const char *host, const int display)
 {
-    XCBGetInputFocusRep *reply = XCBGetInputFocusReply(c, XCBGetInputFocus(c), e);
-    free(reply);
-    return reply != 0;
+	return _xcb_open(host, display);
+}
+
+int XCBOpenTCP(const char *host, const unsigned short port)
+{
+	return _xcb_open_tcp(host, port);
+}
+
+int XCBOpenUnix(const char *file)
+{
+	return _xcb_open_unix(file);
 }
