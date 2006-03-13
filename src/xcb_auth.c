@@ -37,12 +37,12 @@
 #include "xcb.h"
 #include "xcbint.h"
 
-#ifdef HAS_AUTH_XA1
-#include "xcb_des.h"
+#ifdef HASXDMAUTH
+#include <X11/Xdmcp.h>
 #endif
 
 enum auth_protos {
-#ifdef HAS_AUTH_XA1
+#ifdef HASXDMAUTH
     AUTH_XA1,
 #endif
     AUTH_MC1,
@@ -50,74 +50,11 @@ enum auth_protos {
 };
 
 static char *authnames[N_AUTH_PROTOS] = {
-#ifdef HAS_AUTH_XA1
+#ifdef HASXDMAUTH
     "XDM-AUTHORIZATION-1",
 #endif
     "MIT-MAGIC-COOKIE-1",
 };
-
-#ifdef HAS_AUTH_XA1
-
-static int next_nonce(void)
-{
-    static int nonce = 0;
-    static pthread_mutex_t nonce_mutex = PTHREAD_MUTEX_INITIALIZER;
-    int ret;
-    pthread_mutex_lock(&nonce_mutex);
-    ret = nonce++;
-    pthread_mutex_unlock(&nonce_mutex);
-    return ret;
-}
-
-/*
- * This code and the code it calls is taken from libXdmcp,
- * specifically from Wrap.c, Wrap.h, and Wraphelp.c.  The US
- * has changed, thank goodness, and it should be OK to bury
- * DES code in an open source product without a maze of
- * twisty wrapper functions stored offshore.  Or maybe
- * not. --Bart Massey 2003/11/5
- */
-
-static void
-Wrap (
-    des_cblock	        input,
-    des_cblock          key,
-    des_cblock          output,
-    int			bytes)
-{
-    int			i, j;
-    int			len;
-    des_cblock          tmp;
-    des_cblock          expand_key;
-    des_key_schedule	schedule;
-
-    XCBDESKeyToOddParity (key, expand_key);
-    XCBDESKeySchedule (expand_key, schedule);
-    for (j = 0; j < bytes; j += 8)
-    {
-	len = 8;
-	if (bytes - j < len)
-	    len = bytes - j;
-	/* block chaining */
-	for (i = 0; i < len; i++)
-	{
-	    if (j == 0)
-		tmp[i] = input[i];
-	    else
-		tmp[i] = input[j + i] ^ output[j - 8 + i];
-	}
-	for (; i < 8; i++)
-	{
-	    if (j == 0)
-		tmp[i] = 0;
-	    else
-		tmp[i] = 0 ^ output[j - 8 + i];
-	}
-	XCBDESEncrypt (tmp, (output + j), schedule, 1);
-    }
-}
-
-#endif
 
 static size_t memdup(char **dst, void *src, size_t len)
 {
@@ -195,7 +132,18 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen)
                                  N_AUTH_PROTOS, authnames, authnamelens);
 }
 
-#ifdef HAS_AUTH_XA1
+#ifdef HASXDMAUTH
+static int next_nonce(void)
+{
+    static int nonce = 0;
+    static pthread_mutex_t nonce_mutex = PTHREAD_MUTEX_INITIALIZER;
+    int ret;
+    pthread_mutex_lock(&nonce_mutex);
+    ret = nonce++;
+    pthread_mutex_unlock(&nonce_mutex);
+    return ret;
+}
+
 static void do_append(char *buf, int *idxp, void *val, size_t valsize) {
     memcpy(buf + *idxp, val, valsize);
     *idxp += valsize;
@@ -210,8 +158,8 @@ static int compute_auth(XCBAuthInfo *info, Xauth *authptr, struct sockaddr *sock
             return 0;
         return 1;
     }
-#ifdef HAS_AUTH_XA1
-#define APPEND(buf,idx,val) do_append((buf),&(idx),(val),sizeof(val))
+#ifdef HASXDMAUTH
+#define APPEND(buf,idx,val) do_append((buf),&(idx),&(val),sizeof(val))
     if (authname_match(AUTH_XA1, authptr->name, authptr->name_length)) {
 	int j;
 
@@ -251,7 +199,7 @@ static int compute_auth(XCBAuthInfo *info, Xauth *authptr, struct sockaddr *sock
 	while (j < 192 / 8)
 	    info->data[j++] = 0;
 	info->datalen = j;
-	Wrap (info->data, authptr->data + 8, info->data, info->datalen);
+	XdmcpWrap ((unsigned char *) info->data, (unsigned char *) authptr->data + 8, (unsigned char *) info->data, info->datalen);
 	return 1;
     }
 #undef APPEND

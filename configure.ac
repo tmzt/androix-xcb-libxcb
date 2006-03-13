@@ -38,6 +38,17 @@ PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 0.9)
 PKG_CHECK_MODULES(XPROTO, xproto)
 PKG_CHECK_MODULES(XAU, xau)
 
+PKG_CHECK_MODULES(XDMCP, xdmcp,
+	AC_CHECK_LIB(Xdmcp, XdmcpWrap,
+		[
+		AC_DEFINE(HASXDMAUTH,1,[Has Wraphelp.c needed for XDM AUTH protocols])
+		],
+		[
+		XDMCP_CFLAGS=
+		XDMCP_LIBS=
+		], [$XDMCP_LIBS]),
+	[AC_MSG_RESULT(no)])
+
 # Find the xcb-proto protocol descriptions
 AC_MSG_CHECKING(XCBPROTO_XCBINCLUDEDIR)
 XCBPROTO_XCBINCLUDEDIR=`$PKG_CONFIG --variable=xcbincludedir xcb-proto`
