@@ -156,6 +156,11 @@ struct XCBConnection {
 
 int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count);
 
+
+/* xcb_auth.c */
+
+int _xcb_get_auth_info(int fd, XCBAuthInfo *info);
+
 #ifdef GCC_HAS_VISIBILITY
 #pragma GCC visibility pop
 #endif

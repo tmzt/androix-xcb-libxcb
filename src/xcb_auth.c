@@ -208,7 +208,7 @@ static int compute_auth(XCBAuthInfo *info, Xauth *authptr, struct sockaddr *sock
     return 0;   /* Unknown authorization type */
 }
 
-int XCBGetAuthInfo(int fd, XCBAuthInfo *info)
+int _xcb_get_auth_info(int fd, XCBAuthInfo *info)
 {
     /* code adapted from Xlib/ConnDis.c, xtrans/Xtranssocket.c,
        xtrans/Xtransutils.c */

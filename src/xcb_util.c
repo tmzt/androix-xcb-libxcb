@@ -40,6 +40,7 @@
 
 #include "xcb.h"
 #include "xcbext.h"
+#include "xcbint.h"
 
 int XCBPopcount(CARD32 mask)
 {
@@ -162,7 +163,7 @@ XCBConnection *XCBConnect(const char *displayname, int *screenp)
     if(fd == -1)
         return 0;
 
-    XCBGetAuthInfo(fd, &auth);
+    _xcb_get_auth_info(fd, &auth);
     c = XCBConnectToFD(fd, &auth);
     free(auth.name);
     free(auth.data);
@@ -217,4 +218,9 @@ int XCBOpenTCP(const char *host, const unsigned short port)
 int XCBOpenUnix(const char *file)
 {
 	return _xcb_open_unix(file);
+}
+
+int XCBGetAuthInfo(int fd, XCBAuthInfo *info)
+{
+	return _xcb_get_auth_info(fd, info);
 }
