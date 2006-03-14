@@ -1089,6 +1089,12 @@ authorization from the authors.
     <xsl:text>)</xsl:text>
   </xsl:template>
 
+  <xsl:template match="bit" mode="output-expression">
+    <xsl:text>(1 &lt;&lt; </xsl:text>
+    <xsl:value-of select="@bit" />
+    <xsl:text>)</xsl:text>
+  </xsl:template>
+
   <xsl:template match="function-call" mode="output-expression">
     <xsl:param name="field-prefix" />
     <xsl:value-of select="@name" />
