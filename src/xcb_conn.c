@@ -169,7 +169,7 @@ static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
 
 /* Public interface */
 
-XCBConnSetupSuccessRep *XCBGetSetup(XCBConnection *c)
+const XCBConnSetupSuccessRep *XCBGetSetup(XCBConnection *c)
 {
     /* doesn't need locking because it's never written to. */
     return c->setup;
