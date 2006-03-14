@@ -28,7 +28,19 @@
 #ifndef __XCB_H
 #define __XCB_H
 #include <sys/types.h>
-#include <X11/Xmd.h>
+
+/* TODO: check for stdint in config? (HAVE_STDINT) fallback? */
+#include <stdint.h>
+
+typedef uint8_t  BYTE;
+typedef uint8_t  BOOL;
+typedef uint8_t  CARD8;
+typedef uint16_t CARD16;
+typedef uint32_t CARD32;
+typedef int8_t   INT8;
+typedef int16_t  INT16;
+typedef int32_t  INT32;
+
 #include <X11/X.h>
 #include <sys/uio.h>
 #include <pthread.h>
