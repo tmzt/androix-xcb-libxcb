@@ -84,6 +84,8 @@ extern "C" {
 /** XCBNone is the universal null resource or null atom parameter value for many core X requests */
 #define XCBNone 0L
 
+/** XCBCopyFromParent can be used for many CreateWindow parameters */
+#define XCBCopyFromParent 0L
 
 /* Opaque structures */
 
