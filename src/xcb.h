@@ -81,6 +81,10 @@ extern "C" {
 #define XCB_TYPE_PAD(T,I) (-(I) & (sizeof(T) > 4 ? 3 : sizeof(T) - 1))
 
 
+/** XCBNone is the universal null resource or null atom parameter value for many core X requests */
+#define XCBNone 0L
+
+
 /* Opaque structures */
 
 /**
