@@ -34,12 +34,20 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "xcb.h"
-#include "xcbint.h"
+/* FIXME: for the moment Xdmcp.h must be included before xcb.h because
+ * it includes Xmd.h, but config.h (normally included from xcbint.h
+ * which must be included after xcb.h) must be included before Xdmcp.h.
+ * Ow. */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef HASXDMAUTH
 #include <X11/Xdmcp.h>
 #endif
+
+#include "xcb.h"
+#include "xcbint.h"
 
 enum auth_protos {
 #ifdef HASXDMAUTH

@@ -32,6 +32,8 @@
 /* TODO: check for stdint in config? (HAVE_STDINT) fallback? */
 #include <stdint.h>
 
+/* FIXME: these names conflict with those defined in Xmd.h. */
+#ifndef XMD_H
 typedef uint8_t  BYTE;
 typedef uint8_t  BOOL;
 typedef uint8_t  CARD8;
@@ -40,6 +42,7 @@ typedef uint32_t CARD32;
 typedef int8_t   INT8;
 typedef int16_t  INT16;
 typedef int32_t  INT32;
+#endif /* XMD_H */
 
 #include <X11/X.h>
 #include <sys/uio.h>
