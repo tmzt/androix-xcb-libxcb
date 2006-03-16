@@ -1091,7 +1091,7 @@ authorization from the authors.
 
   <xsl:template match="bit" mode="output-expression">
     <xsl:text>(1 &lt;&lt; </xsl:text>
-    <xsl:value-of select="@bit" />
+    <xsl:value-of select="." />
     <xsl:text>)</xsl:text>
   </xsl:template>
 
