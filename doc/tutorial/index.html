@@ -75,10 +75,11 @@
         <li>Setting preferred window size(s)
         <li>Setting miscellaneous window manager hints
         <li>Setting an application's icon
+        <li>Obeying the delete-window protocol
       </ol>
     <li><a class="section" href="#winop">Simple window operations</a>
       <ol>
-        <li><a class="subsection" href="#winmap">Mapping and un-mapping a window</a>
+        <li><a class="subsection" href="#winmap">Mapping and unmapping a window</a>
         <li><a class="subsection" href="#winconf">Configuring a window</a>
         <li><a class="subsection" href="#winmove">Moving a window around the screen</a>
         <li><a class="subsection" href="#winsize">Resizing a window</a>
@@ -166,7 +167,7 @@
       deals with the X Windows generality.
       </p>
       <p>
-      This tutorial is intended to people who want to start to program
+      This tutorial is intended for people who want to start to program
       with the <a href="http://xcb.freedesktop.org">XCB</a>
       library. keep in mind that XCB, like the
       <a href="http://tronche.com/gui/x/xlib/introduction">Xlib</a>
@@ -184,16 +185,16 @@
       </p>
       <p>
       After reading this tutorial, one should be able to write very
-      simple graphical programs, but not programs with descent user
+      simple graphical programs, but not programs with decent user
       interfaces. For such programs, one of the previously mentioned
-      library should be used.
+      libraries should be used.
       </p>
       <p>
       But what is XCB? Xlib has been
-      the standard C binding for the <a href="http://www.xfree86.org">X
+      the standard C binding for the <a href="http://www.x.org">X
       Window System</a> protocol for many years now. It is an
       excellent piece of work, but there are applications for which it
-      is not ideal, for example
+      is not ideal, for example:
       </p>
       <ul>
         <li><b>Small platforms</b>: Xlib is a large piece of code, and
@@ -221,7 +222,7 @@
         <li>Toolkit implementation.
         <li>Direct protocol-level programming.
         <li>Lightweight emulation of commonly used portions of the
-        Xlib API (in progress)
+        Xlib API.
       </ul>
       <br>
       <li class="title"><a name="Xmodel">The client and server model of the X window system</a>
@@ -238,14 +239,14 @@
       </p>
       <p>
       This model is the complete opposite of what is used to when
-      dealing with clients and servers. In our case, the user seats
+      dealing with clients and servers. In our case, the user sits
       near the machine controlled by the server, while the client
       might be running on a remote machine. The server controls the
       screens, mouse and keyboard. A client may connect to the server,
       request that it draws a window (or several windows), and ask the
       server to send it any input the user sends to these
       windows. Thus, several clients may connect to a single X server
-      (one might be running an mail software, one running a WWW
+      (one might be running mail software, one running a WWW
       browser, etc). When input is sent by the user to some window,
       the server sends a message to the client controlling this window
       for processing. The client decides what to do with this input,
@@ -305,7 +306,7 @@
       <br>
       <li class="title"><a name="notions">Basic XCB notions</a>
       <p>
-      XCB has been created to eliminate the needs of
+      XCB has been created to eliminate the need for
       programs to actually implement the X protocol layer. This
       library gives a program a very low-level access to any X
       server. Since the protocol is standardized, a client using any
@@ -321,7 +322,8 @@
         given X server. It hides a queue of messages coming from the
         server, and a queue of pending requests that our client
         intends to send to the server. In XCB, this structure is named
-        'XCBConnection'. When we open a connection to an X server, the
+        'XCBConnection'. It is analogous to the Xlib Display.
+        When we open a connection to an X server, the
         library returns a pointer to such a structure. Later, we
         supply this pointer to any XCB function that should send
         messages to the X server or receive messages from this server.
@@ -329,7 +331,7 @@
         <li class="subtitle"><a name="requestsreplies">Requests and
         replies: the Xlib killers</a>
         <p>
-        To ask informations to the X server, we have to make a request
+        To ask for information from the X server, we have to make a request
         and ask for a reply. With Xlib, these two tasks are
         automatically done: Xlib locks the system, sends a request,
         waits for a reply from the X server and unlocks. This is
@@ -527,11 +529,12 @@ main ()
         A structure is used to pass events received from the X
         server. XCB supports exactly the events specified in the
         protocol (33 events). This structure contains the type
-        of event received, as well as the data associated with the
+        of event received (including a bit for whether it came
+        from the server or another client), as well as the data associated with the
         event (e.g. position on the screen where the event was
         generated, mouse button associated with the event, region of
         the screen associated with a "redraw" event, etc). The way to
-        read the event's data epends on the event type.
+        read the event's data depends on the event type.
         </p>
       </ol>
       <br>
@@ -539,6 +542,12 @@ main ()
       <br>
       <ol>
         <li class="subtitle"><a name="inst">Installation of XCB</a>
+        <p>
+        <b>TODO:<b> These instructions are out of date.
+        Just reference the <a href="http://xcb.freedesktop.org/">main XCB page</a>
+        so we don't have to maintain these instructions in more than
+        one place.
+        </p>
         <p>
         To build XCB from source, you need to have installed at
         least:
@@ -597,7 +606,7 @@ main (int argc, char *argv[])
 {
   XCBConnection *c;
   
-  /* Open the connection to the X server. use the DISPLAY environment variable as the default display name */
+  /* Open the connection to the X server. Use the DISPLAY environment variable as the default display name */
   c = XCBConnect (NULL, NULL);
 
   return 1;
@@ -638,11 +647,11 @@ void XCBDisconnect (XCBConnection *c);
       </p>
       <li class="title"><a name="screen">Checking basic information about a connection</a>
       <p>
-      Once we opened a connection to an X server, we should check some
-      basic informations about it: what screens it has, what is the
+      Once we have opened a connection to an X server, we should check some
+      basic information about it: what screens it has, what is the
       size (width and height) of the screen, how many colors it
       supports (black and white ? grey scale ?, 256 colors ? more ?),
-      and so on. We get such informations from the XCBSCREEN
+      and so on. We get such information from the XCBSCREEN
       structure:
       </p>
       <pre class="code">
@@ -713,7 +722,7 @@ main (int argc, char *argv[])
 </pre>
       <li class="title"><a name="helloworld">Creating a basic window - the "hello world" program</a>
       <p>
-      After we got some basic informations about our screen, we can
+      After we got some basic information about our screen, we can
       create our first window. In the X Window System, a window is
       characterized by an Id. So, in XCB, a window is of type:
       </p>
@@ -761,7 +770,7 @@ XCBVoidCookie XCBMapWindow (XCBConnection *c, XCBWINDOW window);
       150x150 pixels, positioned at the top-left corner of the screen:
       </p>
       <pre class="code">
-#include &lt;unistd.h&gt;
+#include &lt;unistd.h&gt;      /* pause() */
 
 #include &lt;X11/XCB/xcb.h&gt;
 
@@ -783,28 +792,29 @@ main (int argc, char *argv[])
 
   /* Create the window */
   XCBCreateWindow (c,                        /* Connection          */
-                   0,                        /* depth               */
+                   XCBCopyFromParent,        /* depth (same as root)*/
                    win.window,               /* window Id           */
                    screen-&gt;root,             /* parent window       */
                    0, 0,                     /* x, y                */
                    150, 150,                 /* width, height       */
                    10,                       /* border_width        */
-                   InputOutput,              /* class               */
+                   XCBWindowClassInputOutput,/* class               */
                    screen-&gt;root_visual,      /* visual              */
                    0, NULL);                 /* masks, not used yet */
 
   /* Map the window on the screen */
   XCBMapWindow (c, win.window);
 
-  XCBSync (c, 0);
+  /* Make sure commands are sent before we pause, so window is shown */
+  XCBFlush (c);
   
-  pause ();
+  pause ();    /* hold client until Ctrl-C */
 
   return 1;
 }
 </pre>
       <p>
-      In this code, you see one more function - <span class="code">XCBSync()</span>, not explained
+      In this code, you see one more function - <span class="code">XCBFlush()</span>, not explained
       yet. It is used to flush all the pending requests. More
       precisely, there are 2 functions that do such things. The first
       one is <span class="code">XCBFlush()</span>:
@@ -836,7 +846,7 @@ int XCBSync(XCBConnection *c, XCBGenericError **e);
       described yet. See the subsections
       <a href="#winconf">Configuring a window</a> or
       <a href="#winconf">Registering for event types using event masks</a>
-      for exemples on how to use these parameters. In addition, as no
+      for examples on how to use these parameters. In addition, as no
       events are handled, you have to make a Ctrl-C to interrupt the
       program.
       </p>
@@ -903,7 +913,7 @@ XCBVoidCookie XCBCreateGC (XCBConnection *c,
 </pre>
         <p>
         We give now an example on how to allocate a graphic context
-        that specifies that each drawing functions that use it will
+        that specifies that each drawing function that uses it will
         draw in foreground with a black color.
         </p>                   
         <pre class="code">
@@ -926,7 +936,7 @@ main (int argc, char *argv[])
   /* Create a black graphic context for drawing in the foreground */
   win.window = screen-&gt;root;
   black = XCBGCONTEXTNew (c);
-  mask = GCForeground;
+  mask = XCBGCForeground;
   value[0] = screen-&gt;black_pixel;
   XCBCreateGC (c, black, win, mask, value);
 
@@ -986,32 +996,32 @@ XCBVoidCookie XCBChangeGC (XCBConnection *c,           /* The XCB Connection */
 </pre>
         <p>
         The <span class="code">value_mask</span> parameter could take
-        these values:
+        any combination of these masks from the XCBGC enumeration:
         </p>
         <ul>
-          <li>GCFunction
-          <li>GCPlaneMask
-          <li>GCForeground
-          <li>GCBackground
-          <li>GCLineWidth
-          <li>GCLineStyle
-          <li>GCCapStyle
-          <li>GCJoinStyle
-          <li>GCFillStyle
-          <li>GCFillRule
-          <li>GCTile
-          <li>GCStipple
-          <li>GCTileStipXOrigin
-          <li>GCTileStipYOrigin
-          <li>GCFont
-          <li>GCSubwindowMode
-          <li>GCGraphicsExposures
-          <li>GCClipXOrigin
-          <li>GCClipYOrigin
-          <li>GCClipMask
-          <li>GCDashOffset
-          <li>GCDashList
-          <li>GCArcMode
+          <li>XCBGCFunction
+          <li>XCBGCPlaneMask
+          <li>XCBGCForeground
+          <li>XCBGCBackground
+          <li>XCBGCLineWidth
+          <li>XCBGCLineStyle
+          <li>XCBGCCapStyle
+          <li>XCBGCJoinStyle
+          <li>XCBGCFillStyle
+          <li>XCBGCFillRule
+          <li>XCBGCTile
+          <li>XCBGCStipple
+          <li>XCBGCTileStippleOriginX
+          <li>XCBGCTileStippleOriginY
+          <li>XCBGCFont
+          <li>XCBGCSubwindowMode
+          <li>XCBGCGraphicsExposures
+          <li>XCBGCClipOriginX
+          <li>XCBGCClipOriginY
+          <li>XCBGCClipMask
+          <li>XCBGCDashOffset
+          <li>XCBGCDashList
+          <li>XCBGCArcMode
         </ul>
         <p>
         It is possible to set several attributes at the same
@@ -1019,7 +1029,8 @@ XCBVoidCookie XCBChangeGC (XCBConnection *c,           /* The XCB Connection */
         color which will be used to display a string), by OR'ing these
         values in <span class="code">value_mask</span>. Then
         <span class="code">value_list</span> has to be an array which
-        lists the value for the respective attributes. See Subsection
+        lists the value for the respective attributes.  <b>These values
+        must be in the same order as masks listed above.</b> See Subsection
         Drawing with a color to have an example.
         </p>
         <p>
@@ -1033,7 +1044,7 @@ XCBVoidCookie XCBChangeGC (XCBConnection *c,           /* The XCB Connection */
         <p>
         After we have created a Graphic Context, we can draw on a
         window using this Graphic Context, with a set of XCB
-        functions, collectively called "drawing primitive". Let see
+        functions, collectively called "drawing primitives". Let see
         how they are used.
         </p>
         <p>
@@ -1041,7 +1052,7 @@ XCBVoidCookie XCBChangeGC (XCBConnection *c,           /* The XCB Connection */
         </p>
         <pre class="code">
 XCBVoidCookie XCBPolyPoint (XCBConnection  *c,               /* The connection to the X server */
-                            BYTE            coordinate_mode, /* Coordinate mode, usually set to CoordModeOrigin */
+                            BYTE            coordinate_mode, /* Coordinate mode, usually set to XCBCoordModeOrigin */
                             XCBDRAWABLE     drawable,        /* The drawable on which we want to draw the point(s) */
                             XCBGCONTEXT     gc,              /* The Graphic Context we use to draw the point(s) */
                             CARD32          points_len,      /* The number of points */
@@ -1052,9 +1063,13 @@ XCBVoidCookie XCBPolyPoint (XCBConnection  *c,               /* The connection t
         specifies the coordinate mode.  Available values are
         </p>
         <ul>
-          <li><span class="code">CoordModeOrigin</span>
-          <li><span class="code">CoordModePrevious</span>
+          <li><span class="code">XCBCoordModeOrigin</span>
+          <li><span class="code">XCBCoordModePrevious</span>
         </ul>
+        <p>
+        If XCBCoordModePrevious is used, then all points but the first one
+        are relative to the immediately previous point.
+        </p>
         <p>
         The <span class="code">XCBPOINT</span> type is just a
         structure with two fields (the coordinates of the point):
@@ -1073,7 +1088,7 @@ typedef struct {
         </p>
         <pre class="code">
 XCBVoidCookie XCBPolyLine (XCBConnection  *c,               /* The connection to the X server */
-                           BYTE            coordinate_mode, /* Coordinate mode, usually set to CoordModeOrigin */
+                           BYTE            coordinate_mode, /* Coordinate mode, usually set to XCBCoordModeOrigin */
                            XCBDRAWABLE     drawable,        /* The drawable on which we want to draw the line(s) */
                            XCBGCONTEXT     gc,              /* The Graphic Context we use to draw the line(s) */
                            CARD32          points_len,      /* The number of points in the polygonal line */
@@ -1130,9 +1145,8 @@ typedef struct {
     CARD16 height;
 } XCBRECTANGLE;
 </pre>
-        <p>
-        <b>TODO</b>: there's no coordinate_mode. Is it normal ?
-        </p>
+        <!-- There's no coordinate_mode. Is it normal? -->
+        <!-- [iano] Yes, it's not in the protocol. -->
         <p>
         To draw an elliptical arc, or several elliptical arcs, we use
         </p>
@@ -1167,13 +1181,11 @@ typedef struct {
         indicate clockwise motion.
         </p>
         </div>
-        <p>
-        <b>TODO</b>: there's no coordinate_mode. Is it normal ?
-        </p>
-        <p>
-        <b>TODO</b>: I think that (x,y) should be the center of the
-        ellipse, and (width, height) the radius. It's more logical.
-        </p>
+        <!-- I think that (x,y) should be the center of the
+        ellipse, and (width, height) the radius. It's more logical. -->
+        <!-- iano: Yes, and I bet some toolkits do that.
+         But the protocol (and many other graphics APIs) define arcs
+         by bounding rectangles. -->
         <p>
         The corresponding function which fill inside the geometrical
         object are listed below, without  further explanation, as they
@@ -1198,9 +1210,9 @@ XCBVoidCookie XCBFillPoly (XCBConnection  *c,
         values are
         </p>
         <ul>
-          <li><span class="code">Complex</span>
-          <li><span class="code">Convex</span>
-          <li><span class="code">Nonconvex</span>
+          <li><span class="code">XCBPolyShapeComplex</span>
+          <li><span class="code">XCBPolyShapeNonconvex</span>
+          <li><span class="code">XCBPolyShapeConvex</span>
         </ul>
         <p>
         To fill one or several rectangles, we use
@@ -1223,11 +1235,18 @@ XCBVoidCookie XCBPolyFillArc (XCBConnection *c,
                               const XCBARC  *arcs);
 </pre>
         <br>
+        <a name="points.c"></a>
         <p>
         To illustrate these functions, here is an example that draws
         four points, a polygonal line, two segments, two rectangles
         and two arcs. Remark that we use events for the first time, as
         an introduction to the next section.
+        </p>
+        <p>
+        <b>TODO:</b> Use screen-&gt;root_depth for depth parameter.
+        </p>
+        <p>
+        <b>TODO:</b> Remove get_depth(). It isn't used!
         </p>
         <pre class="code">
 #include &lt;stdlib.h&gt;
@@ -1279,9 +1298,9 @@ main (int argc, char *argv[])
 
   XCBPOINT         polyline[] = {
     {50, 10},
-    {55, 30},
-    {80, 10},
-    {90, 20}};
+    { 5, 20},     /* rest of points are relative */
+    {25,-20},
+    {10, 10}};
 
   XCBSEGMENT       segments[] = {
     {100, 10, 140, 30},
@@ -1292,8 +1311,8 @@ main (int argc, char *argv[])
     { 80, 50, 10, 40}};
 
   XCBARC           arcs[] = {
-    {10, 100, 60, 40, 0, 90 << 6},
-    {90, 100, 55, 40, 0, 270 << 6}};
+    {10, 100, 60, 40, 0, 90 &lt;&lt; 6},
+    {90, 100, 55, 40, 0, 270 &lt;&lt; 6}};
   
   /* Open the connection to the X server */
   c = XCBConnect (NULL, NULL);
@@ -1301,11 +1320,11 @@ main (int argc, char *argv[])
   /* Get the first screen */
   screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
 
-  /* Create black (foregroung) graphic context */
+  /* Create black (foreground) graphic context */
   win.window = screen-&gt;root;
 
   foreground = XCBGCONTEXTNew (c);
-  mask = GCForeground | GCGraphicsExposures;
+  mask = XCBGCForeground | XCBGCGraphicsExposures;
   values[0] = screen-&gt;black_pixel;
   values[1] = 0;
   XCBCreateGC (c, foreground, win, mask, values);
@@ -1316,15 +1335,15 @@ main (int argc, char *argv[])
   /* Create the window */
   mask = XCBCWBackPixel | XCBCWEventMask;
   values[0] = screen-&gt;white_pixel;
-  values[1] = ExposureMask;
+  values[1] = XCBEventMaskExposure;
   XCBCreateWindow (c,                        /* Connection          */
-                   0,                        /* depth               */
+                   XCBCopyFromParent,        /* depth               */
                    win.window,               /* window Id           */
                    screen-&gt;root,             /* parent window       */
                    0, 0,                     /* x, y                */
                    150, 150,                 /* width, height       */
                    10,                       /* border_width        */
-                   InputOutput,              /* class               */
+                   XCBWindowClassInputOutput,/* class               */
                    screen-&gt;root_visual,      /* visual              */
                    mask, values);            /* masks */
 
@@ -1333,19 +1352,19 @@ main (int argc, char *argv[])
 
 
   /* We flush the request */
-  XCBSync (c, 0);
+  XCBFlush (c);
 
-  while ((e = XCBWaitEvent (c)))
+  while ((e = XCBWaitForEvent (c)))
     {
-      switch (e-&gt;response_type)
+      switch (e-&gt;response_type &amp; ~0x80)
         {
         case XCBExpose:
           {
             /* We draw the points */
-            XCBPolyPoint (c, CoordModeOrigin, win, foreground, 4, points);
+            XCBPolyPoint (c, XCBCoordModeOrigin, win, foreground, 4, points);
             
             /* We draw the polygonal line */
-            XCBPolyLine (c, CoordModeOrigin, win, foreground, 4, polyline);
+            XCBPolyLine (c, XCBCoordModePrevious, win, foreground, 4, polyline);
             
             /* We draw the segements */
             XCBPolySegment (c, win, foreground, 2, segments);
@@ -1357,7 +1376,7 @@ main (int argc, char *argv[])
             XCBPolyArc (c, win, foreground, 2, arcs);
 
             /* We flush the request */
-            XCBSync (c, 0);
+            XCBFlush (c);
             
             break;
           }
@@ -1405,30 +1424,30 @@ main (int argc, char *argv[])
         </p>
         <pre class="code">
   mask = XCBCWEventMask;
-  valwin[0] = ExposureMask;
+  valwin[0] = XCBEventMaskExposure;
   win.window = XCBWINDOWNew (c);
   XCBCreateWindow (c, depth, win.window, root-&gt;root,
                    0, 0, 150, 150, 10,
-                   InputOutput, root-&gt;root_visual,
+                   XCBWindowClassInputOutput, root-&gt;root_visual,
                    mask, valwin);
 </pre>
         <p>
-        <span class="code">ExposureMask</span> is a constant defined
-        in the "X.h" header file. If we wanted to register to several
+        <span class="code">XCBEventMaskExposure</span> is a constant defined
+        in the XCBEventMask enumeration in the "xproto.h" header file. If we wanted to register for several
         event types, we can logically "or" them, as follows:
         </p>
         <pre class="code">
   mask = XCBCWEventMask;
-  valwin[0] = ExposureMask | ButtonPressMask;
+  valwin[0] = XCBEventMaskExposure | XCBEventMaskButtonPress;
   win.window = XCBWINDOWNew (c);
   XCBCreateWindow (c, depth, win.window, root-&gt;root,
                    0, 0, 150, 150, 10,
-                   InputOutput, root-&gt;root_visual,
+                   XCBWindowClassInputOutput, root-&gt;root_visual,
                    mask, valwin);
 </pre>
         <p>
         This registers for <span class="code">Expose</span> events as
-        well as for mouse button presses insode the created
+        well as for mouse button presses inside the created
         window. You should note that a mask may represent several
         event sub-types.
         </p>
@@ -1464,9 +1483,9 @@ typedef enum {
         </div>
         <pre class="code">
   mask = XCBCWEventMask | XCBCWBackPixmap;
-  valwin[0] = None;                           /* for XCBCWBackPixmap (whose value is 1)    */
-  valwin[1] = ExposureMask | ButtonPressMask; /* for XCBCWEventMask, whose value (2048)    */
-                                              /* is superior to the one of XCBCWBackPixmap */
+  valwin[0] = XCBNone;                           /* for XCBCWBackPixmap (whose value is 1)    */
+  valwin[1] = XCBEventMaskExposure | XCBEventMaskButtonPress; /* for XCBCWEventMask, whose value (2048)    */
+                                              /* is greater than the one of XCBCWBackPixmap */
 </pre>
         <p>
         If the window has already been created, we can use the
@@ -1476,10 +1495,10 @@ typedef enum {
         prototype. As an example, here is a piece of code that
         configures the window to receive the
         <span class="code">Expose</span> and
-        <span class="code">ButtonPressMask</span> events:
+        <span class="code">ButtonPress</span> events:
         </p>
         <pre class="code">
-const static CARD32 values[] = { ExposureMask | ButtonPressMask };
+const static CARD32 values[] = { XCBEventMaskExposure | XCBEventMaskButtonPress };
 
 /* The connection c and the window win are supposed to be defined */
 
@@ -1501,11 +1520,11 @@ XCBConfigureWindow (c, win, XCBCWEventMask, values);
         After we have registered for the event types we are interested
         in, we need to enter a loop of receiving events and handling
         them. There are two ways to receive events: a blocking way and
-        a non blocking way:
+        a non-blocking way:
         </p>
         <ul>
           <li>
-          <span class="code">XCBWaitEvent (XCBConnection *c)</span>
+          <span class="code">XCBWaitForEvent (XCBConnection *c)</span>
           is the blocking way. It waits (so blocks...) until an event is
           queued in the X server. Then it retrieves it into a newly
           allocated structure (it dequeues it from the queue) and returns
@@ -1515,28 +1534,27 @@ XCBConfigureWindow (c, win, XCBCWEventMask, values);
           <br>
           <li>
           <span class="code">XCBPollForEvent (XCBConnection *c, int
-          *error)</span> is the non blocking way. It looks at the event
+          *error)</span> is the non-blocking way. It looks at the event
           queue and returns (and dequeues too) an existing event into
           a newly allocated structure. This structure has to be
           freed. It returns <span class="code">NULL</span> if there is
           no event. If an error occurs, the parameter <span
           class="code">error</span> will be filled with the error
           status.
-           
         </ul>
         <p>
         There are various ways to write such a loop. We present two
         ways to write such a loop, with the two functions above. The
-        first one uses <span class="code">XCBWaitEvent</span>, which
+        first one uses <span class="code">XCBWaitForEvent</span>, which
         is similar to an event Xlib loop using only <span
         class="code">XNextEvent</span>:
         </p>
         <pre class="code">
   XCBGenericEvent *e;
 
-  while ((e = XCBWaitEvent (c)))
+  while ((e = XCBWaitForEvent (c)))
     {
-      switch (e-&gt;response_type)
+      switch (e-&gt;response_type &amp; ~0x80)
         {
         case XCBExpose:
           {
@@ -1570,7 +1588,8 @@ XCBConfigureWindow (c, win, XCBCWEventMask, values);
         You will certainly want to use <span
         class="code">XCBPollForEvent(XCBConnection *c, int
         *error)</span> if, in Xlib, you use <span
-        class="code">XPending</span>:
+        class="code">XPending</span> or
+        <span class="code">XCheckMaskEvent</span>:
         </p>
         <pre class="code">
   while (XPending (display))
@@ -1595,7 +1614,7 @@ XCBConfigureWindow (c, win, XCBCWEventMask, values);
 </pre>
         <p>
         The events are managed in the same way as with <span
-        class="code">XCBWaitEvent</span>.
+        class="code">XCBWaitForEvent</span>.
         Obviously, we will need to give the user some way of
         terminating the program. This is usually done by handling a
         special "quit" event, as we will soon see.
@@ -1611,19 +1630,18 @@ XCBConfigureWindow (c, win, XCBCWEventMask, values);
           </div>
           <div class="xcb">
             <ul>
-              <li>XCBWaitEvent ()
+              <li>XCBWaitForEvent ()
             </ul>
           </div>
           <div class="xlib">
             <ul>
-              <li>XPending ()
-              <li>XNextEvent ()
+              <li>XPending ()</li>
+              <li>XCheckMaskEvent ()</li>
             </ul>
           </div>
           <div class="xcb">
             <ul>
               <li>XCBPollForEvent ()
-              <br>
             </ul>
           </div>
         </div>
@@ -1688,9 +1706,9 @@ typedef struct {
           (or more) of the following masks when we create our window:
           </p>
           <ul>
-            <li><span class="code">ButtonPressMask</span>: notify us
+            <li><span class="code">XCBEventMaskButtonPress</span>: notify us
             of any button that was pressed in one of our windows.
-            <li><span class="code">ButtonReleaseMask</span>: notify us
+            <li><span class="code">XCBEventMaskButtonRelease</span>: notify us
             of any button that was released in one of our windows.
           </ul>
           <p>
@@ -1724,22 +1742,23 @@ typedef XCBButtonPressEvent XCBButtonReleaseEvent;
           </p>
           <p>
           The <span class="code">state</span> field is a mask of the buttons held down during
-          the event. It is a bitwise OR of any of the following:
+          the event. It is a bitwise OR of any of the following (from the XCBButtonMask and
+          XCBModMask enumerations):
           </p>
           <ul>
-            <li><span class="code">Button1Mask</span>
-            <li><span class="code">Button2Mask</span>
-            <li><span class="code">Button3Mask</span>
-            <li><span class="code">Button4Mask</span>
-            <li><span class="code">Button5Mask</span>
-            <li><span class="code">ShiftMask</span>
-            <li><span class="code">LockMask</span>
-            <li><span class="code">ControlMask</span>
-            <li><span class="code">Mod1Mask</span>
-            <li><span class="code">Mod2Mask</span>
-            <li><span class="code">Mod3Mask</span>
-            <li><span class="code">Mod4Mask</span>
-            <li><span class="code">Mod5Mask</span>
+            <li><span class="code">XCBButtonMask1</span>
+            <li><span class="code">XCBButtonMask2</span>
+            <li><span class="code">XCBButtonMask3</span>
+            <li><span class="code">XCBButtonMask4</span>
+            <li><span class="code">XCBButtonMask5</span>
+            <li><span class="code">XCBModMaskShift</span>
+            <li><span class="code">XCBModMaskLock</span>
+            <li><span class="code">XCBModMaskControl</span>
+            <li><span class="code">XCBModMask1</span>
+            <li><span class="code">XCBModMask2</span>
+            <li><span class="code">XCBModMask3</span>
+            <li><span class="code">XCBModMask4</span>
+            <li><span class="code">XCBModMask5</span>
           </ul>
           <p>
           Their names are self explanatory, where the first 5 refer to
@@ -1763,20 +1782,20 @@ typedef XCBButtonPressEvent XCBButtonReleaseEvent;
           during the creation of our window:
           </p>
           <ul>
-            <li><span class="code">PointerMotionMask</span>: events of
+            <li><span class="code">XCBEventMaskPointerMotion</span>: events of
             the pointer moving in one of the windows controlled by our
             application, while no mouse button is held pressed.
-            <li><span class="code">ButtonMotionMask</span>: Events of
+            <li><span class="code">XCBEventMaskButtonMotion</span>: Events of
             the pointer moving while one or more of the mouse buttons
             is held pressed.
-            <li><span class="code">Button1MotionMask</span>: same as
-            <span class="code">ButtonMotionMask</span>, but only when
+            <li><span class="code">XCBEventMaskButton1Motion</span>: same as
+            <span class="code">XCBEventMaskButtonMotion</span>, but only when
             the 1st mouse button is held pressed.
-            <li><span class="code">Button2MotionMask</span>,
-            <span class="code">Button3MotionMask</span>,
-            <span class="code">Button4MotionMask</span>,
-            <span class="code">Button5MotionMask</span>: same as
-            <span class="code">Button1MotionMask</span>, but
+            <li><span class="code">XCBEventMaskButton2Motion</span>,
+            <span class="code">XCBEventMaskButton3Motion</span>,
+            <span class="code">XCBEventMaskButton4Motion</span>,
+            <span class="code">XCBEventMaskButton5Motion</span>: same as
+            <span class="code">XCBEventMaskButton1Motion</span>, but
             respectively for 2nd, 3rd, 4th and 5th mouse button.
           </ul>
           <p>
@@ -1803,18 +1822,18 @@ typedef struct {
             <li class="subsubtitle"><a name="mouseenter">Mouse pointer enter and leave events</a>
           <p>
           Another type of event that applications might be interested
-          at, is a mouse pointer entering a window the program
+          in, is a mouse pointer entering a window the program
           controls, or leaving such a window. Some programs use these
-          events to show the user tht the applications is now in
+          events to show the user that the application is now in
           focus. In order to register for such an event type, we
           should add one (or more) of the following masks when we
           create our window:
           </p>
           <ul>
-            <li><span class="code">EnterWindowMask</span>: notify us
+            <li><span class="code">XCBEventEnterWindow</span>: notify us
             when the mouse pointer enters any of our controlled
             windows.
-            <li><span class="code">LeaveWindowMask</span>: notify us
+            <li><span class="code">XCBEventLeaveWindow</span>: notify us
             when the mouse pointer leaves any of our controlled
             windows.
           </ul>
@@ -1849,9 +1868,9 @@ typedef XCBEnterNotifyEvent XCBLeaveNotifyEvent;
           which window should be sent a given keyboard input ? This is
           done using the keyboard focus. Only a single window on the
           screen may have the keyboard focus at a given time. There
-          is a XCB function that allow a program to set the keyboard
+          is a XCB function that allows a program to set the keyboard
           focus to a given window. The user can usually set the
-          keyboard ficus using the window manager (often by clicking
+          keyboard focus using the window manager (often by clicking
           on the title bar of the desired window). Once our window
           has the keyboard focus, every key press or key release will
           cause an event to be sent to our program (if it regsitered
@@ -1865,10 +1884,10 @@ typedef XCBEnterNotifyEvent XCBLeaveNotifyEvent;
           masks when we create our window:
           </p>
           <ul>
-            <li><span class="code">KeyPressMask</span>: notify us when
+            <li><span class="code">XCBEventMaskKeyPress</span>: notify us when
             a key was pressed while any of our controlled windows had
             the keyboard focus.
-            <li><span class="code">KeyReleaseMask</span>: notify us
+            <li><span class="code">XCBEventMaskKeyRelease</span>: notify us
             when a key was released while any of our controlled
             windows had the keyboard focus.
           </ul>
@@ -1896,7 +1915,7 @@ typedef struct {
 typedef XCBKeyPressEvent XCBKeyReleaseEvent;
 </pre>
         <p>
-        The <span class="code">detail</span> field refer to the
+        The <span class="code">detail</span> field refers to the
         physical key on the keyboard.
         </p>
         <p>
@@ -1906,17 +1925,32 @@ typedef XCBKeyPressEvent XCBKeyReleaseEvent;
         <li class="subtitle"><a name="eventex">X events: a complete example</a>
         <p>
         As an example for handling events, we show a program that
-        creates a window, enter an events loop and check for all the
-        events described above, and write on the terminal the relevant
+        creates a window, enters an events loop and checks for all the
+        events described above, and writes on the terminal the relevant
         characteristics of the event. With this code, it should be
         easy to add drawing operations, like those which have been
         described above.
         </p>
         <pre class="code">
-#include &lt;malloc.h&gt;
+#include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 
 #include &lt;X11/XCB/xcb.h&gt;
+
+void
+print_modifiers(CARD32 mask)
+{
+  const char **mod, *mods[] = {
+    "Shift", "Lock", "Ctrl", "Alt",
+    "Mod2", "Mod3", "Mod4", "Mod5",
+    "Button1", "Button2", "Button3", "Button4", "Button5"
+  };
+  printf("Modifier mask: ");
+  for (mod = mods ; mask; mask &gt;&gt;= 1, mod++)
+    if (mask &amp; 1)
+      printf(*mod);
+  putchar('\n');
+}
 
 int
 main (int argc, char *argv[])
@@ -1940,9 +1974,10 @@ main (int argc, char *argv[])
   /* Create the window */
   mask = XCBCWBackPixel | XCBCWEventMask;
   values[0] = screen-&gt;white_pixel;
-  values[1] = ExposureMask      | ButtonPressMask  | ButtonReleaseMask |
-              PointerMotionMask | EnterWindowMask  | LeaveWindowMask   |
-               KeyPressMask     | KeyReleaseMask;
+  values[1] = XCBEventMaskExposure      | XCBEventMaskButtonPress
+            | XCBEventMaskButtonRelease | XCBEventMaskPointerMotion
+            | XCBEventMaskEnterWindow   | XCBEventMaskLeaveWindow
+            | XCBEventMaskKeyPress      | XCBEventMaskKeyRelease;
   XCBCreateWindow (c,                        /* Connection          */
                    0,                        /* depth               */
                    win.window,               /* window Id           */
@@ -1950,17 +1985,18 @@ main (int argc, char *argv[])
                    0, 0,                     /* x, y                */
                    150, 150,                 /* width, height       */
                    10,                       /* border_width        */
-                   InputOutput,              /* class               */
+                   XCBWindowClassInputOutput,/* class               */
                    screen-&gt;root_visual,      /* visual              */
                    mask, values);            /* masks */
 
   /* Map the window on the screen */
   XCBMapWindow (c, win.window);
 
-  XCBSync (c, 0);
-  while ((e = XCBWaitEvent (c)))
+  XCBFlush (c);
+
+  while ((e = XCBWaitForEvent (c)))
     {
-      switch (e-&gt;response_type)
+      switch (e-&gt;response_type &amp; ~0x80)
         {
         case XCBExpose:
           {
@@ -1973,18 +2009,7 @@ main (int argc, char *argv[])
         case XCBButtonPress: 
           {
             XCBButtonPressEvent *ev = (XCBButtonPressEvent *)e;
-            int                  button_num = 0;
-            
-            if ((ev-&gt;state | Button1Mask) == Button1Mask)
-              button_num = 1;
-            if ((ev-&gt;state | Button2Mask) == Button2Mask)
-              button_num = 2;
-            if ((ev-&gt;state | Button3Mask) == Button3Mask)
-              button_num = 3;
-            if ((ev-&gt;state | Button4Mask) == Button4Mask)
-              button_num = 4;
-            if ((ev-&gt;state | Button5Mask) == Button5Mask)
-              button_num = 5;
+            print_modifiers(ev-&gt;state);
               
             switch (ev-&gt;detail.id)
               {
@@ -2009,18 +2034,7 @@ main (int argc, char *argv[])
         case XCBButtonRelease: 
           {
             XCBButtonReleaseEvent *ev = (XCBButtonReleaseEvent *)e;
-            int                    button_num = 0;
-            
-            if ((ev-&gt;state | Button1Mask) == Button1Mask)
-              button_num = 1;
-            if ((ev-&gt;state | Button2Mask) == Button2Mask)
-              button_num = 2;
-            if ((ev-&gt;state | Button3Mask) == Button3Mask)
-              button_num = 3;
-            if ((ev-&gt;state | Button4Mask) == Button4Mask)
-              button_num = 4;
-            if ((ev-&gt;state | Button5Mask) == Button5Mask)
-              button_num = 5;
+            print_modifiers(ev-&gt;state);
             
             printf ("Button %d released in window %ld, at coordinates (%d,%d)\n",
                     ev-&gt;detail.id, ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
@@ -2046,13 +2060,14 @@ main (int argc, char *argv[])
           {
             XCBLeaveNotifyEvent *ev = (XCBLeaveNotifyEvent *)e;
             
-            printf ("Mouse leaved window %ld, at coordinates (%d,%d)\n",
+            printf ("Mouse left window %ld, at coordinates (%d,%d)\n",
                     ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
             break;
           }
         case XCBKeyPress: 
           {
             XCBKeyPressEvent *ev = (XCBKeyPressEvent *)e;
+            print_modifiers(ev-&gt;state);
 
             printf ("Key pressed in window %ld\n",
                     ev-&gt;event.xid);
@@ -2061,14 +2076,16 @@ main (int argc, char *argv[])
         case XCBKeyRelease: 
           {
             XCBKeyReleaseEvent *ev = (XCBKeyReleaseEvent *)e;
+            print_modifiers(ev-&gt;state);
 
-            printf ("Key releaseed in window %ld\n",
+            printf ("Key released in window %ld\n",
                     ev-&gt;event.xid);
             break;
           }
         default:
           {
             /* Unknown event type, ignore it */
+            printf("Unknown event: %d\n", e-&gt;response_type);
             break;
           }
         }
@@ -2093,7 +2110,7 @@ main (int argc, char *argv[])
         <li class="subtitle"><a name="fontstruct">The Font structure</a>
         <p>
         In order to support flexible fonts, a font structure is
-        defined. You know what ? Its an Id:
+        defined. You know what ? It's an Id:
         </p>
         <pre class="code">
 typedef struct {
@@ -2103,6 +2120,10 @@ typedef struct {
         <p>
         It is used to contain information about a font, and is passed
         to several functions that handle fonts selection and text drawing.
+        </p>
+        <p>
+        <b>TODO:</b> example for picking a font and displaying some text.
+        Even better, also demonstrate translating keypresses to text.
         </p>
       </ol>
       <li class="title"><a name="wm">Interacting with the window manager</a>
@@ -2124,7 +2145,7 @@ typedef struct {
         <p>
         Many of the parameters communicated to the window manager are
         passed using data called "properties". These properties are
-        attached by the X server to different windows, and are stores
+        attached by the X server to different windows, and are stored
         in a format that makes it possible to read them from different
         machines that may use different architectures (remember that
         an X client program may run on a remote machine).
@@ -2154,17 +2175,18 @@ XCBVoidCookie XCBChangeProperty (XCBConnection *c,  /* Connection to the X serve
 </pre>
         <p>
         The <span class="code">mode</span> parameter coud be one of
-        the following value (defined in the X.h header file):
+        the following values (defined in enumeration XCBPropMode in
+        the xproto.h header file):
         </p>
         <ul>
-          <li>PropModeReplace
-          <li>PropModePrepend
-          <li>PropModeAppend
+          <li>XCBPropModeReplace
+          <li>XCBPropModePrepend
+          <li>XCBPropModeAppend
         </ul>
         <br>
         <li class="subtitle"><a name="wmname">Setting the window name and icon name</a>
         <p>
-        The firt thing we want to do would be to set the name for our
+        The first thing we want to do would be to set the name for our
         window. This is done using the
         <span class="code">XCBChangeProperty()</span> function. This
         name may be used by the window manager as the title of the
@@ -2209,24 +2231,24 @@ main (int argc, char *argv[])
                    0, 0,                     /* x, y                */
                    250, 150,                 /* width, height       */
                    10,                       /* border_width        */
-                   InputOutput,              /* class               */
+                   XCBWindowClassInputOutput,/* class               */
                    screen-&gt;root_visual,      /* visual              */
                    0, NULL);                 /* masks, not used     */
 
   /* Set the title of the window */
-  XCBChangeProperty(c, PropModeReplace, win.window,
+  XCBChangeProperty(c, XCBPropModeReplace, win.window,
                     WM_NAME, STRING, 8,
                     strlen(title), title);
 
   /* Set the title of the window icon */
-  XCBChangeProperty(c, PropModeReplace, win.window,
+  XCBChangeProperty(c, XCBPropModeReplace, win.window,
                     WM_ICON_NAME, STRING, 8,
                     strlen(title_icon), title_icon);
 
   /* Map the window on the screen */
   XCBMapWindow (c, win.window);
 
-  XCBSync (c, 0);
+  XCBFlush (c);
   
   while (1) {}
 
@@ -2299,7 +2321,7 @@ XCBVoidCookie XCBUnmapWindow(XCBConnection *c, XCBWINDOW window);
         <li class="subtitle"><a name="winconf">Configuring a window</a>
         <p>
         As we have seen when we have created our first window, in the
-        X Events subsection, we can set some attributes to the window
+        X Events subsection, we can set some attributes for the window
         (that is, the position, the size, the events the window will
         receive, etc). If we want to modify them, but the window is
         already created, we can change them by using the following
@@ -2313,16 +2335,16 @@ XCBVoidCookie XCBConfigureWindow (XCBConnection *c,            /* The connection
 </pre>
         <p>
         We set the <span class="code">value_mask</span> to one or
-        several mask values that are in the X.h header:
+        several mask values that are in the XCBConfigWindow enumeration in the xproto.h header:
         </p>
         <ul>
-           <li><span class="code">CWX</span>: new x coordinate of the window's top left corner
-          <li><span class="code">CWY</span>: new y coordinate of the window's top left corner
-          <li><span class="code">CWWidth</span>: new width of the window
-          <li><span class="code">CWHeight</span>: new height of the window
-          <li><span class="code">CWBorderWidth</span>: new width of the border of the window
-          <li><span class="code">CWSibling</span>
-          <li><span class="code">CWStackMode</span>: the new stacking order
+          <li><span class="code">XCBConfigWindowX</span>: new x coordinate of the window's top left corner
+          <li><span class="code">XCBConfigWindowY</span>: new y coordinate of the window's top left corner
+          <li><span class="code">XCBConfigWindowWidth</span>: new width of the window
+          <li><span class="code">XCBConfigWindowHeight</span>: new height of the window
+          <li><span class="code">XCBConfigWindowBorderWidth</span>: new width of the border of the window
+          <li><span class="code">XCBConfigWindowSibling</span>
+          <li><span class="code">XCBConfigWindowStackMode</span>: the new stacking order
         </ul>
         <p>
         We then give to <span class="code">value_mask</span> the new
@@ -2341,7 +2363,7 @@ const static CARD32 values[] = { 10, 20 };
 /* The connection c and the window win are supposed to be defined */
 
 /* Move the window to coordinates x = 10 and y = 20 */
-XCBConfigureWindow (c, win, CWX | CWY, values);
+XCBConfigureWindow (c, win, XCBConfigWindowX | XCBConfigWindowY, values);
 </pre>
         <p>
         Note that when the window is moved, it might get partially
@@ -2360,7 +2382,7 @@ const static CARD32 values[] = { 200, 300 };
 /* The connection c and the window win are supposed to be defined */
 
 /* Resize the window to width = 10 and height = 20 */
-XCBConfigureWindow (c, win, CWWidth | CWHeight, values);
+XCBConfigureWindow (c, win, XCBConfigWindowWidth | XCBConfigWindowHeight, values);
 </pre>
         <p>
         We can also combine the move and resize operations using one
@@ -2373,33 +2395,33 @@ const static CARD32 values[] = { 10, 20, 200, 300 };
 
 /* Move the window to coordinates x = 10 and y = 20 */
 /* and resize the window to width = 10 and height = 20 */
-XCBConfigureWindow (c, win, CWX | CWY | CWWidth | CWHeight, values);
+XCBConfigureWindow (c, win, XCBConfigWindowX | XCBConfigWindowY | XCBConfigWindowWidth | XCBConfigWindowHeight, values);
 </pre>
         <li class="subtitle"><a name="winstack">Changing windows stacking order: raise and lower</a>
         <p>
         Until now, we changed properties of a single window. We'll see
         that there are properties that relate to the window and other
-        windows. One of hem is the stacking order. That is, the order
+        windows. One of them is the stacking order. That is, the order
         in which the windows are layered on top of each other. The
         front-most window is said to be on the top of the stack, while
         the back-most window is at the bottom of the stack. Here is
         how to manipulate our windows stack order:
         </p>
         <pre class="code">
-const static CARD32 values[] = { Above };
+const static CARD32 values[] = { XCBStackModeAbove };
 
 /* The connection c and the window win are supposed to be defined */
 
 /* Move the window on the top of the stack */
-XCBConfigureWindow (c, win, CWStackMode, values);
+XCBConfigureWindow (c, win, XCBConfigWindowStackMode, values);
 </pre>
         <pre class="code">
-const static CARD32 values[] = { Below };
+const static CARD32 values[] = { XCBStackModeBelow };
 
 /* The connection c and the window win are supposed to be defined */
 
 /* Move the window on the bottom of the stack */
-XCBConfigureWindow (c, win, CWStackMode, values);
+XCBConfigureWindow (c, win, XCBConfigWindowStackMode, values);
 </pre>
         <li class="subtitle"><a name="wingetinfo">Getting information about a window</a>
         <p>
@@ -2769,7 +2791,7 @@ main (int argc, char *argv[])
   /* We create the window win here*/
 
   cmap = XCBCOLORMAPNew (c);
-  XCBCreateColormap (c, AllocNone, cmap, win, screen-&gt;root_visual);
+  XCBCreateColormap (c, XCBColormapAllocNone, cmap, win, screen-&gt;root_visual);
 
   return 1;
 }
@@ -2871,7 +2893,7 @@ main (int argc, char *argv[])
   /* We create the window win here*/
 
   cmap = XCBCOLORMAPNew (c);
-  XCBCreateColormap (c, AllocNone, cmap, win, screen-&gt;root_visual);
+  XCBCreateColormap (c, XCBColormapAllocNone, cmap, win, screen-&gt;root_visual);
 
   rep = XCBAllocColorReply (c, XCBAllocColor (c, cmap, 65535, 0, 0), 0);
   
@@ -2918,7 +2940,8 @@ main (int argc, char *argv[])
         looks like a C source file. It contains variables defining the
         width and the height of the bitmap, an array containing the
         bit values of the bitmap (the size of the array is
-        weight*height), and an optional hot-spot location (that will
+        (width+7)/8*height and the bit and byte order are LSB), and 
+        an optional hot-spot location (that will
         be explained later, when discussing mouse cursors).
         </p>
         <p>
@@ -2951,7 +2974,7 @@ typedef union {
 </pre>
         <p>
         in order to avoid confusion between a window and a pixmap. The
-        operations that will work indifferently on a window or a pixmap
+        operations that will work the same on a window or a pixmap
         will require a <span class="code">XCBDRAWABLE</span>
         </p>
         <div class="emph">
@@ -2960,7 +2983,8 @@ typedef union {
         <span class="code">Drawable</span>, a
         <span class="code">Pixmap</span> or a
         <span class="code">Window</span>: all are 32 bit long
-        integer.
+        integer.  XCB wraps all these different IDs in structures to
+        provide some measure of type-safety.
         </p>
         </div>
         <li class="subtitle"><a name="pixmapscreate">Creating a pixmap</a>
@@ -2993,7 +3017,7 @@ XCBVoidCookie XCBCreatePixmap (XCBConnection *c,         /* Pointer to the XCBCo
 </pre>
         <p>
         <b>TODO</b>: Explain the drawable parameter, and give an
-        example (like xpoints.c)
+        example (like <a href="xpoints.c">xpoints.c</a>)
         </p>
         <li class="subtitle"><a name="pixmapsdraw"></a>Drawing a pixmap in a window
         <p>
@@ -3027,10 +3051,10 @@ XCBVoidCookie XCBCopyArea (XCBConnection *c,             /* Pointer to the XCBCo
         fail. The exception to this is if we copy a specific bit plane
         of the source pixmap using the
         <span class="code">XCBCopyPlane</span> function. In such an
-        event, we can copy a specific plain to the target window (in
+        event, we can copy a specific plane to the target window (in
         actuality, setting a specific bit in the color of each pixel
         copied). This can be used to generate strange graphic effects
-        in widow, but that is beyond the scope of this tutorial.
+        in a window, but that is beyond the scope of this tutorial.
         </p>
         <li class="subtitle"><a name="pixmapsfree"></a>Freeing a pixmap
         <p>
@@ -3085,7 +3109,8 @@ int XCBGetFileDescriptor(XCBConnection *c);
           structure, you have to iterate on the screens.
           The equivalent function of the Xlib's
           <span class="code">ScreenOfDisplay</span> function can be
-          found <a href="#ScreenOfDisplay">below</a>. OK, here is the
+          found <a href="#ScreenOfDisplay">below</a>. This is also provided in the
+          XCBAux library as <span class="code">XCBAuxGetScreen()</span>. OK, here is the
           small piece of code to get that number:
           </p>
           <pre class="code">
@@ -3101,6 +3126,13 @@ c = XCBConnect (display_name, &amp;screen_default_nbr);
           <li class="subtitle"><a name="QLength"></a>QLength
           <p>
           Not documented yet.
+          </p>
+          <p>
+          However, this points out a basic difference in philosophy between
+          Xlib and XCB.  Xlib has several functions for filtering and
+          manipulating the incoming and outgoing X message queues.  XCB
+          wishes to hide this as much as possible from the user, which
+          allows for more freedom in implementation strategies.
           </p>
           <li class="subtitle"><a name="ScreenCount"></a>ScreenCount
           <p>
@@ -3480,7 +3512,7 @@ if (screen)
 
     gc = XCBGCONTEXTNew (c);
     draw.window = screen-&gt;root;
-    mask = GCForeground | GCBackground;
+    mask = XCBGCForeground | XCBGCBackground;
     values[0] = screen-&gt;black_pixel;
     values[1] = screen-&gt;white_pixel;
     XCBCreateGC (c, gc, draw, mask, values);
