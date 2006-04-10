@@ -229,7 +229,9 @@ static int read_block(const int fd, void *buf, const size_t len)
             fd_set fds;
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
-            ret = select(fd + 1, &fds, 0, 0, 0);
+	    do {
+		ret = select(fd + 1, &fds, 0, 0, 0);
+	    } while (ret == -1 && errno == EINTR);
         }
         if(ret <= 0)
             return ret;
