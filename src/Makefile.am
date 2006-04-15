@@ -7,6 +7,7 @@ lib_LTLIBRARIES = libXCB.la \
                   libXCBrecord.la \
                   libXCBrender.la \
                   libXCBres.la \
+                  libXCBscreensaver.la \
                   libXCBshape.la \
                   libXCBshm.la \
                   libXCBsync.la \
@@ -27,6 +28,7 @@ EXTHEADERS = \
 		extensions/record.h \
 		extensions/render.h \
 		extensions/res.h \
+		extensions/screensaver.h \
 		extensions/shape.h \
 		extensions/shm.h \
 		extensions/sync.h \
@@ -47,6 +49,7 @@ EXTSOURCES = \
 		extensions/record.c \
 		extensions/render.c \
 		extensions/res.c \
+		extensions/screensaver.c \
 		extensions/shape.c \
 		extensions/shm.c \
 		extensions/sync.c \
@@ -102,6 +105,8 @@ libXCBrender_la_LIBADD = $(XCB_LIBS)
 libXCBrender_la_SOURCES = extensions/render.c extensions/render.h
 libXCBres_la_LIBADD = $(XCB_LIBS)
 libXCBres_la_SOURCES = extensions/res.c extensions/res.h
+libXCBscreensaver_la_LIBADD = $(XCB_LIBS)
+libXCBscreensaver_la_SOURCES = extensions/screensaver.c extensions/screensaver.h
 libXCBshape_la_LIBADD = $(XCB_LIBS)
 libXCBshape_la_SOURCES = extensions/shape.c extensions/shape.h
 libXCBshm_la_LIBADD = $(XCB_LIBS)
