@@ -21,14 +21,14 @@ EXTHEADERS = \
 		extensions/bigreq.h \
 		extensions/composite.h \
 		extensions/damage.h \
+		extensions/dpms.h \
 		extensions/glx.h \
-		extensions/shm.h \
-		extensions/shape.h \
 		extensions/randr.h \
 		extensions/record.h \
 		extensions/render.h \
 		extensions/res.h \
-		extensions/dpms.h \
+		extensions/shape.h \
+		extensions/shm.h \
 		extensions/sync.h \
 		extensions/xc_misc.h \
 		extensions/xevie.h \
@@ -41,14 +41,14 @@ EXTSOURCES = \
 		extensions/bigreq.c \
 		extensions/composite.c \
 		extensions/damage.c \
+		extensions/dpms.c \
 		extensions/glx.c \
-		extensions/shm.c \
-		extensions/shape.c \
 		extensions/randr.c \
 		extensions/record.c \
 		extensions/render.c \
 		extensions/res.c \
-		extensions/dpms.c \
+		extensions/shape.c \
+		extensions/shm.c \
 		extensions/sync.c \
 		extensions/xc_misc.c \
 		extensions/xevie.c \
