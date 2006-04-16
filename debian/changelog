@@ -4,8 +4,9 @@ libxcb0 (0.9-3) UNRELEASED; urgency=low
     autoconf, automake, and libtool.
   * Update -dbg package handling to work with debhelper compat level 5.
     Increase minimum version on debhelper Build-Depends to 5.0.0.
+  * Stop installing the libtool .la files.
 
- -- Josh Triplett <josh@freedesktop.org>  Sat, 15 Apr 2006 19:20:07 -0700
+ -- Josh Triplett <josh@freedesktop.org>  Sat, 15 Apr 2006 22:16:33 -0700
 
 libxcb0 (0.9-2) unstable; urgency=low
 
