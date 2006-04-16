@@ -5,8 +5,12 @@ libxcb0 (0.9-3) UNRELEASED; urgency=low
   * Update -dbg package handling to work with debhelper compat level 5.
     Increase minimum version on debhelper Build-Depends to 5.0.0.
   * Stop installing the libtool .la files.
+  * Debian X11R7 transition:
+    * Change Build-Depends on x-dev to x11proto-core-dev.
+    * Install headers to /usr/include/X11, not /usr/X11R6/include/X11.
+    * Pre-Depends: x11-common (>= 1:1.09).
 
- -- Josh Triplett <josh@freedesktop.org>  Sat, 15 Apr 2006 22:16:33 -0700
+ -- Josh Triplett <josh@freedesktop.org>  Sun, 16 Apr 2006 09:16:45 -0700
 
 libxcb0 (0.9-2) unstable; urgency=low
 
