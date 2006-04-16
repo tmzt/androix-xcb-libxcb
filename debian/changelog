@@ -7,7 +7,7 @@ libxcb0 (0.9-3) UNRELEASED; urgency=low
   * Stop installing the libtool .la files.
   * Add Build-Depends on libxdmcp-dev.
   * Debian X11R7 transition:
-    * Change Build-Depends on x-dev to x11proto-core-dev.
+    * Change Depends and Build-Depends on x-dev to x11proto-core-dev.
     * Install headers to /usr/include/X11, not /usr/X11R6/include/X11.
     * Pre-Depends: x11-common (>= 1:1.09).
 
