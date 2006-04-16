@@ -7,7 +7,6 @@ include /usr/share/cdbs/1/class/autotools.mk
 
 DEB_CONFIGURE_EXTRA_FLAGS = --with-opt
 DEB_CONFIGURE_INCLUDEDIR = "\$${prefix}/X11R6/include"
-DEB_DH_STRIP_ARGS=--dbg-package=libxcb0
 
 debian/copyright: debian/copyright.debian COPYING
 	cat $+ > $@

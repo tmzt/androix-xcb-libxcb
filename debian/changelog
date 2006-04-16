@@ -2,6 +2,8 @@ libxcb0 (0.9-3) UNRELEASED; urgency=low
 
   * Stop running autoreconf in debian/rules, and remove Build-Depends for
     autoconf, automake, and libtool.
+  * Update -dbg package handling to work with debhelper compat level 5.
+    Increase minimum version on debhelper Build-Depends to 5.0.0.
 
  -- Josh Triplett <josh@freedesktop.org>  Sat, 15 Apr 2006 19:20:07 -0700
 
