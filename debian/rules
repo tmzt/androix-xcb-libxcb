@@ -9,10 +9,6 @@ DEB_CONFIGURE_EXTRA_FLAGS = --with-opt
 DEB_CONFIGURE_INCLUDEDIR = "\$${prefix}/X11R6/include"
 DEB_DH_STRIP_ARGS=--dbg-package=libxcb0
 
-debian/stamp-autotools-files:
-	autoreconf -v --install
-	touch debian/stamp-autotools-files
-
 debian/copyright: debian/copyright.debian COPYING
 	cat $+ > $@
 

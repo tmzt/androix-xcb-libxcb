@@ -2,8 +2,7 @@ Source: libxcb0
 Priority: optional
 Maintainer: XCB Developers <xcb@lists.freedesktop.org>
 Uploaders: Jamey Sharp <sharpone@debian.org>, Josh Triplett <josh@freedesktop.org>
-Build-Depends: x-dev, libxau-dev, xcb-proto, cdbs, debhelper (>= 4.1.76), pkg-config, autoconf, automake1.9 | automaken, libtool, xsltproc, check, binutils (>= 2.12.90.0.9)
-Build-Conflicts: automake1.4, automake1.5, automake1.6
+Build-Depends: x-dev, libxau-dev, xcb-proto, cdbs, debhelper (>= 4.1.76), pkg-config, xsltproc, check, binutils (>= 2.12.90.0.9)
 Standards-Version: 3.6.1
 Bugs: mailto:xcb@lists.freedesktop.org
 
