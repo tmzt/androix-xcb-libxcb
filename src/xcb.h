@@ -273,9 +273,10 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error);
  * processed. This function enables applications to determine whether
  * forcing a cookie is going to block.
  *
- * @todo review that function.
+ * @deprecated This function is deprecated in favor of XCBPollForReply.
+ * It must not be used in newly written code.
  */
-unsigned int XCBGetRequestRead(XCBConnection *c);
+unsigned int XCBGetRequestRead(XCBConnection *c) deprecated;
 
 
 /* xcb_ext.c */

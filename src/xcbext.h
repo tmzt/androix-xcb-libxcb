@@ -63,6 +63,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
 /* xcb_in.c */
 
 void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e);
+int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error);
 
 
 /* xcb_xid.c */

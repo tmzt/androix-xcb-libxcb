@@ -32,7 +32,7 @@
 #include "xcb.h"
 
 /* This function must be called with the IOLock held. */
-unsigned int XCBGetQueuedRequestRead(XCBConnection *c);
+unsigned int XCBGetQueuedRequestRead(XCBConnection *c) deprecated;
 
 /* This function must be called with the IOLock held. */
 unsigned int XCBGetRequestSent(XCBConnection *c);

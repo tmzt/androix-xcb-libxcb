@@ -239,6 +239,51 @@ static int read_block(const int fd, void *buf, const size_t len)
     return len;
 }
 
+static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
+{
+    struct reply_list *head;
+
+    if(!request)
+        head = 0;
+    else if(c->in.request_completed >= request)
+    {
+        head = _xcb_map_remove(c->in.replies, request);
+        if(head && head->next)
+            _xcb_map_put(c->in.replies, request, head->next);
+    }
+    else if(c->in.request_read == request && c->in.current_reply)
+    {
+        head = c->in.current_reply;
+        c->in.current_reply = head->next;
+        if(!head->next)
+            c->in.current_reply_tail = &c->in.current_reply;
+    }
+    else
+        /* Would block: do nothing. */
+        return 0;
+
+    if(error)
+        *error = 0;
+    *reply = 0;
+
+    if(head)
+    {
+        if(((XCBGenericRep *) head->reply)->response_type == XCBError)
+        {
+            if(error)
+                *error = head->reply;
+            else
+                free(head->reply);
+        }
+        else
+            *reply = head->reply;
+
+        free(head);
+    }
+
+    return 1;
+}
+
 /* Public interface */
 
 void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
@@ -319,6 +364,16 @@ done:
     pthread_cond_destroy(&cond);
 
     wake_up_next_reader(c);
+    pthread_mutex_unlock(&c->iolock);
+    return ret;
+}
+
+int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
+{
+    int ret;
+    assert(reply != 0);
+    pthread_mutex_lock(&c->iolock);
+    ret = poll_for_reply(c, request, reply, error);
     pthread_mutex_unlock(&c->iolock);
     return ret;
 }
