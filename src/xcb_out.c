@@ -165,7 +165,8 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
 
     request = ++c->out.request;
     assert(request != 0);
-    _xcb_in_expect_reply(c, request, workaround, flags);
+    if(workaround != WORKAROUND_NONE || flags != 0)
+        _xcb_in_expect_reply(c, request, workaround, flags);
     if(!req->isvoid)
         c->in.request_expected = c->out.request;
 

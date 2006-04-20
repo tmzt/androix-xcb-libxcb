@@ -443,18 +443,16 @@ void _xcb_in_destroy(_xcb_in *in)
 
 int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround, int flags)
 {
-    if(workaround != WORKAROUND_NONE || flags != 0)
-    {
-        pending_reply *pend = malloc(sizeof(pending_reply));
-        if(!pend)
-            return 0;
-        pend->request = request;
-        pend->workaround = workaround;
-        pend->flags = flags;
-        pend->next = 0;
-        *c->in.pending_replies_tail = pend;
-        c->in.pending_replies_tail = &pend->next;
-    }
+    pending_reply *pend = malloc(sizeof(pending_reply));
+    assert(workaround != WORKAROUND_NONE || flags != 0);
+    if(!pend)
+        return 0;
+    pend->request = request;
+    pend->workaround = workaround;
+    pend->flags = flags;
+    pend->next = 0;
+    *c->in.pending_replies_tail = pend;
+    c->in.pending_replies_tail = &pend->next;
     return 1;
 }
 
