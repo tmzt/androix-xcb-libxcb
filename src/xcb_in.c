@@ -229,7 +229,9 @@ static int read_block(const int fd, void *buf, const size_t len)
             fd_set fds;
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
-            ret = select(fd + 1, &fds, 0, 0, 0);
+	    do {
+		ret = select(fd + 1, &fds, 0, 0, 0);
+	    } while (ret == -1 && errno == EINTR);
         }
         if(ret <= 0)
             return ret;
@@ -237,86 +239,109 @@ static int read_block(const int fd, void *buf, const size_t len)
     return len;
 }
 
-/* Public interface */
-
-void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
+static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
 {
-    pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-    reader_list reader;
-    reader_list **prev_reader;
     struct reply_list *head;
-    void *ret = 0;
-    if(e)
-        *e = 0;
 
     /* If an error occurred when issuing the request, fail immediately. */
     if(!request)
-        return 0;
-
-    pthread_mutex_lock(&c->iolock);
-
-    /* If this request has not been written yet, write it. */
-    if(!_xcb_out_flush_to(c, request))
-        goto done; /* error */
-
-    for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
-        if((*prev_reader)->request == request)
-            goto done; /* error */
-
-    reader.request = request;
-    reader.data = &cond;
-    reader.next = *prev_reader;
-    *prev_reader = &reader;
-
-    /* If this request has not completed yet and has no reply waiting,
-     * wait for one. */
-    while(c->in.request_completed < request &&
-            !(c->in.request_read == request && c->in.current_reply))
-        if(!_xcb_conn_wait(c, &cond, 0, 0))
-            goto done;
-
-    if(c->in.request_read != request)
+        head = 0;
+    /* We've read requests past the one we want, so if it has replies we have
+     * them all and they're in the replies map. */
+    else if(request < c->in.request_read)
     {
         head = _xcb_map_remove(c->in.replies, request);
         if(head && head->next)
             _xcb_map_put(c->in.replies, request, head->next);
     }
-    else
+    /* We're currently processing the responses to the request we want, and we
+     * have a reply ready to return. So just return it without blocking. */
+    else if(request == c->in.request_read && c->in.current_reply)
     {
         head = c->in.current_reply;
-        if(head)
-        {
-            c->in.current_reply = head->next;
-            if(!head->next)
-                c->in.current_reply_tail = &c->in.current_reply;
-        }
+        c->in.current_reply = head->next;
+        if(!head->next)
+            c->in.current_reply_tail = &c->in.current_reply;
     }
+    /* We know this request can't have any more replies, and we've already
+     * established it doesn't have a reply now. Don't bother blocking. */
+    else if(request == c->in.request_completed)
+        head = 0;
+    /* We may have more replies on the way for this request: block until we're
+     * sure. */
+    else
+        return 0;
+
+    if(error)
+        *error = 0;
+    *reply = 0;
 
     if(head)
     {
-        ret = head->reply;
-        free(head);
-
-        if(((XCBGenericRep *) ret)->response_type == XCBError)
+        if(((XCBGenericRep *) head->reply)->response_type == XCBError)
         {
-            if(e)
-                *e = ret;
+            if(error)
+                *error = head->reply;
             else
-                free(ret);
-            ret = 0;
+                free(head->reply);
         }
+        else
+            *reply = head->reply;
+
+        free(head);
     }
 
-done:
-    for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
-        if(*prev_reader == &reader)
-        {
-            *prev_reader = (*prev_reader)->next;
-            break;
-        }
-    pthread_cond_destroy(&cond);
+    return 1;
+}
+
+/* Public interface */
+
+void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
+{
+    void *ret = 0;
+    if(e)
+        *e = 0;
+
+    pthread_mutex_lock(&c->iolock);
+
+    /* If this request has not been written yet, write it. */
+    if(_xcb_out_flush_to(c, request))
+    {
+        pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+        reader_list reader;
+        reader_list **prev_reader;
+
+        for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
+            /* empty */;
+        reader.request = request;
+        reader.data = &cond;
+        reader.next = *prev_reader;
+        *prev_reader = &reader;
+
+        while(!poll_for_reply(c, request, &ret, e))
+            if(!_xcb_conn_wait(c, &cond, 0, 0))
+                break;
+
+        for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
+            if(*prev_reader == &reader)
+            {
+                *prev_reader = (*prev_reader)->next;
+                break;
+            }
+        pthread_cond_destroy(&cond);
+    }
 
     wake_up_next_reader(c);
+    pthread_mutex_unlock(&c->iolock);
+    return ret;
+}
+
+int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
+{
+    int ret;
+    assert(reply != 0);
+    pthread_mutex_lock(&c->iolock);
+    ret = poll_for_reply(c, request, reply, error);
     pthread_mutex_unlock(&c->iolock);
     return ret;
 }

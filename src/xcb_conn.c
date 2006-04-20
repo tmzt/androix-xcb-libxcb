@@ -253,7 +253,11 @@ int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector
     }
 
     pthread_mutex_unlock(&c->iolock);
-    ret = select(c->fd + 1, &rfds, &wfds, 0, 0) > 0;
+    do {
+	ret = select(c->fd + 1, &rfds, &wfds, 0, 0);
+    } while (ret == -1 && errno == EINTR);
+    if (ret < 0)
+	ret = 0;
     pthread_mutex_lock(&c->iolock);
 
     if(ret)

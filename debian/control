@@ -2,8 +2,7 @@ Source: libxcb0
 Priority: optional
 Maintainer: XCB Developers <xcb@lists.freedesktop.org>
 Uploaders: Jamey Sharp <sharpone@debian.org>, Josh Triplett <josh@freedesktop.org>
-Build-Depends: x-dev, libxau-dev, xcb-proto, cdbs, debhelper (>= 4.1.76), pkg-config, autoconf, automake1.9 | automaken, libtool, xsltproc, check, binutils (>= 2.12.90.0.9)
-Build-Conflicts: automake1.4, automake1.5, automake1.6
+Build-Depends: x11proto-core-dev, libxau-dev, libxdmcp-dev, xcb-proto, cdbs, debhelper (>= 5.0.0), pkg-config, xsltproc, check, binutils (>= 2.12.90.0.9)
 Standards-Version: 3.6.1
 Bugs: mailto:xcb@lists.freedesktop.org
 
@@ -12,30 +11,41 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding
- Xlib has been the standard C binding for the X Window System protocol for
- many years now. It is an excellent piece of work, but there are applications
- for which it is not ideal. XCB builds on nearly two decades of experience
- with X specifically and software engineering in general in an effort to
- replace the aging Xlib code base.
+ This package contains the library files needed to run software using the X C
+ Binding (XCB).
  .
- This package contains the library files needed to run software using
- XCB.
+ The XCB library provides an interface to the X Window System protocol,
+ designed to replace the Xlib interface.  XCB provides several advantages over
+ Xlib:
+ .
+  * Size: small library and lower memory footprint
+  * Latency hiding: batch several requests and wait for the replies later
+  * Direct protocol access: one-to-one mapping between interface and protocol
+  * Thread support: access XCB from multiple threads, with no explicit locking
+  * Easy creation of new extensions: automatically generates interface from
+    machine-parsable protocol descriptions
  .
  Homepage: http://xcb.freedesktop.org
 
 Package: libxcb0-dev
 Section: libdevel
 Architecture: any
-Depends: libxcb0 (= ${Source-Version}), x-dev
+Depends: libxcb0 (= ${Source-Version}), x11proto-core-dev
+Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, development files
- Xlib has been the standard C binding for the X Window System protocol for
- many years now. It is an excellent piece of work, but there are applications
- for which it is not ideal. XCB builds on nearly two decades of experience
- with X specifically and software engineering in general in an effort to
- replace the aging Xlib code base.
- .
  This package contains the header and library files needed to build software
- using XCB.
+ using the X C Binding (XCB) library.
+ .
+ The XCB library provides an interface to the X Window System protocol,
+ designed to replace the Xlib interface.  XCB provides several advantages over
+ Xlib:
+ .
+  * Size: small library and lower memory footprint
+  * Latency hiding: batch several requests and wait for the replies later
+  * Direct protocol access: one-to-one mapping between interface and protocol
+  * Thread support: access XCB from multiple threads, with no explicit locking
+  * Easy creation of new extensions: automatically generates interface from
+    machine-parsable protocol descriptions
  .
  Homepage: http://xcb.freedesktop.org
 
@@ -44,13 +54,18 @@ Section: libdevel
 Architecture: any
 Depends: libxcb0 (= ${Source-Version})
 Description: X C Binding, debugging symbols
- Xlib has been the standard C binding for the X Window System protocol for
- many years now. It is an excellent piece of work, but there are applications
- for which it is not ideal. XCB builds on nearly two decades of experience
- with X specifically and software engineering in general in an effort to
- replace the aging Xlib code base.
- .
  This package contains the debugging symbols associated with libxcb0. gdb will
  automatically use these symbols when debugging libxcb0.
+ .
+ The XCB library provides an interface to the X Window System protocol,
+ designed to replace the Xlib interface.  XCB provides several advantages over
+ Xlib:
+ .
+  * Size: small library and lower memory footprint
+  * Latency hiding: batch several requests and wait for the replies later
+  * Direct protocol access: one-to-one mapping between interface and protocol
+  * Thread support: access XCB from multiple threads, with no explicit locking
+  * Easy creation of new extensions: automatically generates interface from
+    machine-parsable protocol descriptions
  .
  Homepage: http://xcb.freedesktop.org
