@@ -312,9 +312,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
         reader_list **prev_reader;
 
         for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
-            if((*prev_reader)->request == request)
-                goto done; /* error */
-
+            /* empty */;
         reader.request = request;
         reader.data = &cond;
         reader.next = *prev_reader;
@@ -324,7 +322,6 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
             if(!_xcb_conn_wait(c, &cond, 0, 0))
                 break;
 
-done:
         for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
             if(*prev_reader == &reader)
             {
