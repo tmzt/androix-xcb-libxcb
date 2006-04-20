@@ -243,23 +243,33 @@ static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, 
 {
     struct reply_list *head;
 
+    /* If an error occurred when issuing the request, fail immediately. */
     if(!request)
         head = 0;
-    else if(c->in.request_completed >= request)
+    /* We've read requests past the one we want, so if it has replies we have
+     * them all and they're in the replies map. */
+    else if(request < c->in.request_read)
     {
         head = _xcb_map_remove(c->in.replies, request);
         if(head && head->next)
             _xcb_map_put(c->in.replies, request, head->next);
     }
-    else if(c->in.request_read == request && c->in.current_reply)
+    /* We're currently processing the responses to the request we want, and we
+     * have a reply ready to return. So just return it without blocking. */
+    else if(request == c->in.request_read && c->in.current_reply)
     {
         head = c->in.current_reply;
         c->in.current_reply = head->next;
         if(!head->next)
             c->in.current_reply_tail = &c->in.current_reply;
     }
+    /* We know this request can't have any more replies, and we've already
+     * established it doesn't have a reply now. Don't bother blocking. */
+    else if(request == c->in.request_completed)
+        head = 0;
+    /* We may have more replies on the way for this request: block until we're
+     * sure. */
     else
-        /* Would block: do nothing. */
         return 0;
 
     if(error)
@@ -291,14 +301,9 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
     reader_list reader;
     reader_list **prev_reader;
-    struct reply_list *head;
     void *ret = 0;
     if(e)
         *e = 0;
-
-    /* If an error occurred when issuing the request, fail immediately. */
-    if(!request)
-        return 0;
 
     pthread_mutex_lock(&c->iolock);
 
@@ -317,42 +322,9 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
 
     /* If this request has not completed yet and has no reply waiting,
      * wait for one. */
-    while(c->in.request_completed < request &&
-            !(c->in.request_read == request && c->in.current_reply))
+    while(!poll_for_reply(c, request, &ret, e))
         if(!_xcb_conn_wait(c, &cond, 0, 0))
             goto done;
-
-    if(c->in.request_read != request)
-    {
-        head = _xcb_map_remove(c->in.replies, request);
-        if(head && head->next)
-            _xcb_map_put(c->in.replies, request, head->next);
-    }
-    else
-    {
-        head = c->in.current_reply;
-        if(head)
-        {
-            c->in.current_reply = head->next;
-            if(!head->next)
-                c->in.current_reply_tail = &c->in.current_reply;
-        }
-    }
-
-    if(head)
-    {
-        ret = head->reply;
-        free(head);
-
-        if(((XCBGenericRep *) ret)->response_type == XCBError)
-        {
-            if(e)
-                *e = ret;
-            else
-                free(ret);
-            ret = 0;
-        }
-    }
 
 done:
     for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
