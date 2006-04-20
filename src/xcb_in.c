@@ -298,9 +298,6 @@ static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, 
 
 void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
 {
-    pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-    reader_list reader;
-    reader_list **prev_reader;
     void *ret = 0;
     if(e)
         *e = 0;
@@ -308,32 +305,34 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     pthread_mutex_lock(&c->iolock);
 
     /* If this request has not been written yet, write it. */
-    if(!_xcb_out_flush_to(c, request))
-        goto done; /* error */
+    if(_xcb_out_flush_to(c, request))
+    {
+        pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+        reader_list reader;
+        reader_list **prev_reader;
 
-    for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
-        if((*prev_reader)->request == request)
-            goto done; /* error */
+        for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
+            if((*prev_reader)->request == request)
+                goto done; /* error */
 
-    reader.request = request;
-    reader.data = &cond;
-    reader.next = *prev_reader;
-    *prev_reader = &reader;
+        reader.request = request;
+        reader.data = &cond;
+        reader.next = *prev_reader;
+        *prev_reader = &reader;
 
-    /* If this request has not completed yet and has no reply waiting,
-     * wait for one. */
-    while(!poll_for_reply(c, request, &ret, e))
-        if(!_xcb_conn_wait(c, &cond, 0, 0))
-            goto done;
+        while(!poll_for_reply(c, request, &ret, e))
+            if(!_xcb_conn_wait(c, &cond, 0, 0))
+                break;
 
 done:
-    for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
-        if(*prev_reader == &reader)
-        {
-            *prev_reader = (*prev_reader)->next;
-            break;
-        }
-    pthread_cond_destroy(&cond);
+        for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
+            if(*prev_reader == &reader)
+            {
+                *prev_reader = (*prev_reader)->next;
+                break;
+            }
+        pthread_cond_destroy(&cond);
+    }
 
     wake_up_next_reader(c);
     pthread_mutex_unlock(&c->iolock);
