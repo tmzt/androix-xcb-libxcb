@@ -29,7 +29,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <netinet/in.h>
+#ifdef DNETCONN
+#include <netdnet/dnetdb.h>
+#include <netdnet/dn.h>
+#endif
 #include <netdb.h>
 #include <errno.h>
 #include <stdio.h>
@@ -92,6 +95,9 @@ int XCBParseDisplay(const char *name, char **host, int *displayp, int *screenp)
 
 static int _xcb_open_tcp(const char *host, const unsigned short port);
 static int _xcb_open_unix(const char *file);
+#ifdef DNETCONN
+static int _xcb_open_decnet(const char *host, const unsigned short port);
+#endif
 
 static int _xcb_open(const char *host, const int display)
 {
@@ -99,9 +105,24 @@ static int _xcb_open(const char *host, const int display)
 
     if(*host)
     {
-        /* display specifies TCP */
-        unsigned short port = X_TCP_PORT + display;
-        fd = _xcb_open_tcp(host, port);
+#ifdef DNETCONN
+        if (strchr(host,  ':'))
+        {
+            /* DECnet displays have two colons, so the parser will have left
+               one at the end */
+            char *dnethost = strdup(host);
+
+            dnethost[strlen(dnethost)-1] = '\0';
+            fd = _xcb_open_decnet(dnethost, display);
+            free(dnethost);
+        }
+        else
+#endif
+        {
+            /* display specifies TCP */
+            unsigned short port = X_TCP_PORT + display;
+            fd = _xcb_open_tcp(host, port);
+        }
     }
     else
     {
@@ -114,6 +135,40 @@ static int _xcb_open(const char *host, const int display)
 
     return fd;
 }
+
+#ifdef DNETCONN
+static int _xcb_open_decnet(const char *host, const unsigned short port)
+{
+    int fd;
+    struct sockaddr_dn addr;
+    struct accessdata_dn accessdata;
+    struct nodeent *nodeaddr = getnodebyname(host);
+
+    if(!nodeaddr)
+        return -1;
+    addr.sdn_family = AF_DECnet;
+
+    addr.sdn_add.a_len = nodeaddr->n_length;
+    memcpy(addr.sdn_add.a_addr, nodeaddr->n_addr, addr.sdn_add.a_len);
+
+    sprintf((char *)addr.sdn_objname, "X$X%d", port);
+    addr.sdn_objnamel = strlen((char *)addr.sdn_objname);
+    addr.sdn_objnum = 0;
+
+    fd = socket(PF_DECnet, SOCK_STREAM, 0);
+    if(fd == -1)
+        return -1;
+
+    memset(&accessdata, 0, sizeof(accessdata));
+    sprintf((char*)accessdata.acc_acc, "%d", getuid());
+    accessdata.acc_accl = strlen((char *)accessdata.acc_acc);
+    setsockopt(fd, DNPROTO_NSP, SO_CONACCESS, &accessdata, sizeof(accessdata));
+
+    if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1)
+        return -1;
+    return fd;
+}
+#endif
 
 static int _xcb_open_tcp(const char *host, const unsigned short port)
 {
