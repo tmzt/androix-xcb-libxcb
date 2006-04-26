@@ -15,6 +15,7 @@ lib_LTLIBRARIES = libXCB.la \
                   libXCBxf86dri.la \
                   libXCBxfixes.la \
                   libXCBxprint.la \
+                  libXCBxtest.la \
                   libXCBxv.la \
                   libXCBxvmc.la
 
@@ -37,6 +38,7 @@ EXTHEADERS = \
 		extensions/xf86dri.h \
 		extensions/xfixes.h \
 		extensions/xprint.h \
+		extensions/xtest.h \
 		extensions/xv.h \
 		extensions/xvmc.h
 EXTSOURCES = \
@@ -58,6 +60,7 @@ EXTSOURCES = \
 		extensions/xf86dri.c \
 		extensions/xfixes.c \
 		extensions/xprint.c \
+		extensions/xtest.c \
 		extensions/xv.c \
 		extensions/xvmc.c
 EXTENSIONS = $(EXTSOURCES) $(EXTHEADERS)
@@ -122,6 +125,8 @@ libXCBxfixes_la_LIBADD = $(XCB_LIBS)
 libXCBxfixes_la_SOURCES = extensions/xfixes.c extensions/xfixes.h
 libXCBxprint_la_LIBADD = $(XCB_LIBS)
 libXCBxprint_la_SOURCES = extensions/xprint.c extensions/xprint.h
+libXCBxtest_la_LIBADD = $(XCB_LIBS)
+libXCBxtest_la_SOURCES = extensions/xtest.c extensions/xtest.h
 libXCBxv_la_LIBADD = $(XCB_LIBS)
 libXCBxv_la_SOURCES = extensions/xv.c extensions/xv.h
 libXCBxvmc_la_LIBADD = $(XCB_LIBS)
