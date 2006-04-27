@@ -290,7 +290,7 @@ typedef struct XCBExtension XCBExtension;  /**< Opaque structure used as key for
  * @brief Caches reply information from QueryExtension requests.
  * @param c: The connection.
  * @param ext: The extension data.
- * @return A pointer to a XCBConnSetupSuccessRep pointer.
+ * @return A pointer to the XCBQueryExtensionRep for the extension.
  *
  * This function is the primary interface to the "extension cache",
  * which caches reply information from QueryExtension
@@ -323,7 +323,7 @@ void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext);
 /**
  * @brief Access the data returned by the server.
  * @param c: The connection.
- * @return A pointer to a XCBConnSetupSuccessRep pointer.
+ * @return A pointer to an XCBSetup structure.
  *
  * Accessor for the data returned by the server when the XCBConnection
  * was initialized. This data includes
