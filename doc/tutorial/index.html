@@ -679,7 +679,7 @@ typedef struct {
       following function:
       </p>
       <pre class="code">
-XCBSCREENIter XCBConnSetupSuccessRepRootsIter (XCBConnSetupSuccessRep *R);
+XCBSCREENIter XCBSetupRootsIter (XCBSetup *R);
 </pre>
       <p>
       Here is a small program that shows how to use this function:
@@ -701,7 +701,7 @@ main (int argc, char *argv[])
   c = XCBConnect (NULL, &amp;screen_nbr);
   
   /* Get the screen #screen_nbr */
-  iter = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c));
+  iter = XCBSetupRootsIter (XCBGetSetup (c));
   for (; iter.rem; --screen_nbr, XCBSCREENNext (&amp;iter))
     if (screen_nbr == 0)
       {
@@ -785,7 +785,7 @@ main (int argc, char *argv[])
   c = XCBConnect (NULL, NULL);
   
   /* Get the first screen */
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* Ask for our window's Id */
   win.window = XCBWINDOWNew(c);
@@ -931,7 +931,7 @@ main (int argc, char *argv[])
   
   /* Open the connection to the X server and get the first screen */
   c = XCBConnect (NULL, NULL);
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* Create a black graphic context for drawing in the foreground */
   win.window = screen-&gt;root;
@@ -1318,7 +1318,7 @@ main (int argc, char *argv[])
   c = XCBConnect (NULL, NULL);
   
   /* Get the first screen */
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* Create black (foreground) graphic context */
   win.window = screen-&gt;root;
@@ -1966,7 +1966,7 @@ main (int argc, char *argv[])
   c = XCBConnect (NULL, NULL);
   
   /* Get the first screen */
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* Ask for our window's Id */
   win.window = XCBWINDOWNew(c);
@@ -2218,7 +2218,7 @@ main (int argc, char *argv[])
   c = XCBConnect (NULL, NULL);
   
   /* Get the first screen */
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* Ask for our window's Id */
   win.window = XCBWINDOWNew(c);
@@ -2740,7 +2740,7 @@ main (int argc, char *argv[])
   
   /* Open the connection to the X server and get the first screen */
   c = XCBConnect (NULL, NULL);
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   colormap = screen-&gt;default_colormap;
 
@@ -2786,7 +2786,7 @@ main (int argc, char *argv[])
   
   /* Open the connection to the X server and get the first screen */
   c = XCBConnect (NULL, NULL);
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* We create the window win here*/
 
@@ -2888,7 +2888,7 @@ main (int argc, char *argv[])
   
   /* Open the connection to the X server and get the first screen */
   c = XCBConnect (NULL, NULL);
-  screen = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).data;
+  screen = XCBSetupRootsIter (XCBGetSetup (c)).data;
 
   /* We create the window win here*/
 
@@ -3088,7 +3088,7 @@ XCBVoidCookie XCBFreePixmap (XCBConnection *c,        /* Pointer to the XCBConne
         return some members of the <span class="code">Display</span>
         structure. They are obtained by using a function that requires a
         <span class="code">XCBConnection *</span> or a member of the
-        <span class="code">XCBConnSetupSuccessRep</span> structure
+        <span class="code">XCBSetup</span> structure
         (via the function <span class="code">XCBGetSetup</span>), or
         a function that requires that structure.
         <ol>
@@ -3139,7 +3139,7 @@ c = XCBConnect (display_name, &amp;screen_default_nbr);
           You get the count of screens with the functions
           <span class="code">XCBGetSetup</span>
           and
-          <span class="code">XCBConnSetupSuccessRepRootsIter</span>
+          <span class="code">XCBSetupRootsIter</span>
           (if you need to iterate):
           </p>
           <pre class="code">
@@ -3148,14 +3148,14 @@ int            screen_count;
 
 /* you init the connection */
 
-screen_count = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c)).rem;
+screen_count = XCBSetupRootsIter (XCBGetSetup (c)).rem;
 
 /* screen_count contains now the count of screens */
 </pre>
           <p>
           If you don't want to iterate over the screens, a better way
           to get that number is to use
-          <span class="code">XCBConnSetupSuccessRepRootsLength</span>:
+          <span class="code">XCBSetupRootsLength</span>:
           </p>
           <pre class="code">
 XCBConnection *c;
@@ -3163,7 +3163,7 @@ int            screen_count;
 
 /* you init the connection */
 
-screen_count = XCBConnSetupSuccessRepRootsLength (XCBGetSetup (c));
+screen_count = XCBSetupRootsLength (XCBGetSetup (c));
 
 /* screen_count contains now the count of screens */
 </pre>
@@ -3173,7 +3173,7 @@ screen_count = XCBConnSetupSuccessRepRootsLength (XCBGetSetup (c));
           the functions <span class="code">XCBGetSetup</span>
           and
           <span
-          class="code">XCBConnSetupSuccessRepVendor</span>. Beware
+          class="code">XCBSetupVendor</span>. Beware
           that, unlike Xlib, the string returned by XCB is not
           necessarily null-terminaled:
           </p>
@@ -3183,10 +3183,10 @@ char          *vendor = NULL;
 int            length;
 
 /* you init the connection */
-length = XCBConnSetupSuccessRepVendorLength (XCBGetSetup (c));
+length = XCBSetupVendorLength (XCBGetSetup (c));
 vendor = (char *)malloc (length + 1);
 if (vendor)
-memcpy (vendor, XCBConnSetupSuccessRepVendor (XCBGetSetup (c)), length);
+memcpy (vendor, XCBSetupVendor (XCBGetSetup (c)), length);
 vendor[length] = '\0';
 
 /* vendor contains now the name of the vendor. Must be freed when not used anymore */
@@ -3194,7 +3194,7 @@ vendor[length] = '\0';
           <li class="subtitle"><a name="ProtocolVersion"></a>ProtocolVersion
           <p>
           You get the major version of the protocol in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3210,7 +3210,7 @@ protocol_major_version = XCBGetSetup (c)-&gt;protocol_major_version;
           <li class="subtitle"><a name="ProtocolRevision"></a>ProtocolRevision
           <p>
           You get the minor version of the protocol in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3226,7 +3226,7 @@ protocol_minor_version = XCBGetSetup (c)-&gt;protocol_minor_version;
           <li class="subtitle"><a name="VendorRelease"></a>VendorRelease
           <p>
           You get the number of the release of the server hardware in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3247,7 +3247,7 @@ release_number = XCBGetSetup (c)-&gt;release_number;
           <li class="subtitle"><a name="BitmapUnit"></a>BitmapUnit
           <p>
           You get the bitmap scanline unit in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3263,7 +3263,7 @@ bitmap_format_scanline_unit = XCBGetSetup (c)-&gt;bitmap_format_scanline_unit;
           <li class="subtitle"><a name="BitmapBitOrder"></a>BitmapBitOrder
           <p>
           You get the bitmap bit order in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3279,7 +3279,7 @@ bitmap_format_bit_order = XCBGetSetup (c)-&gt;bitmap_format_bit_order;
           <li class="subtitle"><a name="BitmapPad"></a>BitmapPad
           <p>
           You get the bitmap scanline pad in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3295,7 +3295,7 @@ bitmap_format_scanline_pad = XCBGetSetup (c)-&gt;bitmap_format_scanline_pad;
           <li class="subtitle"><a name="ImageByteOrder"></a>ImageByteOrder
           <p>
           You get the image byte order in the
-          <span class="code">XCBConnSetupSuccessRep</span>
+          <span class="code">XCBSetup</span>
           structure, with the function <span class="code">XCBGetSetup</span>:
           </p>
           <pre class="code">
@@ -3346,7 +3346,7 @@ XCBSCREEN *ScreenOfDisplay (XCBConnection *c,
 {
   XCBSCREENIter iter;
 
-  iter = XCBConnSetupSuccessRepRootsIter (XCBGetSetup (c));
+  iter = XCBSetupRootsIter (XCBGetSetup (c));
   for (; iter.rem; --screen, XCBSCREENNext (&amp;iter))
     if (screen == 0)
       return iter.data;
