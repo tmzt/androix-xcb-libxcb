@@ -711,7 +711,7 @@ authorization from the authors.
                                /*[self::valueparam or self::list]" />
       <xsl:if test="not($is-variable)">
         <function type="{@type} *" name="{$ref}{$field-name}">
-          <field type="{$ref}{$kind} *" name="R" />
+          <field type="const {$ref}{$kind} *" name="R" />
           <xsl:choose>
             <xsl:when test="$is-first">
               <l>return (<xsl:value-of select="@type" /> *) <!--
@@ -728,7 +728,7 @@ authorization from the authors.
         </function>
       </xsl:if>
       <function type="int" name="{$ref}{$field-name}Length">
-        <field type="{$ref}{$kind} *" name="R" />
+        <field type="const {$ref}{$kind} *" name="R" />
         <l>return <xsl:apply-templates mode="output-expression">
                     <xsl:with-param name="field-prefix" select="'R->'" />
                   </xsl:apply-templates>;</l>
@@ -736,7 +736,7 @@ authorization from the authors.
       <xsl:choose>
         <xsl:when test="substring(@type, 1, 3) = 'XCB'">
           <function type="{@type}Iter" name="{$ref}{$field-name}Iter">
-            <field type="{$ref}{$kind} *" name="R" />
+            <field type="const {$ref}{$kind} *" name="R" />
             <l><xsl:value-of select="@type" />Iter i;</l>
             <xsl:choose>
               <xsl:when test="$is-first">
@@ -766,7 +766,7 @@ authorization from the authors.
             </xsl:choose>
           </xsl:variable>
           <function type="XCBGenericIter" name="{$ref}{$field-name}End">
-            <field type="{$ref}{$kind} *" name="R" />
+            <field type="const {$ref}{$kind} *" name="R" />
             <l>XCBGenericIter i;</l>
             <xsl:choose>
               <xsl:when test="$is-first">
