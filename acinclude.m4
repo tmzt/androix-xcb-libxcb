@@ -5,7 +5,7 @@ dnl GCC_CHECK_VISIBILITY([ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
 dnl Check the visibility feature of gcc
 dnl
 AC_DEFUN([GCC_CHECK_VISIBILITY],
-   [AC_MSG_CHECKING([whether ${CC} supports visibility feature])
+   [AC_MSG_CHECKING([whether ${CC} supports symbol visibility])
     save_CFLAGS=${CFLAGS}
     CFLAGS="$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
     AC_COMPILE_IFELSE(
@@ -20,7 +20,7 @@ extern void f(int);
        [AC_DEFINE(
            GCC_HAS_VISIBILITY,
            [],
-           [Defined if GCC supports the vilibility feature])
+           [Defined if GCC supports the visibility feature])
         m4_if([$1], [], [:], [$1])
         AC_MSG_RESULT(yes)],
        [m4_if([$2], [], [:], [$2])
