@@ -338,7 +338,7 @@ void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext);
  *
  * The result must not be freed.
  */
-const XCBConnSetupSuccessRep *XCBGetSetup(XCBConnection *c);
+const XCBSetup *XCBGetSetup(XCBConnection *c);
 
 /**
  * @brief Access the file descriptor of the connection.
@@ -481,6 +481,47 @@ int XCBSync(XCBConnection *c, XCBGenericError **e);
 /**
  * @}
  */
+
+
+/* Old names for connection-setup types, to be removed before 1.0. */
+
+typedef XCBSetupReq XCBConnSetupReq deprecated;
+typedef XCBSetupReqIter XCBConnSetupReqIter deprecated;
+typedef XCBSetupFailed XCBConnSetupFailedRep deprecated;
+typedef XCBSetupFailedIter XCBConnSetupFailedRepIter deprecated;
+typedef XCBSetupAuthenticate XCBConnSetupAuthenticateRep deprecated;
+typedef XCBSetupAuthenticateIter XCBConnSetupAuthenticateRepIter deprecated;
+typedef XCBSetup XCBConnSetupSuccessRep deprecated;
+typedef XCBSetupIter XCBConnSetupSuccessRepIter deprecated;
+
+char *XCBConnSetupReqAuthorizationProtocolName(XCBSetupReq *R) deprecated;
+int XCBConnSetupReqAuthorizationProtocolNameLength(XCBSetupReq *R) deprecated;
+XCBGenericIter XCBConnSetupReqAuthorizationProtocolNameEnd(XCBSetupReq *R) deprecated;
+char *XCBConnSetupReqAuthorizationProtocolData(XCBSetupReq *R) deprecated;
+int XCBConnSetupReqAuthorizationProtocolDataLength(XCBSetupReq *R) deprecated;
+XCBGenericIter XCBConnSetupReqAuthorizationProtocolDataEnd(XCBSetupReq *R) deprecated;
+void XCBConnSetupReqNext(XCBSetupReqIter *i) deprecated;
+XCBGenericIter XCBConnSetupReqEnd(XCBSetupReqIter i) deprecated;
+char *XCBConnSetupFailedRepReason(XCBSetupFailed *R) deprecated;
+int XCBConnSetupFailedRepReasonLength(XCBSetupFailed *R) deprecated;
+XCBGenericIter XCBConnSetupFailedRepReasonEnd(XCBSetupFailed *R) deprecated;
+void XCBConnSetupFailedRepNext(XCBSetupFailedIter *i) deprecated;
+XCBGenericIter XCBConnSetupFailedRepEnd(XCBSetupFailedIter i) deprecated;
+char *XCBConnSetupAuthenticateRepReason(XCBSetupAuthenticate *R) deprecated;
+int XCBConnSetupAuthenticateRepReasonLength(XCBSetupAuthenticate *R) deprecated;
+XCBGenericIter XCBConnSetupAuthenticateRepReasonEnd(XCBSetupAuthenticate *R) deprecated;
+void XCBConnSetupAuthenticateRepNext(XCBSetupAuthenticateIter *i) deprecated;
+XCBGenericIter XCBConnSetupAuthenticateRepEnd(XCBSetupAuthenticateIter i) deprecated;
+char *XCBConnSetupSuccessRepVendor(XCBSetup *R) deprecated;
+int XCBConnSetupSuccessRepVendorLength(XCBSetup *R) deprecated;
+XCBGenericIter XCBConnSetupSuccessRepVendorEnd(XCBSetup *R) deprecated;
+XCBFORMAT *XCBConnSetupSuccessRepPixmapFormats(XCBSetup *R) deprecated;
+int XCBConnSetupSuccessRepPixmapFormatsLength(XCBSetup *R) deprecated;
+XCBFORMATIter XCBConnSetupSuccessRepPixmapFormatsIter(XCBSetup *R) deprecated;
+int XCBConnSetupSuccessRepRootsLength(XCBSetup *R) deprecated;
+XCBSCREENIter XCBConnSetupSuccessRepRootsIter(XCBSetup *R) deprecated;
+void XCBConnSetupSuccessRepNext(XCBSetupIter *i) deprecated;
+XCBGenericIter XCBConnSetupSuccessRepEnd(XCBSetupIter i) deprecated;
 
 
 #ifdef __cplusplus

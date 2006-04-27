@@ -38,6 +38,12 @@
 #include "xcb.h"
 #include "xcbint.h"
 
+typedef struct {
+    CARD8  status;
+    CARD8  pad0[5];
+    CARD16 length;
+} XCBSetupGeneric;
+
 static int set_fd_flags(const int fd)
 {
     long flags = fcntl(fd, F_GETFL, 0);
@@ -54,7 +60,7 @@ static int set_fd_flags(const int fd)
 static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
 {
     static const char pad[3];
-    XCBConnSetupReq out;
+    XCBSetupReq out;
     struct iovec parts[6];
     int count = 0;
     int endian = 0x01020304;
@@ -71,9 +77,9 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     out.protocol_minor_version = X_PROTOCOL_REVISION;
     out.authorization_protocol_name_len = 0;
     out.authorization_protocol_data_len = 0;
-    parts[count].iov_len = sizeof(XCBConnSetupReq);
+    parts[count].iov_len = sizeof(XCBSetupReq);
     parts[count++].iov_base = &out;
-    parts[count].iov_len = XCB_PAD(sizeof(XCBConnSetupReq));
+    parts[count].iov_len = XCB_PAD(sizeof(XCBSetupReq));
     parts[count++].iov_base = (char *) pad;
 
     if(auth_info)
@@ -101,21 +107,21 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
 static int read_setup(XCBConnection *c)
 {
     /* Read the server response */
-    c->setup = malloc(sizeof(XCBConnSetupGenericRep));
+    c->setup = malloc(sizeof(XCBSetupGeneric));
     if(!c->setup)
         return 0;
 
-    if(_xcb_in_read_block(c, c->setup, sizeof(XCBConnSetupGenericRep)) != sizeof(XCBConnSetupGenericRep))
+    if(_xcb_in_read_block(c, c->setup, sizeof(XCBSetupGeneric)) != sizeof(XCBSetupGeneric))
         return 0;
 
     {
-        void *tmp = realloc(c->setup, c->setup->length * 4 + sizeof(XCBConnSetupGenericRep));
+        void *tmp = realloc(c->setup, c->setup->length * 4 + sizeof(XCBSetupGeneric));
         if(!tmp)
             return 0;
         c->setup = tmp;
     }
 
-    if(_xcb_in_read_block(c, (char *) c->setup + sizeof(XCBConnSetupGenericRep), c->setup->length * 4) <= 0)
+    if(_xcb_in_read_block(c, (char *) c->setup + sizeof(XCBSetupGeneric), c->setup->length * 4) <= 0)
         return 0;
 
     /* 0 = failed, 2 = authenticate, 1 = success */
@@ -123,15 +129,15 @@ static int read_setup(XCBConnection *c)
     {
     case 0: /* failed */
         {
-            XCBConnSetupFailedRep *setup = (XCBConnSetupFailedRep *) c->setup;
-            write(STDERR_FILENO, XCBConnSetupFailedRepReason(setup), XCBConnSetupFailedRepReasonLength(setup));
+            XCBSetupFailed *setup = (XCBSetupFailed *) c->setup;
+            write(STDERR_FILENO, XCBSetupFailedReason(setup), XCBSetupFailedReasonLength(setup));
             return 0;
         }
 
     case 2: /* authenticate */
         {
-            XCBConnSetupAuthenticateRep *setup = (XCBConnSetupAuthenticateRep *) c->setup;
-            write(STDERR_FILENO, XCBConnSetupAuthenticateRepReason(setup), XCBConnSetupAuthenticateRepReasonLength(setup));
+            XCBSetupAuthenticate *setup = (XCBSetupAuthenticate *) c->setup;
+            write(STDERR_FILENO, XCBSetupAuthenticateReason(setup), XCBSetupAuthenticateReasonLength(setup));
             return 0;
         }
     }
@@ -169,7 +175,7 @@ static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
 
 /* Public interface */
 
-const XCBConnSetupSuccessRep *XCBGetSetup(XCBConnection *c)
+const XCBSetup *XCBGetSetup(XCBConnection *c)
 {
     /* doesn't need locking because it's never written to. */
     return c->setup;

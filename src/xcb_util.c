@@ -278,3 +278,143 @@ int XCBGetAuthInfo(int fd, XCBAuthInfo *info)
 {
 	return _xcb_get_auth_info(fd, info);
 }
+
+char *XCBConnSetupReqAuthorizationProtocolName(XCBSetupReq *R)
+{
+	return XCBSetupReqAuthorizationProtocolName(R);
+}
+
+int XCBConnSetupReqAuthorizationProtocolNameLength(XCBSetupReq *R)
+{
+	return XCBSetupReqAuthorizationProtocolNameLength(R);
+}
+
+XCBGenericIter XCBConnSetupReqAuthorizationProtocolNameEnd(XCBSetupReq *R)
+{
+	return XCBSetupReqAuthorizationProtocolNameEnd(R);
+}
+
+char *XCBConnSetupReqAuthorizationProtocolData(XCBSetupReq *R)
+{
+	return XCBSetupReqAuthorizationProtocolData(R);
+}
+
+int XCBConnSetupReqAuthorizationProtocolDataLength(XCBSetupReq *R)
+{
+	return XCBSetupReqAuthorizationProtocolDataLength(R);
+}
+
+XCBGenericIter XCBConnSetupReqAuthorizationProtocolDataEnd(XCBSetupReq *R)
+{
+	return XCBSetupReqAuthorizationProtocolDataEnd(R);
+}
+
+void XCBConnSetupReqNext(XCBSetupReqIter *i)
+{
+	XCBSetupReqNext(i);
+}
+
+XCBGenericIter XCBConnSetupReqEnd(XCBSetupReqIter i)
+{
+	return XCBSetupReqEnd(i);
+}
+
+char *XCBConnSetupFailedRepReason(XCBSetupFailed *R)
+{
+	return XCBSetupFailedReason(R);
+}
+
+int XCBConnSetupFailedRepReasonLength(XCBSetupFailed *R)
+{
+	return XCBSetupFailedReasonLength(R);
+}
+
+XCBGenericIter XCBConnSetupFailedRepReasonEnd(XCBSetupFailed *R)
+{
+	return XCBSetupFailedReasonEnd(R);
+}
+
+void XCBConnSetupFailedRepNext(XCBSetupFailedIter *i)
+{
+	XCBSetupFailedNext(i);
+}
+
+XCBGenericIter XCBConnSetupFailedRepEnd(XCBSetupFailedIter i)
+{
+	return XCBSetupFailedEnd(i);
+}
+
+char *XCBConnSetupAuthenticateRepReason(XCBSetupAuthenticate *R)
+{
+	return XCBSetupAuthenticateReason(R);
+}
+
+int XCBConnSetupAuthenticateRepReasonLength(XCBSetupAuthenticate *R)
+{
+	return XCBSetupAuthenticateReasonLength(R);
+}
+
+XCBGenericIter XCBConnSetupAuthenticateRepReasonEnd(XCBSetupAuthenticate *R)
+{
+	return XCBSetupAuthenticateReasonEnd(R);
+}
+
+void XCBConnSetupAuthenticateRepNext(XCBSetupAuthenticateIter *i)
+{
+	XCBSetupAuthenticateNext(i);
+}
+
+XCBGenericIter XCBConnSetupAuthenticateRepEnd(XCBSetupAuthenticateIter i)
+{
+	return XCBSetupAuthenticateEnd(i);
+}
+
+char *XCBConnSetupSuccessRepVendor(XCBSetup *R)
+{
+	return XCBSetupVendor(R);
+}
+
+int XCBConnSetupSuccessRepVendorLength(XCBSetup *R)
+{
+	return XCBSetupVendorLength(R);
+}
+
+XCBGenericIter XCBConnSetupSuccessRepVendorEnd(XCBSetup *R)
+{
+	return XCBSetupVendorEnd(R);
+}
+
+XCBFORMAT *XCBConnSetupSuccessRepPixmapFormats(XCBSetup *R)
+{
+	return XCBSetupPixmapFormats(R);
+}
+
+int XCBConnSetupSuccessRepPixmapFormatsLength(XCBSetup *R)
+{
+	return XCBSetupPixmapFormatsLength(R);
+}
+
+XCBFORMATIter XCBConnSetupSuccessRepPixmapFormatsIter(XCBSetup *R)
+{
+	return XCBSetupPixmapFormatsIter(R);
+}
+
+int XCBConnSetupSuccessRepRootsLength(XCBSetup *R)
+{
+	return XCBSetupRootsLength(R);
+}
+
+XCBSCREENIter XCBConnSetupSuccessRepRootsIter(XCBSetup *R)
+{
+	return XCBSetupRootsIter(R);
+}
+
+void XCBConnSetupSuccessRepNext(XCBSetupIter *i)
+{
+	XCBSetupNext(i);
+}
+
+XCBGenericIter XCBConnSetupSuccessRepEnd(XCBSetupIter i)
+{
+	return XCBSetupEnd(i);
+}
