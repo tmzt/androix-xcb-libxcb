@@ -1264,7 +1264,7 @@ Description: X C Binding, xvmc extension
 Package: libxcbxvmc0-dev
 Section: libdevel
 Architecture: any
-Depends: libxcbxvmc0 (= ${Source-Version}), libxcb0-dev, libxv0-dev
+Depends: libxcbxvmc0 (= ${Source-Version}), libxcb0-dev, libxcbxv0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xvmc extension, development files
  This package contains the header and library files needed to build software
