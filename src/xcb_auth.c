@@ -105,7 +105,7 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen)
 	     addr = (char *) &si->sin_addr;
 	     addrlen = 4;
 	     if (ntohl(si->sin_addr.s_addr) != 0x7f000001)
-		 family = 0; /* X.h: FamilyInternet */
+		 family = XCBFamilyInternet;
 	     snprintf(dispbuf, sizeof(dispbuf), "%d", ntohs(si->sin_port) - X_TCP_PORT);
 	     display = dispbuf;
         }

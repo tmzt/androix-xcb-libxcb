@@ -83,13 +83,6 @@ extern "C" {
 
 #define XCB_TYPE_PAD(T,I) (-(I) & (sizeof(T) > 4 ? 3 : sizeof(T) - 1))
 
-
-/** XCBNone is the universal null resource or null atom parameter value for many core X requests */
-#define XCBNone 0L
-
-/** XCBCopyFromParent can be used for many CreateWindow parameters */
-#define XCBCopyFromParent 0L
-
 /* Opaque structures */
 
 /**
@@ -164,6 +157,19 @@ typedef struct {
 /* Include the generated xproto and xcb_types headers. */
 #include "xcb_types.h"
 #include "xproto.h"
+
+
+/** XCBNone is the universal null resource or null atom parameter value for many core X requests */
+#define XCBNone 0L
+
+/** XCBCopyFromParent can be used for many CreateWindow parameters */
+#define XCBCopyFromParent 0L
+
+/** XCBCurrentTime can be used in most requests that take an XCBTIMESTAMP */
+#define XCBCurrentTime 0L
+
+/** XCBNoSymbol fills in unused entries in XCBKEYSYM tables */
+#define XCBNoSymbol 0L
 
 
 /* xcb_auth.c */
