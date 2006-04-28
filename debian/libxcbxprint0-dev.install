@@ -1,0 +1,4 @@
+usr/include/X11/XCB/xprint.h
+usr/lib/libXCBxprint.a
+usr/lib/libXCBxprint.so
+usr/lib/pkgconfig/xcb-xprint.pc

@@ -1,0 +1,4 @@
+usr/include/X11/XCB/xv.h
+usr/lib/libXCBxv.a
+usr/lib/libXCBxv.so
+usr/lib/pkgconfig/xcb-xv.pc

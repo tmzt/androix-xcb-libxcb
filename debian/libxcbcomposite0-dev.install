@@ -1,0 +1,4 @@
+usr/include/X11/XCB/composite.h
+usr/lib/libXCBcomposite.a
+usr/lib/libXCBcomposite.so
+usr/lib/pkgconfig/xcb-composite.pc

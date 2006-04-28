@@ -1,0 +1,4 @@
+usr/include/X11/XCB/glx.h
+usr/lib/libXCBglx.a
+usr/lib/libXCBglx.so
+usr/lib/pkgconfig/xcb-glx.pc

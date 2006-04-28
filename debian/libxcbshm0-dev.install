@@ -1,0 +1,4 @@
+usr/include/X11/XCB/shm.h
+usr/lib/libXCBshm.a
+usr/lib/libXCBshm.so
+usr/lib/pkgconfig/xcb-shm.pc

@@ -1,0 +1,4 @@
+usr/include/X11/XCB/record.h
+usr/lib/libXCBrecord.a
+usr/lib/libXCBrecord.so
+usr/lib/pkgconfig/xcb-record.pc

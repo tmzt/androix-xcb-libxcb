@@ -1,0 +1,4 @@
+usr/include/X11/XCB/xtest.h
+usr/lib/libXCBxtest.a
+usr/lib/libXCBxtest.so
+usr/lib/pkgconfig/xcb-xtest.pc

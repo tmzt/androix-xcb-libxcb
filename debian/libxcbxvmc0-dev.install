@@ -1,0 +1,4 @@
+usr/include/X11/XCB/xvmc.h
+usr/lib/libXCBxvmc.a
+usr/lib/libXCBxvmc.so
+usr/lib/pkgconfig/xcb-xvmc.pc

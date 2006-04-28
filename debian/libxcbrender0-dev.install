@@ -1,0 +1,4 @@
+usr/include/X11/XCB/render.h
+usr/lib/libXCBrender.a
+usr/lib/libXCBrender.so
+usr/lib/pkgconfig/xcb-render.pc

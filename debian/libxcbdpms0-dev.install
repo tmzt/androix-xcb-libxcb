@@ -1,0 +1,4 @@
+usr/include/X11/XCB/dpms.h
+usr/lib/libXCBdpms.a
+usr/lib/libXCBdpms.so
+usr/lib/pkgconfig/xcb-dpms.pc

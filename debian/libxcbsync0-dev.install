@@ -1,0 +1,4 @@
+usr/include/X11/XCB/sync.h
+usr/lib/libXCBsync.a
+usr/lib/libXCBsync.so
+usr/lib/pkgconfig/xcb-sync.pc
