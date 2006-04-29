@@ -12,6 +12,7 @@ libxcb (0.9-3) experimental; urgency=low
     * Pre-Depends: x11-common (>= 1:1.09).
   * Create library, -dev, and -dbg packages for each new extension library.
   * Drop library version from source package name.
+  * Add a Section field for the source package in debian/control.
   * Remove Bugs field in control, so bugs go to the Debian BTS.
   * Set distribution to experimental.
 
