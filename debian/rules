@@ -28,6 +28,7 @@ include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
 
 DEB_CONFIGURE_EXTRA_FLAGS = --with-opt
+DEB_MAKE_CHECK_TARGET=check
 
 debian/copyright: debian/copyright.debian COPYING
 	cat $+ > $@
