@@ -1,4 +1,4 @@
-Source: libxcb0
+Source: libxcb
 Priority: optional
 Maintainer: XCB Developers <xcb@lists.freedesktop.org>
 Uploaders: Jamey Sharp <sharpone@debian.org>, Josh Triplett <josh@freedesktop.org>

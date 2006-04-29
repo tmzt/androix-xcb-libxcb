@@ -1,4 +1,4 @@
-libxcb0 (0.9-3) experimental; urgency=low
+libxcb (0.9-3) experimental; urgency=low
 
   * Stop running autoreconf in debian/rules, and remove Build-Depends for
     autoconf, automake, and libtool.
@@ -11,6 +11,7 @@ libxcb0 (0.9-3) experimental; urgency=low
     * Install headers to /usr/include/X11, not /usr/X11R6/include/X11.
     * Pre-Depends: x11-common (>= 1:1.09).
   * Create library, -dev, and -dbg packages for each new extension library.
+  * Drop library version from source package name.
   * Remove Bugs field in control, so bugs go to the Debian BTS.
   * Set distribution to experimental.
 
