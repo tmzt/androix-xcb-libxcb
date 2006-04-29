@@ -4,7 +4,6 @@ Maintainer: XCB Developers <xcb@lists.freedesktop.org>
 Uploaders: Jamey Sharp <sharpone@debian.org>, Josh Triplett <josh@freedesktop.org>
 Build-Depends: x11proto-core-dev, libxau-dev, libxdmcp-dev, xcb-proto, cdbs, debhelper (>= 5.0.0), pkg-config, xsltproc, check, binutils (>= 2.12.90.0.9)
 Standards-Version: 3.6.1
-Bugs: mailto:xcb@lists.freedesktop.org
 
 Package: libxcb0
 Section: libs
