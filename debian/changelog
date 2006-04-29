@@ -14,6 +14,9 @@ libxcb (0.9-3) experimental; urgency=low
   * Drop library version from source package name.
   * Add a Section field for the source package in debian/control.
   * Set DEB_MAKE_CHECK_TARGET=check in debian/rules.
+  * Stop setting DEB_CONFIGURE_EXTRA_FLAGS = --with-opt in debian/rules;
+    cdbs does the right thing on its own, and correctly handles
+    DEB_BUILD_OPTS.
   * Remove Bugs field in control, so bugs go to the Debian BTS.
   * Set distribution to experimental.
 
