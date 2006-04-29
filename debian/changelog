@@ -1,4 +1,4 @@
-libxcb0 (0.9-3) UNRELEASED; urgency=low
+libxcb0 (0.9-3) experimental; urgency=low
 
   * Stop running autoreconf in debian/rules, and remove Build-Depends for
     autoconf, automake, and libtool.
@@ -12,8 +12,9 @@ libxcb0 (0.9-3) UNRELEASED; urgency=low
     * Pre-Depends: x11-common (>= 1:1.09).
   * Create library, -dev, and -dbg packages for each new extension library.
   * Remove Bugs field in control, so bugs go to the Debian BTS.
+  * Set distribution to experimental.
 
- -- Josh Triplett <josh@freedesktop.org>  Sat, 29 Apr 2006 10:55:50 -0700
+ -- Josh Triplett <josh@freedesktop.org>  Sat, 29 Apr 2006 10:57:24 -0700
 
 libxcb0 (0.9-2) unstable; urgency=low
 
