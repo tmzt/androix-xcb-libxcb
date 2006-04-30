@@ -17,6 +17,8 @@ libxcb (0.9-3) experimental; urgency=low
   * Stop setting DEB_CONFIGURE_EXTRA_FLAGS = --with-opt in debian/rules;
     cdbs does the right thing on its own, and correctly handles
     DEB_BUILD_OPTS.
+  * Work around the unsetting of CFLAGS in src/Makefile.am, by passing CFLAGS
+    to make via DEB_MAKE_INVOKE in debian/rules.
   * Remove Bugs field in control, so bugs go to the Debian BTS.
   * Set distribution to experimental.
 
