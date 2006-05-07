@@ -100,7 +100,7 @@ CLEANFILES = $(COREPROTO) $(EXTENSIONS)
 clean-local:
 	rmdir extensions || true
 
-XCB_LIBS = $(top_builddir)/src/libXCB.la
+XCB_LIBS = libXCB.la
 
 # FIXME: find a way to autogenerate this from the XML files.
 
