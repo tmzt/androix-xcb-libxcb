@@ -144,7 +144,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     flags &= ~XCB_REQUEST_RAW;
 
     /* do we need to work around the X server bug described in glx.xml? */
-    if(req->ext && !req->isvoid && strcmp(req->ext->name, "GLX") &&
+    if(req->ext && !req->isvoid && !strcmp(req->ext->name, "GLX") &&
             ((req->opcode == 17 && ((CARD32 *) vector[0].iov_base)[0] == 0x10004) ||
              req->opcode == 21))
         workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
