@@ -239,6 +239,7 @@ XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *displayname, XCBAuthI
     return XCBConnectToFD(fd, auth);
 }
 
+/* backwards compatible interfaces: remove before 1.0 release */
 int XCBSync(XCBConnection *c, XCBGenericError **e)
 {
     XCBGetInputFocusRep *reply = XCBGetInputFocusReply(c, XCBGetInputFocus(c), e);
@@ -246,10 +247,6 @@ int XCBSync(XCBConnection *c, XCBGenericError **e)
     return reply != 0;
 }
 
-
-
-
-/* backwards compatible interfaces: remove before 1.0 release */
 XCBConnection *XCBConnectBasic()
 {
     XCBConnection *c = XCBConnect(0, 0);

@@ -477,11 +477,11 @@ XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *display, XCBAuthInfo 
  * @param e: A pointer to an error.
  * @return @c 1 on success, @c 0 otherwise.
  *
- * Blocks the calling thread for the duration of one round trip to the
- * server, ensuring that all events and errors caused by previous
- * requests are available to XCB.
+ * @deprecated This function is deprecated. It must not be used in
+ * newly written code.  XCBFlush is more efficient.
+ * Use XCBAuxSync if absolutely necessary.
  */
-int XCBSync(XCBConnection *c, XCBGenericError **e);
+int XCBSync(XCBConnection *c, XCBGenericError **e) deprecated;
 
 
 /**
