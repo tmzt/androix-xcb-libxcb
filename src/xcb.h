@@ -25,8 +25,8 @@
  * authorization from the authors.
  */
 
-#ifndef __XCB_H
-#define __XCB_H
+#ifndef __XCB_H__
+#define __XCB_H__
 #include <sys/types.h>
 
 /* TODO: check for stdint in config? (HAVE_STDINT) fallback? */
@@ -48,9 +48,11 @@ typedef int32_t  INT32;
 #include <sys/uio.h>
 #include <pthread.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 #if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #define deprecated __attribute__((__deprecated__))
@@ -534,4 +536,5 @@ XCBGenericIter XCBConnSetupSuccessRepEnd(XCBSetupIter i) deprecated;
 }
 #endif
 
-#endif
+
+#endif /* __XCB_H__ */
