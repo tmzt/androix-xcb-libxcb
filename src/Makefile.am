@@ -71,8 +71,8 @@ ESSENTIAL_EXTENSIONS = \
 		extensions/xc_misc.h \
 		extensions/xc_misc.c
 
-COREHEADERS = xproto.h xcb_types.h
-CORESOURCES = xproto.c xcb_types.c
+COREHEADERS = xproto.h
+CORESOURCES = xproto.c
 COREPROTO   = $(CORESOURCES) $(COREHEADERS)
 
 xcbinclude_HEADERS = xcb.h xcbext.h xcbxlib.h $(COREHEADERS) $(EXTHEADERS)

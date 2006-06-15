@@ -156,8 +156,7 @@ typedef struct {
 } XCBVoidCookie;
 
 
-/* Include the generated xproto and xcb_types headers. */
-#include "xcb_types.h"
+/* Include the generated xproto header. */
 #include "xproto.h"
 
 

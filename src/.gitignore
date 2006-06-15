@@ -1,7 +1,5 @@
 xproto.c
 xproto.h
 xcb_des.c
-xcb_types.c
-xcb_types.h
 extensions
 X11
