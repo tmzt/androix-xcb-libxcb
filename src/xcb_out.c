@@ -157,16 +157,22 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
 
-    if(req->isvoid && c->out.request == c->in.request_expected + (1 << 16) - 2)
+    request = ++c->out.request;
+    /* send GetInputFocus (sync) when 64k-2 requests have been sent without
+     * a reply.
+     * Also send sync (could use NoOp) at 32-bit wrap to avoid having
+     * applications see sequence 0 as that is used to indicate
+     * an error in sending the request */
+    if((req->isvoid &&
+	c->out.request == c->in.request_expected + (1 << 16) - 2) ||
+       request == 0)
     {
         prefix[0] = sync.packet;
-        request = ++c->out.request;
         _xcb_in_expect_reply(c, request, WORKAROUND_NONE, XCB_REQUEST_DISCARD_REPLY);
         c->in.request_expected = c->out.request;
+	request = ++c->out.request;
     }
 
-    request = ++c->out.request;
-    assert(request != 0);
     if(workaround != WORKAROUND_NONE || flags != 0)
         _xcb_in_expect_reply(c, request, workaround, flags);
     if(!req->isvoid)
@@ -238,8 +244,8 @@ int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count)
 
 int _xcb_out_flush_to(XCBConnection *c, unsigned int request)
 {
-    assert(request <= c->out.request);
-    if(c->out.request_written >= request)
+    assert(XCB_SEQUENCE_COMPARE(request, <=, c->out.request));
+    if(XCB_SEQUENCE_COMPARE(c->out.request_written, >=, request))
         return 1;
     if(c->out.queue_len)
     {
@@ -252,6 +258,6 @@ int _xcb_out_flush_to(XCBConnection *c, unsigned int request)
     }
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
-    assert(c->out.request_written >= request);
+    assert(XCB_SEQUENCE_COMPARE(c->out.request_written, >=, request));
     return 1;
 }

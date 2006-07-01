@@ -43,6 +43,8 @@ enum workarounds {
 
 #define XCB_PAD(i) (-(i) & 3)
 
+#define XCB_SEQUENCE_COMPARE(a,op,b)	((int) ((a) - (b)) op 0)
+
 /* xcb_list.c */
 
 typedef void (*XCBListFreeFunc)(void *);

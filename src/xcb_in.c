@@ -91,11 +91,11 @@ static int read_packet(XCBConnection *c)
     /* Compute 32-bit sequence number of this packet. */
     if((genrep.response_type & 0x7f) != XCBKeymapNotify)
     {
-        int lastread = c->in.request_read;
+        unsigned int lastread = c->in.request_read;
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
-        if(c->in.request_read < lastread)
+        if(XCB_SEQUENCE_COMPARE(c->in.request_read, <, lastread))
             c->in.request_read += 0x10000;
-        if(c->in.request_read > c->in.request_expected)
+        if(XCB_SEQUENCE_COMPARE(c->in.request_read, >, c->in.request_expected))
             c->in.request_expected = c->in.request_read;
 
         if(c->in.request_read != lastread)
@@ -111,7 +111,8 @@ static int read_packet(XCBConnection *c)
         if(genrep.response_type != XCBReply) /* error or event */
             c->in.request_completed = c->in.request_read; /* XXX: does event/error imply no more replies? */
 
-        while(c->in.pending_replies && c->in.pending_replies->request <= c->in.request_completed)
+        while(c->in.pending_replies && 
+	      XCB_SEQUENCE_COMPARE (c->in.pending_replies->request, <=, c->in.request_completed))
         {
             pending_reply *oldpend = c->in.pending_replies;
             c->in.pending_replies = oldpend->next;
@@ -168,12 +169,17 @@ static int read_packet(XCBConnection *c)
         cur->next = 0;
         *c->in.current_reply_tail = cur;
         c->in.current_reply_tail = &cur->next;
-        for(reader = c->in.readers; reader && reader->request <= c->in.request_read; reader = reader->next)
+        for(reader = c->in.readers; 
+	    reader && 
+	    XCB_SEQUENCE_COMPARE(reader->request, <=, c->in.request_read);
+	    reader = reader->next)
+	{
             if(reader->request == c->in.request_read)
             {
                 pthread_cond_signal(reader->data);
                 break;
             }
+	}
         return 1;
     }
 
@@ -249,7 +255,7 @@ static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, 
         head = 0;
     /* We've read requests past the one we want, so if it has replies we have
      * them all and they're in the replies map. */
-    else if(request < c->in.request_read)
+    else if(XCB_SEQUENCE_COMPARE(request, <, c->in.request_read))
     {
         head = _xcb_map_remove(c->in.replies, request);
         if(head && head->next)
@@ -312,8 +318,13 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
         reader_list reader;
         reader_list **prev_reader;
 
-        for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
+        for(prev_reader = &c->in.readers; 
+	    *prev_reader && 
+	    XCB_SEQUENCE_COMPARE ((*prev_reader)->request, <=, request);
+	    prev_reader = &(*prev_reader)->next)
+	{
             /* empty */;
+	}
         reader.request = request;
         reader.data = &cond;
         reader.next = *prev_reader;
@@ -323,12 +334,17 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
             if(!_xcb_conn_wait(c, &cond, 0, 0))
                 break;
 
-        for(prev_reader = &c->in.readers; *prev_reader && (*prev_reader)->request <= request; prev_reader = &(*prev_reader)->next)
+        for(prev_reader = &c->in.readers;
+	    *prev_reader && 
+	    XCB_SEQUENCE_COMPARE((*prev_reader)->request, <=, request);
+	    prev_reader = &(*prev_reader)->next)
+	{
             if(*prev_reader == &reader)
             {
                 *prev_reader = (*prev_reader)->next;
                 break;
             }
+	}
         pthread_cond_destroy(&cond);
     }
 
