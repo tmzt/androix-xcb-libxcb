@@ -44,7 +44,6 @@ typedef int16_t  INT16;
 typedef int32_t  INT32;
 #endif /* XMD_H */
 
-#include <X11/X.h>
 #include <sys/uio.h>
 #include <pthread.h>
 
