@@ -29,8 +29,11 @@
 #define __XCB_H__
 #include <sys/types.h>
 
-/* TODO: check for stdint in config? (HAVE_STDINT) fallback? */
+#if HAVE_STDINT_H
 #include <stdint.h>
+#elif HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 
 /* FIXME: these names conflict with those defined in Xmd.h. */
 #ifndef XMD_H
