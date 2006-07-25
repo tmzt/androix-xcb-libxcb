@@ -29,10 +29,10 @@
 #define __XCB_H__
 #include <sys/types.h>
 
-#if HAVE_STDINT_H
-#include <stdint.h>
-#elif HAVE_INTTYPES_H
+#if defined(__solaris__)
 #include <inttypes.h>
+#else
+#include <stdint.h>
 #endif
 
 /* FIXME: these names conflict with those defined in Xmd.h. */
