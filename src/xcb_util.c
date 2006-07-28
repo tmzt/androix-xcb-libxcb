@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <netinet/in.h>
 #ifdef DNETCONN
 #include <netdnet/dnetdb.h>
 #include <netdnet/dn.h>
