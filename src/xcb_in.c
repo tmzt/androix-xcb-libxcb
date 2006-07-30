@@ -402,6 +402,24 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
     return ret;
 }
 
+XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie)
+{
+    /* FIXME: this could hold the lock to avoid syncing unnecessarily, but
+     * that would require factoring the locking out of XCBGetInputFocus,
+     * XCBGetInputFocusReply, and XCBWaitForReply. */
+    XCBGenericError *ret;
+    void *reply;
+    if(XCB_SEQUENCE_COMPARE(cookie.request,>,c->in.request_expected)
+       && XCB_SEQUENCE_COMPARE(cookie.request,>,c->in.request_completed))
+    {
+        free(XCBGetInputFocusReply(c, XCBGetInputFocus(c), &ret));
+        assert(!ret);
+    }
+    reply = XCBWaitForReply(c, cookie.request, &ret);
+    assert(!reply);
+    return ret;
+}
+
 unsigned int XCBGetRequestRead(XCBConnection *c)
 {
     unsigned int ret;

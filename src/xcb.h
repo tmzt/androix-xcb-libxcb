@@ -273,6 +273,24 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c);
 XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error);
 
 /**
+ * @brief Return the error for a request, or NULL if none can ever arrive.
+ * @param c: The connection to the X server.
+ * @param cookie: The request cookie.
+ * @return The error for the request, or NULL if none can ever arrive.
+ *
+ * The XCBVoidCookie cookie supplied to this function must have resulted from
+ * a call to XCB[RequestName]Checked().  This function will block until one of
+ * two conditions happens.  If an error is received, it will be returned.  If
+ * a reply to a subsequent request has already arrived, no error can arrive
+ * for this request, so this function will return NULL.
+ *
+ * Note that this function will perform a sync if needed to ensure that the
+ * sequence number will advance beyond that provided in cookie; this is a
+ * convenience to avoid races in determining whether the sync is needed.
+ */
+XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie);
+
+/**
  * @brief Returns the last sequence number that the server is known to
  * have processed.
  * @param c: The connection to the X server.
