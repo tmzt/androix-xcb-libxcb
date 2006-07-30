@@ -163,8 +163,8 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
      * Also send sync (could use NoOp) at 32-bit wrap to avoid having
      * applications see sequence 0 as that is used to indicate
      * an error in sending the request */
-    if((req->isvoid &&
-	c->out.request == c->in.request_expected + (1 << 16) - 2) ||
+    while((req->isvoid &&
+	c->out.request == c->in.request_expected + (1 << 16) - 1) ||
        request == 0)
     {
         prefix[0] = sync.packet;
