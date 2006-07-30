@@ -409,13 +409,13 @@ XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie)
      * XCBGetInputFocusReply, and XCBWaitForReply. */
     XCBGenericError *ret;
     void *reply;
-    if(XCB_SEQUENCE_COMPARE(cookie.request,>,c->in.request_expected)
-       && XCB_SEQUENCE_COMPARE(cookie.request,>,c->in.request_completed))
+    if(XCB_SEQUENCE_COMPARE(cookie.sequence,>,c->in.request_expected)
+       && XCB_SEQUENCE_COMPARE(cookie.sequence,>,c->in.request_completed))
     {
         free(XCBGetInputFocusReply(c, XCBGetInputFocus(c), &ret));
         assert(!ret);
     }
-    reply = XCBWaitForReply(c, cookie.request, &ret);
+    reply = XCBWaitForReply(c, cookie.sequence, &ret);
     assert(!reply);
     return ret;
 }
