@@ -201,12 +201,14 @@ authorization from the authors.
   </xsl:template>
   
   <!-- Helper template for requests, that outputs the cookie type.  The
-       context node must be the request. -->
+       parameter "request" must be the request node, which defaults to the
+       context node. -->
   <xsl:template name="cookie-type">
+    <xsl:param name="request" select="." />
     <xsl:text>XCB</xsl:text>
     <xsl:choose>
-      <xsl:when test="reply">
-        <xsl:value-of select="concat($ext, @name)" />
+      <xsl:when test="$request/reply">
+        <xsl:value-of select="concat($ext, $request/@name)" />
       </xsl:when>
       <xsl:otherwise>
         <xsl:text>Void</xsl:text>
@@ -216,6 +218,7 @@ authorization from the authors.
   </xsl:template>
 
   <xsl:template match="request" mode="pass1">
+    <xsl:variable name="req" select="." />
     <xsl:if test="reply">
       <struct name="XCB{$ext}{@name}Cookie">
         <field type="unsigned int" name="sequence" />
@@ -231,14 +234,16 @@ authorization from the authors.
         <field type="CARD16" name="length" no-assign="true" />
       </middle>
     </struct>
-    <function name="XCB{$ext}{@name}">
+    <function name="XCB{$ext}{$req/@name}">
       <xsl:attribute name="type">
-        <xsl:call-template name="cookie-type" />
+        <xsl:call-template name="cookie-type">
+          <xsl:with-param name="request" select="$req" />
+        </xsl:call-template>
       </xsl:attribute>
       <field type="XCBConnection *" name="c" />
-      <xsl:apply-templates select="*[not(self::reply)]" mode="param" />
-      <do-request ref="XCB{$ext}{@name}Req" opcode="{@opcode}">
-        <xsl:if test="reply">
+      <xsl:apply-templates select="$req/*[not(self::reply)]" mode="param" />
+      <do-request ref="XCB{$ext}{$req/@name}Req" opcode="{$req/@opcode}">
+        <xsl:if test="$req/reply">
           <xsl:attribute name="has-reply">true</xsl:attribute>
         </xsl:if>
       </do-request>
