@@ -217,6 +217,33 @@ authorization from the authors.
     <xsl:text>Cookie</xsl:text>
   </xsl:template>
 
+  <xsl:template name="request-function">
+    <xsl:param name="checked" />
+    <xsl:param name="req" />
+    <function>
+      <xsl:attribute name="name">
+        <xsl:text>XCB</xsl:text>
+        <xsl:value-of select="$ext" />
+        <xsl:value-of select="$req/@name" />
+        <xsl:if test="$checked='true' and not($req/reply)">Checked</xsl:if>
+        <xsl:if test="$checked='false' and $req/reply">Unchecked</xsl:if>
+      </xsl:attribute>
+      <xsl:attribute name="type">
+        <xsl:call-template name="cookie-type">
+          <xsl:with-param name="request" select="$req" />
+        </xsl:call-template>
+      </xsl:attribute>
+      <field type="XCBConnection *" name="c" />
+      <xsl:apply-templates select="$req/*[not(self::reply)]" mode="param" />
+      <do-request ref="XCB{$ext}{$req/@name}Req" opcode="{$req/@opcode}"
+                  checked="{$checked}">
+        <xsl:if test="$req/reply">
+          <xsl:attribute name="has-reply">true</xsl:attribute>
+        </xsl:if>
+      </do-request>
+    </function>
+  </xsl:template>
+  
   <xsl:template match="request" mode="pass1">
     <xsl:variable name="req" select="." />
     <xsl:if test="reply">
@@ -234,20 +261,14 @@ authorization from the authors.
         <field type="CARD16" name="length" no-assign="true" />
       </middle>
     </struct>
-    <function name="XCB{$ext}{$req/@name}">
-      <xsl:attribute name="type">
-        <xsl:call-template name="cookie-type">
-          <xsl:with-param name="request" select="$req" />
-        </xsl:call-template>
-      </xsl:attribute>
-      <field type="XCBConnection *" name="c" />
-      <xsl:apply-templates select="$req/*[not(self::reply)]" mode="param" />
-      <do-request ref="XCB{$ext}{$req/@name}Req" opcode="{$req/@opcode}">
-        <xsl:if test="$req/reply">
-          <xsl:attribute name="has-reply">true</xsl:attribute>
-        </xsl:if>
-      </do-request>
-    </function>
+    <xsl:call-template name="request-function">
+      <xsl:with-param name="checked" select="'true'" />
+      <xsl:with-param name="req" select="$req" />
+    </xsl:call-template>
+    <xsl:call-template name="request-function">
+      <xsl:with-param name="checked" select="'false'" />
+      <xsl:with-param name="req" select="$req" />
+    </xsl:call-template>
     <xsl:if test="reply">
       <struct name="XCB{$ext}{@name}Rep">
         <field type="BYTE" name="response_type" />
@@ -612,7 +633,7 @@ authorization from the authors.
 
     <l>xcb_ret.sequence = XCBSendRequest(c, <!--
     --><xsl:choose>
-         <xsl:when test="@has-reply">XCB_REQUEST_CHECKED</xsl:when>
+         <xsl:when test="@checked='true'">XCB_REQUEST_CHECKED</xsl:when>
          <xsl:otherwise>0</xsl:otherwise>
        </xsl:choose>, xcb_parts + 2, &amp;xcb_req);</l>
     <l>return xcb_ret;</l>
