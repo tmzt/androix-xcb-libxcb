@@ -417,7 +417,7 @@ main ()
   Atom    *atoms_x;
   double   diff_x;
 
-  c = XCBConnectBasic ();
+  c = XCBConnect (NULL, NULL);
 
   count = 500;
   atoms = (XCBATOM *)malloc (count * sizeof (atoms));
@@ -3460,7 +3460,7 @@ XCBConnection *c;
 XCBSCREEN     *screen;
 int            screen_nbr;
 XCBVISUALID    root_visual = { 0 };
-XCBVISUATYPE  *visual_type = NULL;    /* the returned visual type */
+XCBVISUALTYPE  *visual_type = NULL;    /* the returned visual type */
 
 /* you init the connection and screen_nbr */
 
