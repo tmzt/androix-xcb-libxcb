@@ -55,14 +55,6 @@ typedef int32_t  INT32;
 extern "C" {
 #endif
 
-
-#if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
-#define deprecated __attribute__((__deprecated__))
-#else
-#define deprecated
-#endif
-
-
 /**
  * @file xcb.h
  */
@@ -189,17 +181,6 @@ typedef struct XCBAuthInfo {
     char *data;   /**< Data interpreted in a protocol-specific manner. */
 } XCBAuthInfo;
 
-/**
- * @brief Gets authorization information.
- * @param fd: The file descriptor.
- * @param info: The authorisation info to set.
- * @return @c 0 on failure, 1 otherwise.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.
- */
-int XCBGetAuthInfo(int fd, XCBAuthInfo *info) deprecated;
-
 
 /* xcb_out.c */
 
@@ -233,16 +214,6 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c);
 
 
 /* xcb_in.c */
-
-/**
- * @brief Returns the next event or error from the server.
- * @param c: The connection to the X server.
- * @return The next event from the server.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.
- */
-XCBGenericEvent *XCBWaitEvent(XCBConnection *c) deprecated;
 
 /**
  * @brief Returns the next event or error from the server.
@@ -289,21 +260,6 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error);
  * convenience to avoid races in determining whether the sync is needed.
  */
 XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie);
-
-/**
- * @brief Returns the last sequence number that the server is known to
- * have processed.
- * @param c: The connection to the X server.
- * @return The last sequence number.
- *
- * Returns the last sequence number that the server is known to have
- * processed. This function enables applications to determine whether
- * forcing a cookie is going to block.
- *
- * @deprecated This function is deprecated in favor of XCBPollForReply.
- * It must not be used in newly written code.
- */
-unsigned int XCBGetRequestRead(XCBConnection *c) deprecated;
 
 
 /* xcb_ext.c */
@@ -424,47 +380,6 @@ void XCBDisconnect(XCBConnection *c);
 int XCBParseDisplay(const char *name, char **host, int *display, int *screen);
 
 /**
- * @brief Open a connection to the X server.
- * @param host: The host name.
- * @param display: The display number.
- * @return The file descriptor.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.
- */
-int XCBOpen(const char *host, int display) deprecated;
-
-/**
- * @brief Open a connection to the X server.
- * @param host: The host name.
- * @param port: The TCP port.
- * @return The file descriptor.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.
- */
-int XCBOpenTCP(const char *host, unsigned short port) deprecated;
-
-/**
- * @brief Connects to the X server.
- * @param file: The file name.
- * @return The file descriptor.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.
- */
-int XCBOpenUnix(const char *file) deprecated;
-
-/**
- * @brief Connects to the X server.
- * @return A newly allocated XCBConnection structure.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.
- */
-XCBConnection *XCBConnectBasic(void) deprecated;
-
-/**
  * @brief Connects to the X server.
  * @param displayname: The name of the display.
  * @param screenp: A pointer to a preferred screen number.
@@ -492,64 +407,10 @@ XCBConnection *XCBConnect(const char *displayname, int *screenp);
  */
 XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *display, XCBAuthInfo *auth, int *screen);
 
-/**
- * @brief Ensures that all events and errors are avalaible in XCB.
- * @param c: The connection to the X server.
- * @param e: A pointer to an error.
- * @return @c 1 on success, @c 0 otherwise.
- *
- * @deprecated This function is deprecated. It must not be used in
- * newly written code.  XCBFlush is more efficient.
- * Use XCBAuxSync if absolutely necessary.
- */
-int XCBSync(XCBConnection *c, XCBGenericError **e) deprecated;
-
 
 /**
  * @}
  */
-
-
-/* Old names for connection-setup types, to be removed before 1.0. */
-
-typedef XCBSetupReq XCBConnSetupReq deprecated;
-typedef XCBSetupReqIter XCBConnSetupReqIter deprecated;
-typedef XCBSetupFailed XCBConnSetupFailedRep deprecated;
-typedef XCBSetupFailedIter XCBConnSetupFailedRepIter deprecated;
-typedef XCBSetupAuthenticate XCBConnSetupAuthenticateRep deprecated;
-typedef XCBSetupAuthenticateIter XCBConnSetupAuthenticateRepIter deprecated;
-typedef XCBSetup XCBConnSetupSuccessRep deprecated;
-typedef XCBSetupIter XCBConnSetupSuccessRepIter deprecated;
-
-char *XCBConnSetupReqAuthorizationProtocolName(XCBSetupReq *R) deprecated;
-int XCBConnSetupReqAuthorizationProtocolNameLength(XCBSetupReq *R) deprecated;
-XCBGenericIter XCBConnSetupReqAuthorizationProtocolNameEnd(XCBSetupReq *R) deprecated;
-char *XCBConnSetupReqAuthorizationProtocolData(XCBSetupReq *R) deprecated;
-int XCBConnSetupReqAuthorizationProtocolDataLength(XCBSetupReq *R) deprecated;
-XCBGenericIter XCBConnSetupReqAuthorizationProtocolDataEnd(XCBSetupReq *R) deprecated;
-void XCBConnSetupReqNext(XCBSetupReqIter *i) deprecated;
-XCBGenericIter XCBConnSetupReqEnd(XCBSetupReqIter i) deprecated;
-char *XCBConnSetupFailedRepReason(XCBSetupFailed *R) deprecated;
-int XCBConnSetupFailedRepReasonLength(XCBSetupFailed *R) deprecated;
-XCBGenericIter XCBConnSetupFailedRepReasonEnd(XCBSetupFailed *R) deprecated;
-void XCBConnSetupFailedRepNext(XCBSetupFailedIter *i) deprecated;
-XCBGenericIter XCBConnSetupFailedRepEnd(XCBSetupFailedIter i) deprecated;
-char *XCBConnSetupAuthenticateRepReason(XCBSetupAuthenticate *R) deprecated;
-int XCBConnSetupAuthenticateRepReasonLength(XCBSetupAuthenticate *R) deprecated;
-XCBGenericIter XCBConnSetupAuthenticateRepReasonEnd(XCBSetupAuthenticate *R) deprecated;
-void XCBConnSetupAuthenticateRepNext(XCBSetupAuthenticateIter *i) deprecated;
-XCBGenericIter XCBConnSetupAuthenticateRepEnd(XCBSetupAuthenticateIter i) deprecated;
-char *XCBConnSetupSuccessRepVendor(XCBSetup *R) deprecated;
-int XCBConnSetupSuccessRepVendorLength(XCBSetup *R) deprecated;
-XCBGenericIter XCBConnSetupSuccessRepVendorEnd(XCBSetup *R) deprecated;
-XCBFORMAT *XCBConnSetupSuccessRepPixmapFormats(XCBSetup *R) deprecated;
-int XCBConnSetupSuccessRepPixmapFormatsLength(XCBSetup *R) deprecated;
-XCBFORMATIter XCBConnSetupSuccessRepPixmapFormatsIter(XCBSetup *R) deprecated;
-int XCBConnSetupSuccessRepRootsLength(XCBSetup *R) deprecated;
-XCBSCREENIter XCBConnSetupSuccessRepRootsIter(XCBSetup *R) deprecated;
-void XCBConnSetupSuccessRepNext(XCBSetupIter *i) deprecated;
-XCBGenericIter XCBConnSetupSuccessRepEnd(XCBSetupIter i) deprecated;
-
 
 #ifdef __cplusplus
 }
