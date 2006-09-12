@@ -96,8 +96,6 @@ libXCB_la_LDFLAGS = -version-info 0:0:0
 
 BUILT_SOURCES = $(COREPROTO) $(EXTENSIONS)
 CLEANFILES = $(COREPROTO) $(EXTENSIONS)
-clean-local:
-	rmdir extensions || true
 
 XCB_LIBS = libXCB.la
 
@@ -179,9 +177,11 @@ libXCBxvmc_la_LDFLAGS = -version-info 0:0:0
 libXCBxvmc_la_LIBADD = $(XCB_LIBS)
 libXCBxvmc_la_SOURCES = extensions/xvmc.c extensions/xvmc.h
 
-vpath %.xml $(XCBPROTO_XCBINCLUDEDIR) $(XCBPROTO_XCBINCLUDEDIR)/extensions
+$(EXTHEADERS) $(EXTSOURCES): c-client.xsl
 
-%.h: %.xml c-client.xsl
+SUFFIXES = .xml
+
+.xml.h:
 	@n=`dirname $*`; test -d $$n || (echo mkdir $$n; mkdir $$n)
 	$(XSLTPROC) --stringparam mode header \
 	            --stringparam base-path $(XCBPROTO_XCBINCLUDEDIR)/ \
@@ -189,10 +189,76 @@ vpath %.xml $(XCBPROTO_XCBINCLUDEDIR) $(XCBPROTO_XCBINCLUDEDIR)/extensions
 	                          $(XCBPROTO_XCBINCLUDEDIR)/extensions/ \
 	            -o $@ $(srcdir)/c-client.xsl $< 
 
-%.c: %.xml c-client.xsl
+.xml.c:
 	@n=`dirname $*`; test -d $$n || (echo mkdir $$n; mkdir $$n)
 	$(XSLTPROC) --stringparam mode source \
 	            --stringparam base-path $(XCBPROTO_XCBINCLUDEDIR)/ \
 	            --stringparam extension-path \
 	                          $(XCBPROTO_XCBINCLUDEDIR)/extensions/ \
 	            -o $@ $(srcdir)/c-client.xsl $< 
+
+xproto.xml: $(XCBPROTO_XCBINCLUDEDIR)/xproto.xml
+	ln -s $< $@
+
+extensions/bigreq.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/bigreq.xml
+	ln -s $< $@
+
+extensions/composite.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/composite.xml
+	ln -s $< $@
+
+extensions/damage.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/damage.xml
+	ln -s $< $@
+
+extensions/dpms.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/dpms.xml
+	ln -s $< $@
+
+extensions/glx.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/glx.xml
+	ln -s $< $@
+
+extensions/randr.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/randr.xml
+	ln -s $< $@
+
+extensions/record.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/record.xml
+	ln -s $< $@
+
+extensions/render.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/render.xml
+	ln -s $< $@
+
+extensions/res.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/res.xml
+	ln -s $< $@
+
+extensions/screensaver.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/screensaver.xml
+	ln -s $< $@
+
+extensions/shape.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/shape.xml
+	ln -s $< $@
+
+extensions/shm.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/shm.xml
+	ln -s $< $@
+
+extensions/sync.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/sync.xml
+	ln -s $< $@
+
+extensions/xc_misc.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xc_misc.xml
+	ln -s $< $@
+
+extensions/xevie.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xevie.xml
+	ln -s $< $@
+
+extensions/xf86dri.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xf86dri.xml
+	ln -s $< $@
+
+extensions/xfixes.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xfixes.xml
+	ln -s $< $@
+
+extensions/xprint.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xprint.xml
+	ln -s $< $@
+
+extensions/xtest.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xtest.xml
+	ln -s $< $@
+
+extensions/xvmc.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xvmc.xml
+	ln -s $< $@
+
+extensions/xv.xml: $(XCBPROTO_XCBINCLUDEDIR)/extensions/xv.xml
+	ln -s $< $@

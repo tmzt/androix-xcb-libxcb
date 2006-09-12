@@ -1,0 +1,3 @@
+It is convenient not to have to teach Makefile.am when to
+create this directory, but GIT won't track an empty
+directory.  Hence this file.  Sorry.
