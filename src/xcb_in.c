@@ -363,11 +363,6 @@ int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGen
     return ret;
 }
 
-XCBGenericEvent *XCBWaitEvent(XCBConnection *c)
-{
-    return XCBWaitForEvent(c);
-}
-
 XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 {
     XCBGenericEvent *ret;
@@ -417,17 +412,6 @@ XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie)
     }
     reply = XCBWaitForReply(c, cookie.sequence, &ret);
     assert(!reply);
-    return ret;
-}
-
-unsigned int XCBGetRequestRead(XCBConnection *c)
-{
-    unsigned int ret;
-    pthread_mutex_lock(&c->iolock);
-    /* FIXME: follow X meets Z architecture changes. */
-    _xcb_in_read(c);
-    ret = c->in.request_read;
-    pthread_mutex_unlock(&c->iolock);
     return ret;
 }
 
