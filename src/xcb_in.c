@@ -108,8 +108,8 @@ static int read_packet(XCBConnection *c)
             }
             c->in.request_completed = c->in.request_read - 1;
         }
-        if(genrep.response_type != XCBReply) /* error or event */
-            c->in.request_completed = c->in.request_read; /* XXX: does event/error imply no more replies? */
+        if(genrep.response_type == XCBError)
+            c->in.request_completed = c->in.request_read;
 
         while(c->in.pending_replies && 
 	      XCB_SEQUENCE_COMPARE (c->in.pending_replies->request, <=, c->in.request_completed))
