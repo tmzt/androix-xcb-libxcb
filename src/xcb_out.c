@@ -59,6 +59,8 @@ static int write_block(XCBConnection *c, struct iovec *vector, int count)
 
 CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
 {
+    if(c->has_error)
+        return 0;
     pthread_mutex_lock(&c->out.reqlenlock);
     if(!c->out.maximum_request_length)
     {
@@ -90,6 +92,9 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     CARD32 prefix[3] = { 0 };
     int veclen = req->count;
     enum workarounds workaround = WORKAROUND_NONE;
+
+    if(c->has_error)
+        return 0;
 
     assert(c != 0);
     assert(vector != 0);
@@ -200,6 +205,8 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
 int XCBFlush(XCBConnection *c)
 {
     int ret;
+    if(c->has_error)
+        return 0;
     pthread_mutex_lock(&c->iolock);
     ret = _xcb_out_flush_to(c, c->out.request);
     pthread_mutex_unlock(&c->iolock);

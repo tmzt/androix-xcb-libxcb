@@ -28,10 +28,14 @@
 
 unsigned int XCBGetRequestSent(XCBConnection *c)
 {
+    if(c->has_error)
+        return 0;
     return c->out.request;
 }
 
 pthread_mutex_t *XCBGetIOLock(XCBConnection *c)
 {
+    if(c->has_error)
+        return 0;
     return &c->iolock;
 }

@@ -36,6 +36,8 @@
 CARD32 XCBGenerateID(XCBConnection *c)
 {
     CARD32 ret;
+    if(c->has_error)
+        return -1;
     pthread_mutex_lock(&c->xid.lock);
     if(c->xid.last == c->xid.max)
     {

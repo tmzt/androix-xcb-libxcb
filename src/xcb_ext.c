@@ -84,6 +84,8 @@ static lazyreply *get_lazyreply(XCBConnection *c, XCBExtension *ext)
 const XCBQueryExtensionRep *XCBGetExtensionData(XCBConnection *c, XCBExtension *ext)
 {
     lazyreply *data;
+    if(c->has_error)
+        return 0;
 
     pthread_mutex_lock(&c->ext.lock);
     data = get_lazyreply(c, ext);
@@ -99,6 +101,8 @@ const XCBQueryExtensionRep *XCBGetExtensionData(XCBConnection *c, XCBExtension *
 
 void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext)
 {
+    if(c->has_error)
+        return;
     pthread_mutex_lock(&c->ext.lock);
     get_lazyreply(c, ext);
     pthread_mutex_unlock(&c->ext.lock);

@@ -308,6 +308,8 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     void *ret = 0;
     if(e)
         *e = 0;
+    if(c->has_error)
+        return 0;
 
     pthread_mutex_lock(&c->iolock);
 
@@ -356,6 +358,13 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
 int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
 {
     int ret;
+    if(c->has_error)
+    {
+        *reply = 0;
+        if(error)
+            *error = 0;
+        return 1; /* would not block */
+    }
     assert(reply != 0);
     pthread_mutex_lock(&c->iolock);
     ret = poll_for_reply(c, request, reply, error);
@@ -366,6 +375,8 @@ int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGen
 XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 {
     XCBGenericEvent *ret;
+    if(c->has_error)
+        return 0;
     pthread_mutex_lock(&c->iolock);
     /* get_event returns 0 on empty list. */
     while(!(ret = get_event(c)))
@@ -379,19 +390,22 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 
 XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
 {
-    XCBGenericEvent *ret = 0;
-    int success;
-    pthread_mutex_lock(&c->iolock);
-    /* FIXME: follow X meets Z architecture changes. */
-    success = _xcb_in_read(c);
-    if(success)
-        ret = get_event(c);
-    pthread_mutex_unlock(&c->iolock);
-    if(success)
+    if(!c->has_error)
     {
-        if(error)
-            *error = 0;
-        return ret;
+        XCBGenericEvent *ret = 0;
+        int success;
+        pthread_mutex_lock(&c->iolock);
+        /* FIXME: follow X meets Z architecture changes. */
+        success = _xcb_in_read(c);
+        if(success)
+            ret = get_event(c);
+        pthread_mutex_unlock(&c->iolock);
+        if(success)
+        {
+            if(error)
+                *error = 0;
+            return ret;
+        }
     }
     if(error)
         *error = -1;
@@ -410,6 +424,8 @@ XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie)
      * XCBGetInputFocusReply, and XCBWaitForReply. */
     XCBGenericError *ret;
     void *reply;
+    if(c->has_error)
+        return 0;
     if(XCB_SEQUENCE_COMPARE(cookie.sequence,>,c->in.request_expected)
        && XCB_SEQUENCE_COMPARE(cookie.sequence,>,c->in.request_completed))
     {

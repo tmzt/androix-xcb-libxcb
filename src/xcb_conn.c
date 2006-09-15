@@ -179,12 +179,16 @@ static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
 
 const XCBSetup *XCBGetSetup(XCBConnection *c)
 {
+    if(c->has_error)
+        return 0;
     /* doesn't need locking because it's never written to. */
     return c->setup;
 }
 
 int XCBGetFileDescriptor(XCBConnection *c)
 {
+    if(c->has_error)
+        return -1;
     /* doesn't need locking because it's never written to. */
     return c->fd;
 }
@@ -225,7 +229,7 @@ XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
 
 void XCBDisconnect(XCBConnection *c)
 {
-    if(!c)
+    if(c->has_error)
         return;
 
     free(c->setup);
