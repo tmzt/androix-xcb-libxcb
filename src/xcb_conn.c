@@ -247,6 +247,11 @@ void XCBDisconnect(XCBConnection *c)
 
 /* Private interface */
 
+void _xcb_conn_shutdown(XCBConnection *c)
+{
+    c->has_error = 1;
+}
+
 int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count)
 {
     int ret;

@@ -158,6 +158,7 @@ struct XCBConnection {
     _xcb_xid xid;
 };
 
+void _xcb_conn_shutdown(XCBConnection *c);
 int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count);
 
 
