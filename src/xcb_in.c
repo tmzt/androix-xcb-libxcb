@@ -142,7 +142,10 @@ static int read_packet(XCBConnection *c)
 
     buf = malloc(length + (genrep.response_type == XCBReply ? 0 : sizeof(CARD32)));
     if(!buf)
+    {
+        _xcb_conn_shutdown(c);
         return 0;
+    }
     if(_xcb_in_read_block(c, buf, length) <= 0)
     {
         free(buf);
@@ -164,7 +167,10 @@ static int read_packet(XCBConnection *c)
         reader_list *reader;
         struct reply_list *cur = malloc(sizeof(struct reply_list));
         if(!cur)
+        {
+            _xcb_conn_shutdown(c);
             return 0;
+        }
         cur->reply = buf;
         cur->next = 0;
         *c->in.current_reply_tail = cur;
@@ -187,6 +193,7 @@ static int read_packet(XCBConnection *c)
     event = malloc(sizeof(struct event_list));
     if(!event)
     {
+        _xcb_conn_shutdown(c);
         free(buf);
         return 0;
     }
@@ -486,7 +493,10 @@ int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workaround
     pending_reply *pend = malloc(sizeof(pending_reply));
     assert(workaround != WORKAROUND_NONE || flags != 0);
     if(!pend)
+    {
+        _xcb_conn_shutdown(c);
         return 0;
+    }
     pend->request = request;
     pend->workaround = workaround;
     pend->flags = flags;
@@ -503,7 +513,10 @@ int _xcb_in_read(XCBConnection *c)
         c->in.queue_len += n;
     while(read_packet(c))
         /* empty */;
-    return (n > 0) || (n < 0 && errno == EAGAIN);
+    if((n > 0) || (n < 0 && errno == EAGAIN))
+        return 1;
+    _xcb_conn_shutdown(c);
+    return 0;
 }
 
 int _xcb_in_read_block(XCBConnection *c, void *buf, int len)
@@ -520,7 +533,10 @@ int _xcb_in_read_block(XCBConnection *c, void *buf, int len)
     {
         int ret = read_block(c->fd, (char *) buf + done, len - done);
         if(ret <= 0)
+        {
+            _xcb_conn_shutdown(c);
             return ret;
+        }
     }
 
     return len;

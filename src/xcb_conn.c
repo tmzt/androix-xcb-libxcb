@@ -156,7 +156,10 @@ static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
     if(n < 0 && errno == EAGAIN)
         return 1;
     if(n <= 0)
+    {
+        _xcb_conn_shutdown(c);
         return 0;
+    }
 
     for(; *count; --*count, ++*vector)
     {
@@ -280,7 +283,10 @@ int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector
 	ret = select(c->fd + 1, &rfds, &wfds, 0, 0);
     } while (ret == -1 && errno == EINTR);
     if (ret < 0)
+    {
+        _xcb_conn_shutdown(c);
 	ret = 0;
+    }
     pthread_mutex_lock(&c->iolock);
 
     if(ret)

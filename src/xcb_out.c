@@ -112,7 +112,10 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
         {
             const XCBQueryExtensionRep *extension = XCBGetExtensionData(c, req->ext);
             if(!(extension && extension->present))
+            {
+                _xcb_conn_shutdown(c);
                 return 0;
+            }
             ((CARD8 *) vector[0].iov_base)[0] = extension->major_opcode;
             ((CARD8 *) vector[0].iov_base)[1] = req->opcode;
         }
@@ -139,7 +142,10 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
             longlen = 0;
         }
         else if(longlen > XCBGetMaximumRequestLength(c))
+        {
+            _xcb_conn_shutdown(c);
             return 0; /* server can't take this; maybe need BIGREQUESTS? */
+        }
 
         /* set the length field. */
         ((CARD16 *) vector[0].iov_base)[1] = shortlen;
@@ -197,7 +203,10 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     }
 
     if(!write_block(c, vector, veclen))
+    {
+        _xcb_conn_shutdown(c);
         request = 0;
+    }
     pthread_mutex_unlock(&c->iolock);
     return request;
 }
