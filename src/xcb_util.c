@@ -45,6 +45,8 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
+static const int error_connection = 1;
+
 int XCBPopcount(CARD32 mask)
 {
     unsigned long y;
@@ -212,11 +214,11 @@ XCBConnection *XCBConnect(const char *displayname, int *screenp)
     XCBAuthInfo auth;
 
     if(!XCBParseDisplay(displayname, &host, &display, screenp))
-        return 0;
+        return (XCBConnection *) &error_connection;
     fd = _xcb_open(host, display);
     free(host);
     if(fd == -1)
-        return 0;
+        return (XCBConnection *) &error_connection;
 
     _xcb_get_auth_info(fd, &auth);
     c = XCBConnectToFD(fd, &auth);
@@ -231,11 +233,11 @@ XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *displayname, XCBAuthI
     char *host;
 
     if(!XCBParseDisplay(displayname, &host, &display, screenp))
-        return 0;
+        return (XCBConnection *) &error_connection;
     fd = _xcb_open(host, display);
     free(host);
     if(fd == -1)
-        return 0;
+        return (XCBConnection *) &error_connection;
 
     return XCBConnectToFD(fd, auth);
 }

@@ -44,6 +44,8 @@ typedef struct {
     CARD16 length;
 } XCBSetupGeneric;
 
+static const int error_connection = 1;
+
 static int set_fd_flags(const int fd)
 {
     long flags = fcntl(fd, F_GETFL, 0);
@@ -199,7 +201,7 @@ XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
 
     c = calloc(1, sizeof(XCBConnection));
     if(!c)
-        return 0;
+        return (XCBConnection *) &error_connection;
 
     c->fd = fd;
 
@@ -215,7 +217,7 @@ XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
         ))
     {
         XCBDisconnect(c);
-        return 0;
+        return (XCBConnection *) &error_connection;
     }
 
     return c;
