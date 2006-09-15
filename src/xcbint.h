@@ -142,6 +142,8 @@ void _xcb_ext_destroy(XCBConnection *c);
 /* xcb_conn.c */
 
 struct XCBConnection {
+    int has_error;
+
     /* constant data */
     XCBSetup *setup;
     int fd;

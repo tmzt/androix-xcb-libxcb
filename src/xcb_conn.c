@@ -187,6 +187,12 @@ int XCBGetFileDescriptor(XCBConnection *c)
     return c->fd;
 }
 
+int XCBConnectionHasError(XCBConnection *c)
+{
+    /* doesn't need locking because it's read and written atomically. */
+    return c->has_error;
+}
+
 XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
 {
     XCBConnection* c;

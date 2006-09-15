@@ -334,6 +334,21 @@ const XCBSetup *XCBGetSetup(XCBConnection *c);
 int XCBGetFileDescriptor(XCBConnection *c);
 
 /**
+ * @brief Test whether the connection has shut down due to a fatal error.
+ * @param c: The connection.
+ * @return 1 if the connection is in an error state; 0 otherwise.
+ *
+ * Some errors that occur in the context of an XCBConnection
+ * are unrecoverable. When such an error occurs, the
+ * connection is shut down and further operations on the
+ * XCBConnection have no effect.
+ *
+ * @todo Other functions should document the conditions in
+ * which they shut down the connection.
+ */
+int XCBConnectionHasError(XCBConnection *c);
+
+/**
  * @brief Connects to the X server.
  * @param fd: The file descriptor.
  * @param auth_info: Authentication data.
