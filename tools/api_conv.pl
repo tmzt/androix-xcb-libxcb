@@ -42,7 +42,7 @@ sub convert($$)
 
 	return "XCB" . uc($_) if $const;
 
-	$_ .= "_t" unless $fun;
+	$_ .= "_t" unless $fun or /_id$/;
 
 	return "xcb" . $_;
 }
