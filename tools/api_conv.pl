@@ -1,52 +1,27 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -plw
 use strict;
 
-sub trans_lines();
-
-my @xids=("WINDOW","VISUALTYPE","DRAWABLE","FONT","ATOM","COLORMAP","FONTABLE","GCONTEXT","PIXMAP","SCREEN");
-
-while(<>) {
-	
-	trans_lines() unless (/#[a-z]/ or /print/ or /\/\// or /\/\*/);
-	print;
-}
-
-#################
-sub trans_lines()
+sub convert($$)
 {
-	s/XCB/xcb_/g;	
-	
-	foreach my $xid (@xids) {
-		if(/$xid/ and /xcb_/) {
-			my $lcxid = lc($xid);
-			
-			#var
-			my $xidsp = $lcxid . " ";
-			my $xidspun = $lcxid . "_t ";
+	local $_ = shift;
+	my ($fun) = @_;
 
-			##
-			s/$xid/$lcxid/g;
+	return "uint$1_t" if /^CARD(8|16|32)$/;
+	return "int$1_t" if /^INT(8|16|32)$/;
+	return "uint8_t" if $_ eq 'BOOL' or $_ eq 'BYTE';
+	return $_ if /_/ or !/^XCB(.+)/;
+	$_ = $1;
 
-			#var
-			s/$xidsp/$xidspun/g;
-		}
-	}
+	my %abbr = (
+		"Iter" => "iterator",
+		"Req" => "request",
+		"Rep" => "reply",
+	);
 
-	#func without XID in it
-	if(/xcb_/) {
-		s/[A-Z]/"_" . lc($&)/eg;
-		s/__/_/g;
+	s/[A-Z](?:[A-Z0-9]*|[a-z0-9]*)(?=[A-Z]|$)/"_" . ($abbr{$&} or lc($&))/eg;
+	$_ .= "_t" unless $fun;
 
-		if(/event/i) {
-			$_ = $` . "event" . "_t" . $';
-
-			s/__/_/g;
-		}
-
-		#repair NULL's
-		s/_n_u_l_l/NULL/g;
-		#repair XCBSCREEN
-		s/s_c_r_e_e_n/screen/g;	
-	}
+	return "xcb" . $_;
 }
 
+s/([_A-Za-z][_A-Za-z0-9]*)([ \t]*\()?/convert($1, defined $2) . ($2 or "")/eg;
