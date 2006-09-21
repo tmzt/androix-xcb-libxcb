@@ -380,21 +380,27 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
 XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
 {
     XCBGenericEvent *ret = 0;
+    int success;
     pthread_mutex_lock(&c->iolock);
-    if(error)
-        *error = 0;
     /* FIXME: follow X meets Z architecture changes. */
-    if(_xcb_in_read(c))
+    success = _xcb_in_read(c);
+    if(success)
         ret = get_event(c);
-    else if(error)
+    pthread_mutex_unlock(&c->iolock);
+    if(success)
+    {
+        if(error)
+            *error = 0;
+        return ret;
+    }
+    if(error)
         *error = -1;
     else
     {
         fprintf(stderr, "XCBPollForEvent: I/O error occured, but no handler provided.\n");
         abort();
     }
-    pthread_mutex_unlock(&c->iolock);
-    return ret;
+    return 0;
 }
 
 XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie)
