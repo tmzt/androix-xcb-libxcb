@@ -221,7 +221,7 @@ SUFFIXES = .xml
 	            -o $@ $(srcdir)/c-client.xsl $< 
 
 xproto.xml: $(XCBPROTO_XCBINCLUDEDIR)/xproto.xml
-	$(LN_S) $< $@
+	$(LN_S) $(XCBPROTO_XCBINCLUDEDIR)/xproto.xml $@
 
 $(EXTENSION_XML):
 	[ -d extensions ] || mkdir extensions
