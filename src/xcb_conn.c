@@ -62,7 +62,7 @@ static int set_fd_flags(const int fd)
 static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
 {
     static const char pad[3];
-    XCBSetupReq out;
+    XCBSetupRequest out;
     struct iovec parts[6];
     int count = 0;
     int endian = 0x01020304;
@@ -79,9 +79,9 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     out.protocol_minor_version = X_PROTOCOL_REVISION;
     out.authorization_protocol_name_len = 0;
     out.authorization_protocol_data_len = 0;
-    parts[count].iov_len = sizeof(XCBSetupReq);
+    parts[count].iov_len = sizeof(XCBSetupRequest);
     parts[count++].iov_base = &out;
-    parts[count].iov_len = XCB_PAD(sizeof(XCBSetupReq));
+    parts[count].iov_len = XCB_PAD(sizeof(XCBSetupRequest));
     parts[count++].iov_base = (char *) pad;
 
     if(auth_info)
