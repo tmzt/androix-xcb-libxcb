@@ -3,12 +3,22 @@ use strict;
 
 BEGIN {
 	%::const = map { $_ => 1 } (
+		# constants in xcb.h
 		"XCBNone",
 		"XCBCopyFromParent",
 		"XCBCurrentTime",
 		"XCBNoSymbol",
 		"XCBError",
 		"XCBReply",
+		# renamed constants
+		"XCBButtonAny",
+		"XCBButton1",
+		"XCBButton2",
+		"XCBButton3",
+		"XCBButton4",
+		"XCBButton5",
+		"XCBHostInsert",
+		"XCBHostDelete",
 	);
 	open(CONST, shift) or die "failed to open constants list: $!";
 	while(<CONST>)
@@ -28,9 +38,11 @@ sub convert($$)
 	return "uint$1_t" if /^CARD(8|16|32)$/;
 	return "int$1_t" if /^INT(8|16|32)$/;
 	return "uint8_t" if $_ eq 'BOOL' or $_ eq 'BYTE';
-	return $_ if /_/ or !/^XCB(.+)/;
+	return $_ if /^[A-Z]*_[A-Z_]*$/ or !/^XCB(.+)/;
 	my $const = defined $::const{$_};
 	$_ = $1;
+
+	s/^(GX|RandR|XFixes|XP|XvMC)(.)/uc($1) . "_" . $2/e;
 
 	my %abbr = (
 		"Iter" => "iterator",
@@ -38,8 +50,9 @@ sub convert($$)
 		"Rep" => "reply",
 	);
 
-	s/[A-Z](?:[A-Z0-9]*|[a-z0-9]*)(?=[A-Z]|$)/"_" . ($abbr{$&} or lc($&))/eg;
+	s/([0-9]+|[A-Z](?:[A-Z]*|[a-z]*))_?(?=[0-9A-Z]|$)/"_" . ($abbr{$1} or lc($1))/eg;
 
+	$_ = "_family_decnet" if $_ eq "_family_de_cnet";
 	return "XCB" . uc($_) if $const;
 
 	$_ .= "_t" unless $fun or /_id$/;
