@@ -4,7 +4,7 @@
 #include "check_suites.h"
 #include "xcb.h"
 
-/* XCBParseDisplay tests {{{ */
+/* xcb_parse_display tests {{{ */
 
 static void parse_display_pass(const char *name, const char *host, const int display, const int screen)
 {
@@ -15,7 +15,7 @@ static void parse_display_pass(const char *name, const char *host, const int dis
 	got_host = (char *) -1;
 	got_display = got_screen = -42;
 	mark_point();
-	success = XCBParseDisplay(name, &got_host, &got_display, &got_screen);
+	success = xcb_parse_display(name, &got_host, &got_display, &got_screen);
 	fail_unless(success, "unexpected parse failure for '%s'", name);
 	fail_unless(strcmp(host, got_host) == 0, "parse produced unexpected hostname '%s' for '%s': expected '%s'", got_host, name, host);
 	fail_unless(display == got_display, "parse produced unexpected display '%d' for '%s': expected '%d'", got_display, name, display);
@@ -24,7 +24,7 @@ static void parse_display_pass(const char *name, const char *host, const int dis
 	got_host = (char *) -1;
 	got_display = got_screen = -42;
 	mark_point();
-	success = XCBParseDisplay(name, &got_host, &got_display, 0);
+	success = xcb_parse_display(name, &got_host, &got_display, 0);
 	fail_unless(success, "unexpected screenless parse failure for '%s'", name);
 	fail_unless(strcmp(host, got_host) == 0, "screenless parse produced unexpected hostname '%s' for '%s': expected '%s'", got_host, name, host);
 	fail_unless(display == got_display, "screenless parse produced unexpected display '%d' for '%s': expected '%d'", got_display, name, display);
@@ -39,7 +39,7 @@ static void parse_display_fail(const char *name)
 	got_host = (char *) -1;
 	got_display = got_screen = -42;
 	mark_point();
-	success = XCBParseDisplay(name, &got_host, &got_display, &got_screen);
+	success = xcb_parse_display(name, &got_host, &got_display, &got_screen);
 	fail_unless(!success, "unexpected parse success for '%s'", name);
 	fail_unless(got_host == (char *) -1, "host changed on failure for '%s': got %p", got_host);
 	fail_unless(got_display == -42, "display changed on failure for '%s': got %d", got_display);
@@ -48,7 +48,7 @@ static void parse_display_fail(const char *name)
 	got_host = (char *) -1;
 	got_display = got_screen = -42;
 	mark_point();
-	success = XCBParseDisplay(name, &got_host, &got_display, 0);
+	success = xcb_parse_display(name, &got_host, &got_display, 0);
 	fail_unless(!success, "unexpected screenless parse success for '%s'", name);
 	fail_unless(got_host == (char *) -1, "host changed on failure for '%s': got %p", got_host);
 	fail_unless(got_display == -42, "display changed on failure for '%s': got %d", got_display);
@@ -119,11 +119,11 @@ Suite *public_suite(void)
 {
 	Suite *s = suite_create("Public API");
 	putenv("DISPLAY");
-	suite_add_test(s, parse_display_unix, "XCBParseDisplay unix");
-	suite_add_test(s, parse_display_ip, "XCBParseDisplay ip");
-	suite_add_test(s, parse_display_ipv4, "XCBParseDisplay ipv4");
-	suite_add_test(s, parse_display_ipv6, "XCBParseDisplay ipv6");
-	suite_add_test(s, parse_display_decnet, "XCBParseDisplay decnet");
-	suite_add_test(s, parse_display_negative, "XCBParseDisplay negative");
+	suite_add_test(s, parse_display_unix, "xcb_parse_display unix");
+	suite_add_test(s, parse_display_ip, "xcb_parse_display ip");
+	suite_add_test(s, parse_display_ipv4, "xcb_parse_display ipv4");
+	suite_add_test(s, parse_display_ipv6, "xcb_parse_display ipv6");
+	suite_add_test(s, parse_display_decnet, "xcb_parse_display decnet");
+	suite_add_test(s, parse_display_negative, "xcb_parse_display negative");
 	return s;
 }
