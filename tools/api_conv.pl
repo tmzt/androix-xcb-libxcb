@@ -19,6 +19,30 @@ BEGIN {
 		"XCBButton5",
 		"XCBHostInsert",
 		"XCBHostDelete",
+		"XCBGlxGC_GL_CURRENT_BIT",
+		"XCBGlxGC_GL_POINT_BIT",
+		"XCBGlxGC_GL_LINE_BIT",
+		"XCBGlxGC_GL_POLYGON_BIT",
+		"XCBGlxGC_GL_POLYGON_STIPPLE_BIT",
+		"XCBGlxGC_GL_PIXEL_MODE_BIT",
+		"XCBGlxGC_GL_LIGHTING_BIT",
+		"XCBGlxGC_GL_FOG_BIT",
+		"XCBGlxGC_GL_DEPTH_BUFFER_BIT",
+		"XCBGlxGC_GL_ACCUM_BUFFER_BIT",
+		"XCBGlxGC_GL_STENCIL_BUFFER_BIT",
+		"XCBGlxGC_GL_VIEWPORT_BIT",
+		"XCBGlxGC_GL_TRANSFORM_BIT",
+		"XCBGlxGC_GL_ENABLE_BIT",
+		"XCBGlxGC_GL_COLOR_BUFFER_BIT",
+		"XCBGlxGC_GL_HINT_BIT",
+		"XCBGlxGC_GL_EVAL_BIT",
+		"XCBGlxGC_GL_LIST_BIT",
+		"XCBGlxGC_GL_TEXTURE_BIT",
+		"XCBGlxGC_GL_SCISSOR_BIT",
+		"XCBGlxGC_GL_ALL_ATTRIB_BITS",
+		"XCBGlxRM_GL_RENDER",
+		"XCBGlxRM_GL_FEEDBACK",
+		"XCBGlxRM_GL_SELECT",
 	);
 	open(CONST, shift) or die "failed to open constants list: $!";
 	while(<CONST>)
@@ -42,7 +66,7 @@ sub convert($$)
 	my $const = defined $::const{$_};
 	$_ = $1;
 
-	s/^(GX|RandR|XFixes|XP|XvMC)(.)/uc($1) . "_" . $2/e;
+	s/^(GX|RandR|XFixes|XP|XvMC|ScreenSaver)(.)/uc($1) . "_" . $2/e unless /^ScreenSaver(?:Reset|Active)$/;
 
 	my %abbr = (
 		"Iter" => "iterator",
@@ -50,8 +74,17 @@ sub convert($$)
 		"Rep" => "reply",
 	);
 
-	s/([0-9]+|[A-Z](?:[A-Z]*|[a-z]*))_?(?=[0-9A-Z]|$)/"_" . ($abbr{$1} or lc($1))/eg;
+	my $word;
+	if(/CHAR2B|INT64|FLOAT32|FLOAT64|BOOL32|STRING8/)
+	{
+		$word = qr/[A-Z](?:[A-Z0-9]*|[a-z]*)/;
+	} else {
+		$word = qr/[0-9]+|[A-Z](?:[A-Z]*|[a-z]*)/;
+	}
+	s/($word)_?(?=[0-9A-Z]|$)/"_" . ($abbr{$1} or lc($1))/eg;
 
+	s/^_shape_shape_/_shape_/;
+	s/^_xf_?86_dri/_xf86dri/;
 	$_ = "_family_decnet" if $_ eq "_family_de_cnet";
 	return "XCB" . uc($_) if $const;
 
