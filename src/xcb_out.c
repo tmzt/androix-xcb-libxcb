@@ -35,7 +35,7 @@
 #include "xcbint.h"
 #include "extensions/bigreq.h"
 
-static int write_block(XCBConnection *c, struct iovec *vector, int count)
+static int write_block(xcb_connection_t *c, struct iovec *vector, int count)
 {
     while(count && c->out.queue_len + vector[0].iov_len <= sizeof(c->out.queue))
     {
@@ -57,19 +57,19 @@ static int write_block(XCBConnection *c, struct iovec *vector, int count)
 
 /* Public interface */
 
-CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
+uint32_t xcb_get_maximum_request_length(xcb_connection_t *c)
 {
     if(c->has_error)
         return 0;
     pthread_mutex_lock(&c->out.reqlenlock);
     if(!c->out.maximum_request_length)
     {
-        const XCBQueryExtensionRep *ext;
+        const xcb_query_extension_reply_t *ext;
         c->out.maximum_request_length = c->setup->maximum_request_length;
-        ext = XCBGetExtensionData(c, &XCBBigRequestsId);
+        ext = xcb_get_extension_data(c, &xcb_big_requests_id);
         if(ext && ext->present)
         {
-            XCBBigRequestsEnableRep *r = XCBBigRequestsEnableReply(c, XCBBigRequestsEnable(c), 0);
+            xcb_big_requests_enable_reply_t *r = xcb_big_requests_enable_reply(c, xcb_big_requests_enable(c), 0);
             c->out.maximum_request_length = r->maximum_request_length;
             free(r);
         }
@@ -78,18 +78,18 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c)
     return c->out.maximum_request_length;
 }
 
-unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, const XCBProtocolRequest *req)
+unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vector, const xcb_protocol_request_t *req)
 {
     static const union {
         struct {
-            CARD8 major;
-            CARD8 pad;
-            CARD16 len;
+            uint8_t major;
+            uint8_t pad;
+            uint16_t len;
         } fields;
-        CARD32 packet;
+        uint32_t packet;
     } sync = { { /* GetInputFocus */ 43, 0, 1 } };
     unsigned int request;
-    CARD32 prefix[3] = { 0 };
+    uint32_t prefix[3] = { 0 };
     int veclen = req->count;
     enum workarounds workaround = WORKAROUND_NONE;
 
@@ -104,23 +104,23 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     {
         static const char pad[3];
         int i;
-        CARD16 shortlen = 0;
+        uint16_t shortlen = 0;
         size_t longlen = 0;
         assert(vector[0].iov_len >= 4);
         /* set the major opcode, and the minor opcode for extensions */
         if(req->ext)
         {
-            const XCBQueryExtensionRep *extension = XCBGetExtensionData(c, req->ext);
+            const xcb_query_extension_reply_t *extension = xcb_get_extension_data(c, req->ext);
             if(!(extension && extension->present))
             {
                 _xcb_conn_shutdown(c);
                 return 0;
             }
-            ((CARD8 *) vector[0].iov_base)[0] = extension->major_opcode;
-            ((CARD8 *) vector[0].iov_base)[1] = req->opcode;
+            ((uint8_t *) vector[0].iov_base)[0] = extension->major_opcode;
+            ((uint8_t *) vector[0].iov_base)[1] = req->opcode;
         }
         else
-            ((CARD8 *) vector[0].iov_base)[0] = req->opcode;
+            ((uint8_t *) vector[0].iov_base)[0] = req->opcode;
 
         /* put together the length field, possibly using BIGREQUESTS */
         for(i = 0; i < req->count; ++i)
@@ -141,14 +141,14 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
             shortlen = longlen;
             longlen = 0;
         }
-        else if(longlen > XCBGetMaximumRequestLength(c))
+        else if(longlen > xcb_get_maximum_request_length(c))
         {
             _xcb_conn_shutdown(c);
             return 0; /* server can't take this; maybe need BIGREQUESTS? */
         }
 
         /* set the length field. */
-        ((CARD16 *) vector[0].iov_base)[1] = shortlen;
+        ((uint16_t *) vector[0].iov_base)[1] = shortlen;
         if(!shortlen)
             prefix[2] = ++longlen;
     }
@@ -158,7 +158,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     /* XXX: GetFBConfigs won't use BIG-REQUESTS in any sane
      * configuration, but that should be handled here anyway. */
     if(req->ext && !req->isvoid && !strcmp(req->ext->name, "GLX") &&
-            ((req->opcode == 17 && ((CARD32 *) vector[0].iov_base)[1] == 0x10004) ||
+            ((req->opcode == 17 && ((uint32_t *) vector[0].iov_base)[1] == 0x10004) ||
              req->opcode == 21))
         workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
 
@@ -194,11 +194,11 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
         --vector, ++veclen;
         if(prefix[2])
         {
-            prefix[1] = ((CARD32 *) vector[1].iov_base)[0];
-            vector[1].iov_base = (CARD32 *) vector[1].iov_base + 1;
-            vector[1].iov_len -= sizeof(CARD32);
+            prefix[1] = ((uint32_t *) vector[1].iov_base)[0];
+            vector[1].iov_base = (uint32_t *) vector[1].iov_base + 1;
+            vector[1].iov_len -= sizeof(uint32_t);
         }
-        vector[0].iov_len = sizeof(CARD32) * (prefix[0] ? 1 : 0 | prefix[2] ? 2 : 0);
+        vector[0].iov_len = sizeof(uint32_t) * (prefix[0] ? 1 : 0 | prefix[2] ? 2 : 0);
         vector[0].iov_base = prefix + !prefix[0];
     }
 
@@ -211,7 +211,7 @@ unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, c
     return request;
 }
 
-int XCBFlush(XCBConnection *c)
+int xcb_flush(xcb_connection_t *c)
 {
     int ret;
     if(c->has_error)
@@ -248,7 +248,7 @@ void _xcb_out_destroy(_xcb_out *out)
     pthread_mutex_destroy(&out->reqlenlock);
 }
 
-int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count)
+int _xcb_out_send(xcb_connection_t *c, struct iovec **vector, int *count)
 {
     int ret = 1;
     while(ret && *count)
@@ -258,7 +258,7 @@ int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count)
     return ret;
 }
 
-int _xcb_out_flush_to(XCBConnection *c, unsigned int request)
+int _xcb_out_flush_to(xcb_connection_t *c, unsigned int request)
 {
     assert(XCB_SEQUENCE_COMPARE(request, <=, c->out.request));
     if(XCB_SEQUENCE_COMPARE(c->out.request_written, >=, request))

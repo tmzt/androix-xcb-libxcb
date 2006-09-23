@@ -36,7 +36,7 @@ extern "C" {
 
 /* xcb_ext.c */
 
-struct XCBExtension {
+struct xcb_extension_t {
     const char *name;
     int global_id;
 };
@@ -46,34 +46,34 @@ struct XCBExtension {
 
 typedef struct {
     size_t count;
-    XCBExtension *ext;
-    CARD8 opcode;
-    BOOL isvoid;
-} XCBProtocolRequest;
+    xcb_extension_t *ext;
+    uint8_t opcode;
+    uint8_t isvoid;
+} xcb_protocol_request_t;
 
-enum XCBSendRequestFlags {
+enum xcb_send_request_flags_t {
     XCB_REQUEST_CHECKED = 1 << 0,
     XCB_REQUEST_RAW = 1 << 1,
     XCB_REQUEST_DISCARD_REPLY = 1 << 2
 };
 
-unsigned int XCBSendRequest(XCBConnection *c, int flags, struct iovec *vector, const XCBProtocolRequest *request);
+unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vector, const xcb_protocol_request_t *request);
 
 
 /* xcb_in.c */
 
-void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e);
-int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error);
+void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_error_t **e);
+int xcb_poll_for_reply(xcb_connection_t *c, unsigned int request, void **reply, xcb_generic_error_t **error);
 
 
 /* xcb_xid.c */
 
-CARD32 XCBGenerateID(XCBConnection *c);
+uint32_t xcb_generate_id(xcb_connection_t *c);
 
 
 /* xcb_util.c */
 
-int XCBPopcount(CARD32 mask);
+int xcb_popcount(uint32_t mask);
 
 #ifdef __cplusplus
 }

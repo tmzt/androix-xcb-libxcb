@@ -39,10 +39,10 @@
 #include "xcbint.h"
 
 typedef struct {
-    CARD8  status;
-    CARD8  pad0[5];
-    CARD16 length;
-} XCBSetupGeneric;
+    uint8_t  status;
+    uint8_t  pad0[5];
+    uint16_t length;
+} xcb_setup_generic_t;
 
 static const int error_connection = 1;
 
@@ -59,10 +59,10 @@ static int set_fd_flags(const int fd)
     return 1;
 }
 
-static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
+static int write_setup(xcb_connection_t *c, xcb_auth_info_t *auth_info)
 {
     static const char pad[3];
-    XCBSetupRequest out;
+    xcb_setup_request_t out;
     struct iovec parts[6];
     int count = 0;
     int endian = 0x01020304;
@@ -79,9 +79,9 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     out.protocol_minor_version = X_PROTOCOL_REVISION;
     out.authorization_protocol_name_len = 0;
     out.authorization_protocol_data_len = 0;
-    parts[count].iov_len = sizeof(XCBSetupRequest);
+    parts[count].iov_len = sizeof(xcb_setup_request_t);
     parts[count++].iov_base = &out;
-    parts[count].iov_len = XCB_PAD(sizeof(XCBSetupRequest));
+    parts[count].iov_len = XCB_PAD(sizeof(xcb_setup_request_t));
     parts[count++].iov_base = (char *) pad;
 
     if(auth_info)
@@ -106,24 +106,24 @@ static int write_setup(XCBConnection *c, XCBAuthInfo *auth_info)
     return ret;
 }
 
-static int read_setup(XCBConnection *c)
+static int read_setup(xcb_connection_t *c)
 {
     /* Read the server response */
-    c->setup = malloc(sizeof(XCBSetupGeneric));
+    c->setup = malloc(sizeof(xcb_setup_generic_t));
     if(!c->setup)
         return 0;
 
-    if(_xcb_in_read_block(c, c->setup, sizeof(XCBSetupGeneric)) != sizeof(XCBSetupGeneric))
+    if(_xcb_in_read_block(c, c->setup, sizeof(xcb_setup_generic_t)) != sizeof(xcb_setup_generic_t))
         return 0;
 
     {
-        void *tmp = realloc(c->setup, c->setup->length * 4 + sizeof(XCBSetupGeneric));
+        void *tmp = realloc(c->setup, c->setup->length * 4 + sizeof(xcb_setup_generic_t));
         if(!tmp)
             return 0;
         c->setup = tmp;
     }
 
-    if(_xcb_in_read_block(c, (char *) c->setup + sizeof(XCBSetupGeneric), c->setup->length * 4) <= 0)
+    if(_xcb_in_read_block(c, (char *) c->setup + sizeof(xcb_setup_generic_t), c->setup->length * 4) <= 0)
         return 0;
 
     /* 0 = failed, 2 = authenticate, 1 = success */
@@ -131,15 +131,15 @@ static int read_setup(XCBConnection *c)
     {
     case 0: /* failed */
         {
-            XCBSetupFailed *setup = (XCBSetupFailed *) c->setup;
-            write(STDERR_FILENO, XCBSetupFailedReason(setup), XCBSetupFailedReasonLength(setup));
+            xcb_setup_failed_t *setup = (xcb_setup_failed_t *) c->setup;
+            write(STDERR_FILENO, xcb_setup_failed_reason(setup), xcb_setup_failed_reason_length(setup));
             return 0;
         }
 
     case 2: /* authenticate */
         {
-            XCBSetupAuthenticate *setup = (XCBSetupAuthenticate *) c->setup;
-            write(STDERR_FILENO, XCBSetupAuthenticateReason(setup), XCBSetupAuthenticateReasonLength(setup));
+            xcb_setup_authenticate_t *setup = (xcb_setup_authenticate_t *) c->setup;
+            write(STDERR_FILENO, xcb_setup_authenticate_reason(setup), xcb_setup_authenticate_reason_length(setup));
             return 0;
         }
     }
@@ -148,7 +148,7 @@ static int read_setup(XCBConnection *c)
 }
 
 /* precondition: there must be something for us to write. */
-static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
+static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
 {
     int n;
     assert(!c->out.queue_len);
@@ -180,7 +180,7 @@ static int write_vec(XCBConnection *c, struct iovec **vector, int *count)
 
 /* Public interface */
 
-const XCBSetup *XCBGetSetup(XCBConnection *c)
+const xcb_setup_t *xcb_get_setup(xcb_connection_t *c)
 {
     if(c->has_error)
         return 0;
@@ -188,7 +188,7 @@ const XCBSetup *XCBGetSetup(XCBConnection *c)
     return c->setup;
 }
 
-int XCBGetFileDescriptor(XCBConnection *c)
+int xcb_get_file_descriptor(xcb_connection_t *c)
 {
     if(c->has_error)
         return -1;
@@ -196,19 +196,19 @@ int XCBGetFileDescriptor(XCBConnection *c)
     return c->fd;
 }
 
-int XCBConnectionHasError(XCBConnection *c)
+int xcb_connection_has_error(xcb_connection_t *c)
 {
     /* doesn't need locking because it's read and written atomically. */
     return c->has_error;
 }
 
-XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
+xcb_connection_t *xcb_connect_to_fd(int fd, xcb_auth_info_t *auth_info)
 {
-    XCBConnection* c;
+    xcb_connection_t* c;
 
-    c = calloc(1, sizeof(XCBConnection));
+    c = calloc(1, sizeof(xcb_connection_t));
     if(!c)
-        return (XCBConnection *) &error_connection;
+        return (xcb_connection_t *) &error_connection;
 
     c->fd = fd;
 
@@ -223,14 +223,14 @@ XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info)
         _xcb_xid_init(c)
         ))
     {
-        XCBDisconnect(c);
-        return (XCBConnection *) &error_connection;
+        xcb_disconnect(c);
+        return (xcb_connection_t *) &error_connection;
     }
 
     return c;
 }
 
-void XCBDisconnect(XCBConnection *c)
+void xcb_disconnect(xcb_connection_t *c)
 {
     if(c->has_error)
         return;
@@ -250,12 +250,12 @@ void XCBDisconnect(XCBConnection *c)
 
 /* Private interface */
 
-void _xcb_conn_shutdown(XCBConnection *c)
+void _xcb_conn_shutdown(xcb_connection_t *c)
 {
     c->has_error = 1;
 }
 
-int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count)
+int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vector, int *count)
 {
     int ret;
     fd_set rfds, wfds;

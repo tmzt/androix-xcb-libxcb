@@ -47,7 +47,7 @@
 
 static const int error_connection = 1;
 
-int XCBPopcount(CARD32 mask)
+int xcb_popcount(uint32_t mask)
 {
     unsigned long y;
     y = (mask >> 1) & 033333333333;
@@ -55,7 +55,7 @@ int XCBPopcount(CARD32 mask)
     return ((y + (y >> 3)) & 030707070707) % 077;
 }
 
-int XCBParseDisplay(const char *name, char **host, int *displayp, int *screenp)
+int xcb_parse_display(const char *name, char **host, int *displayp, int *screenp)
 {
     int len, display, screen;
     char *colon, *dot, *end;
@@ -206,38 +206,38 @@ static int _xcb_open_unix(const char *file)
     return fd;
 }
 
-XCBConnection *XCBConnect(const char *displayname, int *screenp)
+xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
 {
     int fd, display = 0;
     char *host;
-    XCBConnection *c;
-    XCBAuthInfo auth;
+    xcb_connection_t *c;
+    xcb_auth_info_t auth;
 
-    if(!XCBParseDisplay(displayname, &host, &display, screenp))
-        return (XCBConnection *) &error_connection;
+    if(!xcb_parse_display(displayname, &host, &display, screenp))
+        return (xcb_connection_t *) &error_connection;
     fd = _xcb_open(host, display);
     free(host);
     if(fd == -1)
-        return (XCBConnection *) &error_connection;
+        return (xcb_connection_t *) &error_connection;
 
     _xcb_get_auth_info(fd, &auth);
-    c = XCBConnectToFD(fd, &auth);
+    c = xcb_connect_to_fd(fd, &auth);
     free(auth.name);
     free(auth.data);
     return c;
 }
 
-XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *displayname, XCBAuthInfo *auth, int *screenp)
+xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname, xcb_auth_info_t *auth, int *screenp)
 {
     int fd, display = 0;
     char *host;
 
-    if(!XCBParseDisplay(displayname, &host, &display, screenp))
-        return (XCBConnection *) &error_connection;
+    if(!xcb_parse_display(displayname, &host, &display, screenp))
+        return (xcb_connection_t *) &error_connection;
     fd = _xcb_open(host, display);
     free(host);
     if(fd == -1)
-        return (XCBConnection *) &error_connection;
+        return (xcb_connection_t *) &error_connection;
 
-    return XCBConnectToFD(fd, auth);
+    return xcb_connect_to_fd(fd, auth);
 }

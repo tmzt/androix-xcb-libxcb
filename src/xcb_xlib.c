@@ -26,14 +26,14 @@
 #include "xcbxlib.h"
 #include "xcbint.h"
 
-unsigned int XCBGetRequestSent(XCBConnection *c)
+unsigned int xcb_get_request_sent(xcb_connection_t *c)
 {
     if(c->has_error)
         return 0;
     return c->out.request;
 }
 
-pthread_mutex_t *XCBGetIOLock(XCBConnection *c)
+pthread_mutex_t *xcb_get_io_lock(xcb_connection_t *c)
 {
     if(c->has_error)
         return 0;

@@ -26,7 +26,11 @@ authorization from the authors.
 -->
 <xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                version="1.0"
-               xmlns:e="http://exslt.org/common">
+               xmlns:e="http://exslt.org/common"
+               xmlns:func="http://exslt.org/functions"
+               xmlns:str="http://exslt.org/strings"
+               xmlns:xcb="http://xcb.freedesktop.org"
+               extension-element-prefixes="func str xcb">
   
   <xsl:output method="text" />
 
@@ -49,6 +53,8 @@ authorization from the authors.
 
   <xsl:variable name="ucase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
   <xsl:variable name="lcase" select="'abcdefghijklmnopqrstuvwxyz'" />
+  <xsl:variable name="letters" select="concat($ucase, $lcase)" />
+  <xsl:variable name="digits" select="'0123456789'" />
 
   <xsl:variable name="header" select="/xcb/@header" />
   <xsl:variable name="ucase-header"
@@ -80,17 +86,132 @@ authorization from the authors.
     <xcb>
       <xsl:copy-of select="@*" />
       <xsl:if test="$ext">
-        <constant type="XCBExtension" name="XCB{$ext}Id">
+        <constant type="xcb_extension_t" name="{xcb:xcb-prefix()}_id">
           <xsl:attribute name="value">{ "<xsl:value-of select="@extension-xname" />" }</xsl:attribute>
         </constant>
-        <function type="const XCBQueryExtensionRep *" name="XCB{$ext}Init">
-          <field type="XCBConnection *" name="c" />
-          <l>return XCBGetExtensionData(c, &amp;XCB<!--
-          --><xsl:value-of select="$ext" />Id);</l>
+        <function type="const xcb_query_extension_reply_t *" name="{xcb:xcb-prefix('init')}">
+          <field type="xcb_connection_t *" name="c" />
+          <l>return xcb_get_extension_data(c, &amp;<!--
+          --><xsl:value-of select="xcb:xcb-prefix()" />_id);</l>
         </function>
       </xsl:if>
       <xsl:apply-templates mode="pass1" />
     </xcb>
+  </xsl:template>
+
+  <func:function name="xcb:xcb-prefix">
+    <xsl:param name="name" />
+    <func:result>
+      <xsl:text>xcb</xsl:text>
+      <xsl:choose>
+        <xsl:when test="/xcb/@extension-name = 'RandR'">
+          <xsl:text>_randr</xsl:text>
+        </xsl:when>
+        <xsl:when test="/xcb/@extension-name = 'ScreenSaver'">
+          <xsl:text>_screensaver</xsl:text>
+        </xsl:when>
+        <xsl:when test="/xcb/@extension-name = 'XF86Dri'">
+          <xsl:text>_xf86dri</xsl:text>
+        </xsl:when>
+        <xsl:when test="/xcb/@extension-name = 'XFixes'">
+          <xsl:text>_xfixes</xsl:text>
+        </xsl:when>
+        <xsl:when test="/xcb/@extension-name = 'XvMC'">
+          <xsl:text>_xvmc</xsl:text>
+        </xsl:when>
+        <xsl:when test="/xcb/@extension-name">
+          <xsl:text>_</xsl:text>
+          <xsl:call-template name="camelcase-to-underscore">
+            <xsl:with-param name="camelcase" select="/xcb/@extension-name" />
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>
+        </xsl:otherwise>
+      </xsl:choose>
+      <xsl:if test="$name">
+        <xsl:text>_</xsl:text>
+        <xsl:call-template name="camelcase-to-underscore">
+          <xsl:with-param name="camelcase" select="$name" />
+        </xsl:call-template>
+      </xsl:if>
+    </func:result>
+  </func:function>
+
+  <func:function name="xcb:lowercase">
+    <xsl:param name="name" />
+    <func:result>
+      <xsl:call-template name="camelcase-to-underscore">
+        <xsl:with-param name="camelcase" select="$name" />
+      </xsl:call-template>
+    </func:result>
+  </func:function>
+
+  <func:function name="xcb:get-char-void">
+    <xsl:param name="name" />
+    <xsl:variable name="ctype" select="substring-before($name, '_t')" />
+    <func:result>
+      <xsl:choose>
+        <xsl:when test="$ctype = 'char' or $ctype = 'void' or $ctype = 'float' or $ctype = 'double'">
+          <xsl:value-of select="$ctype" />    
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$name" />
+        </xsl:otherwise>
+      </xsl:choose>
+    </func:result>
+  </func:function>
+
+  <func:function name="xcb:remove-void">
+    <xsl:param name="name" />
+    <xsl:variable name="ctype" select="substring-before($name, '_t')" />
+    <func:result>
+      <xsl:choose>
+        <xsl:when test="$ctype = 'char' or $ctype = 'void' or $ctype = 'float' or $ctype = 'double'">
+          <xsl:choose>
+            <xsl:when test="$ctype = 'void'">
+              <xsl:text>char</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$ctype" />
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$name" />
+        </xsl:otherwise>
+      </xsl:choose>
+    </func:result>
+  </func:function>
+
+  <!-- split camel case into words and insert underscore -->
+  <xsl:template name="camelcase-to-underscore">
+    <xsl:param name="camelcase"/>
+    <xsl:choose>
+      <xsl:when test="$camelcase='CHAR2B' or $camelcase='INT64'
+                      or $camelcase='FLOAT32' or $camelcase='FLOAT64'
+                      or $camelcase='BOOL32' or $camelcase='STRING8'
+                      or $camelcase='Family_DECnet'">
+        <xsl:value-of select="translate($camelcase, $ucase, $lcase)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:for-each select="str:split($camelcase, '')">
+          <xsl:variable name="a" select="."/>
+          <xsl:variable name="b" select="following::*[1]"/>
+          <xsl:variable name="c" select="following::*[2]"/>
+          <xsl:value-of select="translate(., $ucase, $lcase)"/>
+          <xsl:if test="($b and contains($lcase, $a) and contains($ucase, $b))
+                        or ($b and contains($digits, $a)
+                            and contains($letters, $b))
+                        or ($b and contains($letters, $a)
+                            and contains($digits, $b))
+                        or ($c and contains($ucase, $a)
+                            and contains($ucase, $b)
+                            and contains($lcase, $c))">
+            <xsl:text>_</xsl:text>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!-- Modify names that conflict with C++ keywords by prefixing them with an
@@ -107,27 +228,26 @@ authorization from the authors.
 
   <!-- List of core types, for use in canonical-type-name. -->
   <xsl:variable name="core-types-rtf">
-    <type name="BOOL" />
-    <type name="BYTE" />
-    <type name="CARD8" />
-    <type name="CARD16" />
-    <type name="CARD32" />
-    <type name="INT8" />
-    <type name="INT16" />
-    <type name="INT32" />
+    <type name="BOOL" newname="uint8" />
+    <type name="BYTE" newname="uint8" />
+    <type name="CARD8" newname="uint8" />
+    <type name="CARD16" newname="uint16" />
+    <type name="CARD32" newname="uint32" />
+    <type name="INT8" newname="int8" />
+    <type name="INT16" newname="int16" />
+    <type name="INT32" newname="int32" />
 
-    <type name="char" />
-    <type name="void" />
-    <type name="float" />
-    <type name="double" />
-    <type name="XID" />
+    <type name="char" newname="char" />
+    <type name="void" newname="void" />
+    <type name="float" newname="float" />
+    <type name="double" newname="double" />
   </xsl:variable>
   <xsl:variable name="core-types" select="e:node-set($core-types-rtf)" />
 
   <!--
     Output the canonical name for a type.  This will be
-    XCB{extension-containing-Type-if-any}Type, wherever the type is found in
-    the search path, or just Type if not found.  If the type parameter is not
+    xcb_{extension-containing-type-if-any}_type, wherever the type is found in
+    the search path, or just type if not found.  If the type parameter is not
     specified, it defaults to the value of the type attribute on the context
     node.
   -->
@@ -149,7 +269,7 @@ authorization from the authors.
 
     <xsl:choose>
       <xsl:when test="$is-unqualified and $core-types/type[@name=$type]">
-        <xsl:value-of select="$type" />
+        <xsl:value-of select="$core-types/type[@name=$type]/@newname" />
       </xsl:when>
       <xsl:otherwise>
         <xsl:variable name="type-definitions"
@@ -165,9 +285,7 @@ authorization from the authors.
         <xsl:choose>
           <xsl:when test="count($type-definitions) = 1">
             <xsl:for-each select="$type-definitions">
-              <xsl:text>XCB</xsl:text>
-              <xsl:value-of select="concat(/xcb/@extension-name,
-                                           $unqualified-type)" />
+              <xsl:value-of select="xcb:xcb-prefix($unqualified-type)" />
             </xsl:for-each>
           </xsl:when>
           <xsl:when test="count($type-definitions) > 1">
@@ -205,16 +323,15 @@ authorization from the authors.
        context node. -->
   <xsl:template name="cookie-type">
     <xsl:param name="request" select="." />
-    <xsl:text>XCB</xsl:text>
     <xsl:choose>
       <xsl:when test="$request/reply">
-        <xsl:value-of select="concat($ext, $request/@name)" />
+        <xsl:value-of select="xcb:xcb-prefix($request/@name)" />
       </xsl:when>
       <xsl:otherwise>
-        <xsl:text>Void</xsl:text>
+        <xsl:text>xcb_void</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:text>Cookie</xsl:text>
+    <xsl:text>_cookie_t</xsl:text>
   </xsl:template>
 
   <xsl:template name="request-function">
@@ -222,20 +339,18 @@ authorization from the authors.
     <xsl:param name="req" />
     <function>
       <xsl:attribute name="name">
-        <xsl:text>XCB</xsl:text>
-        <xsl:value-of select="$ext" />
-        <xsl:value-of select="$req/@name" />
-        <xsl:if test="$checked='true' and not($req/reply)">Checked</xsl:if>
-        <xsl:if test="$checked='false' and $req/reply">Unchecked</xsl:if>
+        <xsl:value-of select="xcb:xcb-prefix($req/@name)" />
+        <xsl:if test="$checked='true' and not($req/reply)">_checked</xsl:if>
+        <xsl:if test="$checked='false' and $req/reply">_unchecked</xsl:if>
       </xsl:attribute>
       <xsl:attribute name="type">
         <xsl:call-template name="cookie-type">
           <xsl:with-param name="request" select="$req" />
         </xsl:call-template>
       </xsl:attribute>
-      <field type="XCBConnection *" name="c" />
+      <field type="xcb_connection_t *" name="c" />
       <xsl:apply-templates select="$req/*[not(self::reply)]" mode="param" />
-      <do-request ref="XCB{$ext}{$req/@name}Req" opcode="{$req/@opcode}"
+      <do-request ref="{xcb:xcb-prefix($req/@name)}_request_t" opcode="{$req/@opcode}"
                   checked="{$checked}">
         <xsl:if test="$req/reply">
           <xsl:attribute name="has-reply">true</xsl:attribute>
@@ -247,18 +362,18 @@ authorization from the authors.
   <xsl:template match="request" mode="pass1">
     <xsl:variable name="req" select="." />
     <xsl:if test="reply">
-      <struct name="XCB{$ext}{@name}Cookie">
+      <struct name="{xcb:xcb-prefix(@name)}_cookie_t">
         <field type="unsigned int" name="sequence" />
       </struct>
     </xsl:if>
-    <struct name="XCB{$ext}{@name}Req">
-      <field type="CARD8" name="major_opcode" no-assign="true" />
+    <struct name="{xcb:xcb-prefix(@name)}_request_t">
+      <field type="uint8_t" name="major_opcode" no-assign="true" />
       <xsl:if test="$ext">
-        <field type="CARD8" name="minor_opcode" no-assign="true" />
+        <field type="uint8_t" name="minor_opcode" no-assign="true" />
       </xsl:if>
       <xsl:apply-templates select="*[not(self::reply)]" mode="field" />
       <middle>
-        <field type="CARD16" name="length" no-assign="true" />
+        <field type="uint16_t" name="length" no-assign="true" />
       </middle>
     </struct>
     <xsl:call-template name="request-function">
@@ -270,83 +385,83 @@ authorization from the authors.
       <xsl:with-param name="req" select="$req" />
     </xsl:call-template>
     <xsl:if test="reply">
-      <struct name="XCB{$ext}{@name}Rep">
-        <field type="BYTE" name="response_type" />
+      <struct name="{xcb:xcb-prefix(@name)}_reply_t">
+        <field type="uint8_t" name="response_type" />
         <xsl:apply-templates select="reply/*" mode="field" />
         <middle>
-          <field type="CARD16" name="sequence" />
-          <field type="CARD32" name="length" />
+          <field type="uint16_t" name="sequence" />
+          <field type="uint32_t" name="length" />
         </middle>
       </struct>
-      <iterator-functions ref="XCB{$ext}{@name}" kind="Rep" />
-      <function type="XCB{$ext}{@name}Rep *" name="XCB{$ext}{@name}Reply">
-        <field type="XCBConnection *" name="c" />
+      <iterator-functions ref="{xcb:xcb-prefix(@name)}" kind="_reply" />
+      <function type="{xcb:xcb-prefix(@name)}_reply_t *" name="{xcb:xcb-prefix(@name)}_reply">
+        <field type="xcb_connection_t *" name="c" />
         <field name="cookie">
           <xsl:attribute name="type">
             <xsl:call-template name="cookie-type" />
           </xsl:attribute>
         </field>
-        <field type="XCBGenericError **" name="e" />
-        <l>return (XCB<xsl:value-of select="concat($ext, @name)" />Rep *)<!--
-        --> XCBWaitForReply(c, cookie.sequence, e);</l>
+        <field type="xcb_generic_error_t **" name="e" />
+        <l>return (<xsl:value-of select="xcb:xcb-prefix(@name)" />_reply_t *)<!--
+        --> xcb_wait_for_reply(c, cookie.sequence, e);</l>
       </function>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="xidtype" mode="pass1">
-    <struct name="XCB{$ext}{@name}">
-      <field type="CARD32" name="xid" />
+    <struct name="{xcb:xcb-prefix(@name)}_t">
+      <field type="uint32_t" name="xid" />
     </struct>
-    <iterator ref="XCB{$ext}{@name}" />
-    <iterator-functions ref="XCB{$ext}{@name}" />
-    <function type="XCB{$ext}{@name}" name="XCB{$ext}{@name}New">
-      <field type="XCBConnection *" name="c" />
-      <l>XCB<xsl:value-of select="concat($ext, @name)" /> ret;</l>
-      <l>ret.xid = XCBGenerateID(c);</l>
+    <iterator ref="{xcb:xcb-prefix(@name)}" />
+    <iterator-functions ref="{xcb:xcb-prefix(@name)}" />
+    <function type="{xcb:xcb-prefix(@name)}_t" name="{xcb:xcb-prefix(@name)}_new">
+      <field type="xcb_connection_t *" name="c" />
+      <l><xsl:value-of select="concat(xcb:xcb-prefix(@name), '_t')" /> ret;</l>
+      <l>ret.xid = xcb_generate_id(c);</l>
       <l>return ret;</l>
     </function>
   </xsl:template>
 
   <xsl:template match="struct|union" mode="pass1">
-    <struct name="XCB{$ext}{@name}">
+    <struct name="{xcb:xcb-prefix(@name)}_t">
       <xsl:if test="self::union">
         <xsl:attribute name="kind">union</xsl:attribute>
       </xsl:if>
       <xsl:apply-templates select="*" mode="field" />
     </struct>
-    <iterator ref="XCB{$ext}{@name}" />
-    <iterator-functions ref="XCB{$ext}{@name}" />
+    <iterator ref="{xcb:xcb-prefix(@name)}" />
+    <iterator-functions ref="{xcb:xcb-prefix(@name)}" />
   </xsl:template>
 
   <xsl:template match="event|eventcopy|error|errorcopy" mode="pass1">
     <xsl:variable name="suffix">
       <xsl:choose>
         <xsl:when test="self::event|self::eventcopy">
-          <xsl:text>Event</xsl:text>
+          <xsl:text>_event_t</xsl:text>
         </xsl:when>
         <xsl:when test="self::error|self::errorcopy">
-          <xsl:text>Error</xsl:text>
+          <xsl:text>_error_t</xsl:text>
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
-    <constant type="number" name="XCB{$ext}{@name}" value="{@number}" />
+    <constant type="number" name="{xcb:xcb-prefix(@name)}" value="{@number}" />
     <xsl:choose>
       <xsl:when test="self::event|self::error">
-        <struct name="XCB{$ext}{@name}{$suffix}">
-          <field type="BYTE" name="response_type" />
+        <struct name="{xcb:xcb-prefix(@name)}{$suffix}">
+          <field type="uint8_t" name="response_type" />
           <xsl:if test="self::error">
-            <field type="BYTE" name="error_code" />
+            <field type="uint8_t" name="error_code" />
           </xsl:if>
           <xsl:apply-templates select="*" mode="field" />
           <xsl:if test="not(self::event and boolean(@no-sequence-number))">
             <middle>
-              <field type="CARD16" name="sequence" />
+              <field type="uint16_t" name="sequence" />
             </middle>
           </xsl:if>
         </struct>
       </xsl:when>
       <xsl:when test="self::eventcopy|self::errorcopy">
-        <typedef newname="XCB{$ext}{@name}{$suffix}">
+        <typedef newname="{xcb:xcb-prefix(@name)}{$suffix}">
           <xsl:attribute name="oldname">
             <xsl:call-template name="canonical-type-name">
               <xsl:with-param name="type" select="@ref" />
@@ -364,21 +479,23 @@ authorization from the authors.
         <xsl:call-template name="canonical-type-name">
           <xsl:with-param name="type" select="@oldname" />
         </xsl:call-template>
+        <xsl:text>_t</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="newname">
         <xsl:call-template name="canonical-type-name">
           <xsl:with-param name="type" select="@newname" />
         </xsl:call-template>
+        <xsl:text>_t</xsl:text>
       </xsl:attribute>
     </typedef>
-    <iterator ref="XCB{$ext}{@newname}" />
-    <iterator-functions ref="XCB{$ext}{@newname}" />
+    <iterator ref="{xcb:xcb-prefix(@newname)}" />
+    <iterator-functions ref="{xcb:xcb-prefix(@newname)}" />
   </xsl:template>
 
   <xsl:template match="enum" mode="pass1">
-    <enum name="XCB{$ext}{@name}">
+    <enum name="{xcb:xcb-prefix(@name)}_t">
       <xsl:for-each select="item">
-        <item name="XCB{$ext}{../@name}{@name}">
+        <item name="{translate(xcb:xcb-prefix(concat(../@name, concat('_', @name))), $lcase, $ucase)}">
           <xsl:copy-of select="*" />
         </item>
       </xsl:for-each>
@@ -397,6 +514,7 @@ authorization from the authors.
     <xsl:copy>
       <xsl:attribute name="type">
         <xsl:call-template name="canonical-type-name" />
+        <xsl:text>_t</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="name">
         <xsl:call-template name="canonical-var-name" />
@@ -407,7 +525,8 @@ authorization from the authors.
 
   <xsl:template match="list" mode="field">
     <xsl:variable name="type"><!--
-      --><xsl:call-template name="canonical-type-name" /><!--
+      --><xsl:call-template name="canonical-type-name" />
+        <xsl:text>_t</xsl:text><!--
     --></xsl:variable>
     <list type="{$type}">
       <xsl:attribute name="name">
@@ -458,6 +577,7 @@ authorization from the authors.
         <xsl:call-template name="canonical-type-name">
           <xsl:with-param name="type" select="@value-mask-type" />
         </xsl:call-template>
+        <xsl:text>_t</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="name">
         <xsl:call-template name="canonical-var-name">
@@ -465,13 +585,13 @@ authorization from the authors.
         </xsl:call-template>
       </xsl:attribute>
     </field>
-    <list type="CARD32">
+    <list type="uint32_t">
       <xsl:attribute name="name">
         <xsl:call-template name="canonical-var-name">
           <xsl:with-param name="name" select="@value-list-name" />
         </xsl:call-template>
       </xsl:attribute>
-      <function-call name="XCBPopcount">
+      <function-call name="xcb_popcount">
         <param>
           <fieldref>
             <xsl:call-template name="canonical-var-name">
@@ -487,6 +607,7 @@ authorization from the authors.
     <field>
       <xsl:attribute name="type">
         <xsl:call-template name="canonical-type-name" />
+        <xsl:text>_t</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="name">
         <xsl:call-template name="canonical-var-name" />
@@ -497,12 +618,18 @@ authorization from the authors.
   <xsl:template match="list" mode="param">
     <!-- If no length expression is provided, use a CARD32 localfield. -->
     <xsl:if test="not(node())">
-      <field type="CARD32" name="{@name}_len" />
+      <field type="uint32_t" name="{@name}_len" />
     </xsl:if>
     <field>
+      <xsl:variable name="ctype">
+        <xsl:call-template name="canonical-type-name" />
+      </xsl:variable>
       <xsl:attribute name="type">
         <xsl:text>const </xsl:text>
         <xsl:call-template name="canonical-type-name" />
+        <xsl:if test="not($ctype='char') and not($ctype='void')">
+          <xsl:text>_t</xsl:text>
+        </xsl:if>
         <xsl:text> *</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="name">
@@ -517,6 +644,7 @@ authorization from the authors.
         <xsl:call-template name="canonical-type-name">
           <xsl:with-param name="type" select="@value-mask-type" />
         </xsl:call-template>
+        <xsl:text>_t</xsl:text>
       </xsl:attribute>
       <xsl:attribute name="name">
         <xsl:call-template name="canonical-var-name">
@@ -524,7 +652,7 @@ authorization from the authors.
         </xsl:call-template>
       </xsl:attribute>
     </field>
-    <field type="const CARD32 *">
+    <field type="const uint32_t *">
       <xsl:attribute name="name">
         <xsl:call-template name="canonical-var-name">
           <xsl:with-param name="name" select="@value-list-name" />
@@ -585,14 +713,14 @@ authorization from the authors.
 
     <xsl:variable name="num-parts" select="(1+count($struct/list))*2" />
 
-    <l>static const XCBProtocolRequest xcb_req = {</l>
+    <l>static const xcb_protocol_request_t xcb_req = {</l>
     <indent>
       <l>/* count */ <xsl:value-of select="$num-parts" />,</l>
       <l>/* ext */ <xsl:choose>
                      <xsl:when test="$ext">
-                       <xsl:text>&amp;XCB</xsl:text>
-                       <xsl:value-of select="$ext" />
-                       <xsl:text>Id</xsl:text>
+                       <xsl:text>&amp;</xsl:text>
+                       <xsl:value-of select="xcb:xcb-prefix()" />
+                       <xsl:text>_id</xsl:text>
                      </xsl:when>
                      <xsl:otherwise>0</xsl:otherwise>
                    </xsl:choose>,</l>
@@ -621,17 +749,24 @@ authorization from the authors.
       <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_base = (char *) <!--
       --><xsl:value-of select="@name" />;</l>
       <l>xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_len = <!--
-      --><xsl:apply-templates mode="output-expression" /><!--
-      --><xsl:if test="not(@type = 'void')">
+      --><xsl:apply-templates mode="output-expression" />
+      <xsl:if test="not(@type = 'void_t')">
         <xsl:text> * sizeof(</xsl:text>
-        <xsl:value-of select="@type" />
+          <xsl:choose>
+          <xsl:when test="@type='char_t'">
+            <xsl:text>char</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="@type" />
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:text>)</xsl:text>
       </xsl:if>;</l>
       <l>xcb_parts[<xsl:value-of select="3 + position() * 2"/>].iov_base = 0;</l>
       <l>xcb_parts[<xsl:value-of select="3 + position() * 2"/>].iov_len = -xcb_parts[<xsl:value-of select="2 + position() * 2"/>].iov_len &amp; 3;</l>
     </xsl:for-each>
 
-    <l>xcb_ret.sequence = XCBSendRequest(c, <!--
+    <l>xcb_ret.sequence = xcb_send_request(c, <!--
     --><xsl:choose>
          <xsl:when test="@checked='true'">XCB_REQUEST_CHECKED</xsl:when>
          <xsl:otherwise>0</xsl:otherwise>
@@ -660,50 +795,30 @@ authorization from the authors.
   </xsl:template>
 
   <xsl:template match="iterator" mode="pass2">
-    <struct name="{@ref}Iter">
-      <field type="{@ref} *" name="data" />
+    <struct name="{@ref}_iterator_t">
+      <field type="{@ref}_t *" name="data" />
       <field type="int" name="rem" />
       <field type="int" name="index" />
     </struct>
-  </xsl:template>
-
-  <!-- Change a_name_like_this to ANameLikeThis.  If the parameter name is not
-       given, it defaults to the name attribute of the context node. -->
-  <xsl:template name="capitalize">
-    <xsl:param name="name" select="string(@name)" />
-    <xsl:if test="$name">
-      <xsl:value-of select="translate(substring($name,1,1), $lcase, $ucase)" />
-      <xsl:choose>
-        <xsl:when test="contains($name, '_')">
-          <xsl:value-of select="substring(substring-before($name, '_'), 2)" />
-          <xsl:call-template name="capitalize">
-            <xsl:with-param name="name" select="substring-after($name, '_')" />
-          </xsl:call-template>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="substring($name, 2)" />
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:if>
   </xsl:template>
 
   <xsl:template match="iterator-functions" mode="pass2">
     <xsl:variable name="ref" select="@ref" />
     <xsl:variable name="kind" select="@kind" />
     <xsl:variable name="struct"
-                  select="$pass1/xcb/struct[@name=concat($ref,$kind)]" />
+                  select="$pass1/xcb/struct[@name=concat($ref, $kind, '_t')]" />
     <xsl:variable name="nextfields-rtf">
       <nextfield>R + 1</nextfield>
       <xsl:for-each select="$struct/list[not(@fixed)]">
         <xsl:choose>
-          <xsl:when test="substring(@type, 1, 3) = 'XCB'">
-            <nextfield><xsl:value-of select="@type" />End(<!--
-            --><xsl:value-of select="$ref" /><!--
-            --><xsl:call-template name="capitalize" />Iter(R))</nextfield>
+          <xsl:when test="substring(@type, 1, 3) = 'xcb'">
+            <nextfield><xsl:value-of select="substring(@type, 1, string-length(@type)-2)" />_end(<!--
+            --><xsl:value-of select="$ref" />_<!--
+            --><xsl:value-of select="string(@name)" />_iterator(R))</nextfield>
           </xsl:when>
           <xsl:otherwise>
-            <nextfield><xsl:value-of select="$ref" /><!--
-            --><xsl:call-template name="capitalize" />End(R)</nextfield>
+            <nextfield><xsl:value-of select="$ref" />_<!--
+            --><xsl:value-of select="string(@name)" />_end(R)</nextfield>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:for-each>
@@ -715,52 +830,51 @@ authorization from the authors.
       <xsl:variable name="nextfield" select="$nextfields/nextfield[$number]" />
       <xsl:variable name="is-first"
                     select="not(preceding-sibling::list[not(@fixed)])" />
-      <xsl:variable name="field-name"><!--
-        --><xsl:call-template name="capitalize" /><!--
-      --></xsl:variable>
+      <xsl:variable name="field-name" select="@name" />
       <xsl:variable name="is-variable"
                     select="$pass1/xcb/struct[@name=current()/@type]/list
                             or document($search-path)/xcb
-                               /struct[concat('XCB',
-                                              ancestor::xcb/@extension-name,
-                                              @name) = current()/@type]
-                               /*[self::valueparam or self::list]" />
+                               /struct[concat(xcb:xcb-prefix(@name), '_t')
+                                       = current()/@type]
+                               /*[self::valueparam
+                                  or self::list[.//*[not(self::value
+                                                         or self::op)]]]" />
       <xsl:if test="not($is-variable)">
-        <function type="{@type} *" name="{$ref}{$field-name}">
-          <field type="const {$ref}{$kind} *" name="R" />
+        <function type="{xcb:get-char-void(@type)} *" name="{$ref}_{xcb:lowercase($field-name)}">
+          <field type="const {$ref}{$kind}_t *" name="R" />
           <xsl:choose>
             <xsl:when test="$is-first">
-              <l>return (<xsl:value-of select="@type" /> *) <!--
+              <l>return (<xsl:value-of select="xcb:get-char-void(@type)" /> *) <!--
               -->(<xsl:value-of select="$nextfield" />);</l>
             </xsl:when>
             <xsl:otherwise>
-              <l>XCBGenericIter prev = <!--
+              <l>xcb_generic_iterator_t prev = <!--
               --><xsl:value-of select="$nextfield" />;</l>
-              <l>return (<xsl:value-of select="@type" /> *) <!--
+              <l>return (<xsl:value-of select="xcb:get-char-void(@type)" /> *) <!--
               -->((char *) prev.data + XCB_TYPE_PAD(<!--
-              --><xsl:value-of select="@type" />, prev.index));</l>
+              --><xsl:value-of select="xcb:get-char-void(@type)" />, prev.index));</l>
             </xsl:otherwise>
           </xsl:choose>
         </function>
       </xsl:if>
-      <function type="int" name="{$ref}{$field-name}Length">
-        <field type="const {$ref}{$kind} *" name="R" />
+      <function type="int" name="{$ref}_{xcb:lowercase($field-name)}_length">
+        <field type="const {$ref}{$kind}_t *" name="R" />
         <l>return <xsl:apply-templates mode="output-expression">
                     <xsl:with-param name="field-prefix" select="'R->'" />
                   </xsl:apply-templates>;</l>
       </function>
       <xsl:choose>
-        <xsl:when test="substring(@type, 1, 3) = 'XCB'">
-          <function type="{@type}Iter" name="{$ref}{$field-name}Iter">
-            <field type="const {$ref}{$kind} *" name="R" />
-            <l><xsl:value-of select="@type" />Iter i;</l>
+        <xsl:when test="substring(@type, 1, 3) = 'xcb'">
+          <function type="{substring(@type, 1, string-length(@type)-2)}_iterator_t" name="{$ref}_{xcb:lowercase($field-name)}_iterator">
+            <field type="const {$ref}{$kind}_t *" name="R" />
+            <l><xsl:value-of select="substring(@type, 1, string-length(@type)-2)" />_iterator_t i;</l>
             <xsl:choose>
               <xsl:when test="$is-first">
                 <l>i.data = (<xsl:value-of select="@type" /> *) <!--
                 -->(<xsl:value-of select="$nextfield" />);</l>
               </xsl:when>
               <xsl:otherwise>
-                <l>XCBGenericIter prev = <!--
+                <l>xcb_generic_iterator_t prev = <!--
                 --><xsl:value-of select="$nextfield" />;</l>
                 <l>i.data = (<xsl:value-of select="@type" /> *) <!--
                 -->((char *) prev.data + XCB_TYPE_PAD(<!--
@@ -781,21 +895,21 @@ authorization from the authors.
               <xsl:otherwise><xsl:value-of select="@type" /></xsl:otherwise>
             </xsl:choose>
           </xsl:variable>
-          <function type="XCBGenericIter" name="{$ref}{$field-name}End">
-            <field type="const {$ref}{$kind} *" name="R" />
-            <l>XCBGenericIter i;</l>
+          <function type="xcb_generic_iterator_t" name="{$ref}_{xcb:lowercase($field-name)}_end">
+            <field type="const {$ref}{$kind}_t *" name="R" />
+            <l>xcb_generic_iterator_t i;</l>
             <xsl:choose>
               <xsl:when test="$is-first">
-                <l>i.data = ((<xsl:value-of select="$cast" /> *) <!--
+                <l>i.data = ((<xsl:value-of select="xcb:remove-void($cast)" /> *) <!--
                 -->(<xsl:value-of select="$nextfield" />)) + (<!--
                 --><xsl:apply-templates mode="output-expression">
                      <xsl:with-param name="field-prefix" select="'R->'" />
                    </xsl:apply-templates>);</l>
               </xsl:when>
               <xsl:otherwise>
-                <l>XCBGenericIter child = <!--
+                <l>xcb_generic_iterator_t child = <!--
                 --><xsl:value-of select="$nextfield" />;</l>
-                <l>i.data = ((<xsl:value-of select="$cast" /> *) <!--
+                <l>i.data = ((<xsl:value-of select="xcb:get-char-void($cast)" /> *) <!--
                 -->child.data) + (<!--
                 --><xsl:apply-templates mode="output-expression">
                      <xsl:with-param name="field-prefix" select="'R->'" />
@@ -810,32 +924,32 @@ authorization from the authors.
       </xsl:choose>
     </xsl:for-each>
     <xsl:if test="not($kind)">
-      <function type="void" name="{$ref}Next">
-        <field type="{$ref}Iter *" name="i" />
+      <function type="void" name="{$ref}_next">
+        <field type="{$ref}_iterator_t *" name="i" />
         <xsl:choose>
           <xsl:when test="$struct/list[not(@fixed)]">
-            <l><xsl:value-of select="$ref" /> *R = i->data;</l>
-            <l>XCBGenericIter child = <!--
+            <l><xsl:value-of select="$ref" />_t *R = i->data;</l>
+            <l>xcb_generic_iterator_t child = <!--
             --><xsl:value-of select="$nextfields/nextfield[last()]" />;</l>
             <l>--i->rem;</l>
-            <l>i->data = (<xsl:value-of select="$ref" /> *) child.data;</l>
+            <l>i->data = (<xsl:value-of select="$ref" />_t *) child.data;</l>
             <l>i->index = child.index;</l>
           </xsl:when>
           <xsl:otherwise>
             <l>--i->rem;</l>
             <l>++i->data;</l>
-            <l>i->index += sizeof(<xsl:value-of select="$ref" />);</l>
+            <l>i->index += sizeof(<xsl:value-of select="$ref" />_t);</l>
           </xsl:otherwise>
         </xsl:choose>
       </function>
-      <function type="XCBGenericIter" name="{$ref}End">
-        <field type="{$ref}Iter" name="i" />
-        <l>XCBGenericIter ret;</l>
+      <function type="xcb_generic_iterator_t" name="{$ref}_end">
+        <field type="{$ref}_iterator_t" name="i" />
+        <l>xcb_generic_iterator_t ret;</l>
         <xsl:choose>
           <xsl:when test="$struct/list[not(@fixed)]">
             <l>while(i.rem > 0)</l>
             <indent>
-              <l><xsl:value-of select="$ref" />Next(&amp;i);</l>
+              <l><xsl:value-of select="$ref" />_next(&amp;i);</l>
             </indent>
             <l>ret.data = i.data;</l>
             <l>ret.rem = i.rem;</l>
@@ -915,7 +1029,7 @@ authorization from the authors.
       <xsl:when test="@type = 'number'">
         <xsl:if test="$h">
           <xsl:text>#define </xsl:text>
-          <xsl:value-of select="@name" />
+          <xsl:value-of select="translate(@name, $lcase, $ucase)" />
           <xsl:text> </xsl:text>
           <xsl:value-of select="@value" />
           <xsl:text>
@@ -958,7 +1072,7 @@ authorization from the authors.
   <xsl:template match="typedef" mode="output">
     <xsl:if test="$h">
       <xsl:text>typedef </xsl:text>
-      <xsl:value-of select="@oldname" />
+      <xsl:value-of select="xcb:get-char-void(@oldname)" />
       <xsl:text> </xsl:text>
       <xsl:value-of select="@newname" />
       <xsl:text>;
@@ -1159,7 +1273,7 @@ authorization from the authors.
     <xsl:variable name="padnum"><xsl:number /></xsl:variable>
 
     <xsl:call-template name="type-and-name">
-      <xsl:with-param name="type" select="'CARD8'" />
+      <xsl:with-param name="type" select="'uint8_t'" />
       <xsl:with-param name="name">
         <xsl:text>pad</xsl:text>
         <xsl:value-of select="$padnum - 1" />

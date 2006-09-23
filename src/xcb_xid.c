@@ -33,16 +33,16 @@
 
 /* Public interface */
 
-CARD32 XCBGenerateID(XCBConnection *c)
+uint32_t xcb_generate_id(xcb_connection_t *c)
 {
-    CARD32 ret;
+    uint32_t ret;
     if(c->has_error)
         return -1;
     pthread_mutex_lock(&c->xid.lock);
     if(c->xid.last == c->xid.max)
     {
-        XCBXCMiscGetXIDRangeRep *range;
-        range = XCBXCMiscGetXIDRangeReply(c, XCBXCMiscGetXIDRange(c), 0);
+        xcb_xc_misc_get_xid_range_reply_t *range;
+        range = xcb_xc_misc_get_xid_range_reply(c, xcb_xc_misc_get_xid_range(c), 0);
         if(!range)
         {
             pthread_mutex_unlock(&c->xid.lock);
@@ -60,7 +60,7 @@ CARD32 XCBGenerateID(XCBConnection *c)
 
 /* Private interface */
 
-int _xcb_xid_init(XCBConnection *c)
+int _xcb_xid_init(xcb_connection_t *c)
 {
     if(pthread_mutex_init(&c->xid.lock, 0))
         return 0;
@@ -71,7 +71,7 @@ int _xcb_xid_init(XCBConnection *c)
     return 1;
 }
 
-void _xcb_xid_destroy(XCBConnection *c)
+void _xcb_xid_destroy(xcb_connection_t *c)
 {
     pthread_mutex_destroy(&c->xid.lock);
 }

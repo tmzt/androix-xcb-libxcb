@@ -47,12 +47,12 @@ enum workarounds {
 
 /* xcb_list.c */
 
-typedef void (*XCBListFreeFunc)(void *);
+typedef void (*xcb_list_free_func_t)(void *);
 
 typedef struct _xcb_map _xcb_map;
 
 _xcb_map *_xcb_map_new(void);
-void _xcb_map_delete(_xcb_map *q, XCBListFreeFunc do_free);
+void _xcb_map_delete(_xcb_map *q, xcb_list_free_func_t do_free);
 int _xcb_map_put(_xcb_map *q, unsigned int key, void *data);
 void *_xcb_map_remove(_xcb_map *q, unsigned int key);
 
@@ -70,14 +70,14 @@ typedef struct _xcb_out {
     unsigned int request_written;
 
     pthread_mutex_t reqlenlock;
-    CARD32 maximum_request_length;
+    uint32_t maximum_request_length;
 } _xcb_out;
 
 int _xcb_out_init(_xcb_out *out);
 void _xcb_out_destroy(_xcb_out *out);
 
-int _xcb_out_send(XCBConnection *c, struct iovec **vector, int *count);
-int _xcb_out_flush_to(XCBConnection *c, unsigned int request);
+int _xcb_out_send(xcb_connection_t *c, struct iovec **vector, int *count);
+int _xcb_out_flush_to(xcb_connection_t *c, unsigned int request);
 
 
 /* xcb_in.c */
@@ -107,24 +107,24 @@ typedef struct _xcb_in {
 int _xcb_in_init(_xcb_in *in);
 void _xcb_in_destroy(_xcb_in *in);
 
-int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround, int flags);
+int _xcb_in_expect_reply(xcb_connection_t *c, unsigned int request, enum workarounds workaround, int flags);
 
-int _xcb_in_read(XCBConnection *c);
-int _xcb_in_read_block(XCBConnection *c, void *buf, int nread);
+int _xcb_in_read(xcb_connection_t *c);
+int _xcb_in_read_block(xcb_connection_t *c, void *buf, int nread);
 
 
 /* xcb_xid.c */
 
 typedef struct _xcb_xid {
     pthread_mutex_t lock;
-    CARD32 last;
-    CARD32 base;
-    CARD32 max;
-    CARD32 inc;
+    uint32_t last;
+    uint32_t base;
+    uint32_t max;
+    uint32_t inc;
 } _xcb_xid;
 
-int _xcb_xid_init(XCBConnection *c);
-void _xcb_xid_destroy(XCBConnection *c);
+int _xcb_xid_init(xcb_connection_t *c);
+void _xcb_xid_destroy(xcb_connection_t *c);
 
 
 /* xcb_ext.c */
@@ -135,17 +135,17 @@ typedef struct _xcb_ext {
     int extensions_size;
 } _xcb_ext;
 
-int _xcb_ext_init(XCBConnection *c);
-void _xcb_ext_destroy(XCBConnection *c);
+int _xcb_ext_init(xcb_connection_t *c);
+void _xcb_ext_destroy(xcb_connection_t *c);
 
 
 /* xcb_conn.c */
 
-struct XCBConnection {
+struct xcb_connection_t {
     int has_error;
 
     /* constant data */
-    XCBSetup *setup;
+    xcb_setup_t *setup;
     int fd;
 
     /* I/O data */
@@ -158,13 +158,13 @@ struct XCBConnection {
     _xcb_xid xid;
 };
 
-void _xcb_conn_shutdown(XCBConnection *c);
-int _xcb_conn_wait(XCBConnection *c, pthread_cond_t *cond, struct iovec **vector, int *count);
+void _xcb_conn_shutdown(xcb_connection_t *c);
+int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vector, int *count);
 
 
 /* xcb_auth.c */
 
-int _xcb_get_auth_info(int fd, XCBAuthInfo *info);
+int _xcb_get_auth_info(int fd, xcb_auth_info_t *info);
 
 #ifdef GCC_HAS_VISIBILITY
 #pragma GCC visibility pop

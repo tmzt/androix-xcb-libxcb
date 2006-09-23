@@ -37,11 +37,11 @@
 #include "xcbext.h"
 #include "xcbint.h"
 
-#define XCBError 0
-#define XCBReply 1
+#define XCB_ERROR 0
+#define XCB_REPLY 1
 
 struct event_list {
-    XCBGenericEvent *event;
+    xcb_generic_event_t *event;
     struct event_list *next;
 };
 
@@ -63,7 +63,7 @@ typedef struct reader_list {
     struct reader_list *next;
 } reader_list;
 
-static void wake_up_next_reader(XCBConnection *c)
+static void wake_up_next_reader(xcb_connection_t *c)
 {
     int pthreadret;
     if(c->in.readers)
@@ -73,9 +73,9 @@ static void wake_up_next_reader(XCBConnection *c)
     assert(pthreadret == 0);
 }
 
-static int read_packet(XCBConnection *c)
+static int read_packet(xcb_connection_t *c)
 {
-    XCBGenericRep genrep;
+    xcb_generic_reply_t genrep;
     int length = 32;
     void *buf;
     pending_reply *pend = 0;
@@ -89,7 +89,7 @@ static int read_packet(XCBConnection *c)
     memcpy(&genrep, c->in.queue, sizeof(genrep));
 
     /* Compute 32-bit sequence number of this packet. */
-    if((genrep.response_type & 0x7f) != XCBKeymapNotify)
+    if((genrep.response_type & 0x7f) != XCB_KEYMAP_NOTIFY)
     {
         unsigned int lastread = c->in.request_read;
         c->in.request_read = (lastread & 0xffff0000) | genrep.sequence;
@@ -108,7 +108,7 @@ static int read_packet(XCBConnection *c)
             }
             c->in.request_completed = c->in.request_read - 1;
         }
-        if(genrep.response_type == XCBError)
+        if(genrep.response_type == XCB_ERROR)
             c->in.request_completed = c->in.request_read;
 
         while(c->in.pending_replies && 
@@ -122,7 +122,7 @@ static int read_packet(XCBConnection *c)
         }
     }
 
-    if(genrep.response_type == XCBError || genrep.response_type == XCBReply)
+    if(genrep.response_type == XCB_ERROR || genrep.response_type == XCB_REPLY)
     {
         pend = c->in.pending_replies;
         if(pend && pend->request != c->in.request_read)
@@ -130,17 +130,17 @@ static int read_packet(XCBConnection *c)
     }
 
     /* For reply packets, check that the entire packet is available. */
-    if(genrep.response_type == XCBReply)
+    if(genrep.response_type == XCB_REPLY)
     {
         if(pend && pend->workaround == WORKAROUND_GLX_GET_FB_CONFIGS_BUG)
         {
-            CARD32 *p = (CARD32 *) c->in.queue;
+            uint32_t *p = (uint32_t *) c->in.queue;
             genrep.length = p[2] * p[3] * 2;
         }
         length += genrep.length * 4;
     }
 
-    buf = malloc(length + (genrep.response_type == XCBReply ? 0 : sizeof(CARD32)));
+    buf = malloc(length + (genrep.response_type == XCB_REPLY ? 0 : sizeof(uint32_t)));
     if(!buf)
     {
         _xcb_conn_shutdown(c);
@@ -157,12 +157,12 @@ static int read_packet(XCBConnection *c)
         return 1;
     }
 
-    if(genrep.response_type != XCBReply)
-        ((XCBGenericEvent *) buf)->full_sequence = c->in.request_read;
+    if(genrep.response_type != XCB_REPLY)
+        ((xcb_generic_event_t *) buf)->full_sequence = c->in.request_read;
 
     /* reply, or checked error */
-    if( genrep.response_type == XCBReply ||
-       (genrep.response_type == XCBError && pend && (pend->flags & XCB_REQUEST_CHECKED)))
+    if( genrep.response_type == XCB_REPLY ||
+       (genrep.response_type == XCB_ERROR && pend && (pend->flags & XCB_REQUEST_CHECKED)))
     {
         reader_list *reader;
         struct reply_list *cur = malloc(sizeof(struct reply_list));
@@ -205,10 +205,10 @@ static int read_packet(XCBConnection *c)
     return 1; /* I have something for you... */
 }
 
-static XCBGenericEvent *get_event(XCBConnection *c)
+static xcb_generic_event_t *get_event(xcb_connection_t *c)
 {
     struct event_list *cur = c->in.events;
-    XCBGenericEvent *ret;
+    xcb_generic_event_t *ret;
     if(!c->in.events)
         return 0;
     ret = cur->event;
@@ -253,7 +253,7 @@ static int read_block(const int fd, void *buf, const size_t len)
     return len;
 }
 
-static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
+static int poll_for_reply(xcb_connection_t *c, unsigned int request, void **reply, xcb_generic_error_t **error)
 {
     struct reply_list *head;
 
@@ -292,7 +292,7 @@ static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, 
 
     if(head)
     {
-        if(((XCBGenericRep *) head->reply)->response_type == XCBError)
+        if(((xcb_generic_reply_t *) head->reply)->response_type == XCB_ERROR)
         {
             if(error)
                 *error = head->reply;
@@ -310,7 +310,7 @@ static int poll_for_reply(XCBConnection *c, unsigned int request, void **reply, 
 
 /* Public interface */
 
-void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **e)
+void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_error_t **e)
 {
     void *ret = 0;
     if(e)
@@ -362,7 +362,7 @@ void *XCBWaitForReply(XCBConnection *c, unsigned int request, XCBGenericError **
     return ret;
 }
 
-int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGenericError **error)
+int xcb_poll_for_reply(xcb_connection_t *c, unsigned int request, void **reply, xcb_generic_error_t **error)
 {
     int ret;
     if(c->has_error)
@@ -379,9 +379,9 @@ int XCBPollForReply(XCBConnection *c, unsigned int request, void **reply, XCBGen
     return ret;
 }
 
-XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
+xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c)
 {
-    XCBGenericEvent *ret;
+    xcb_generic_event_t *ret;
     if(c->has_error)
         return 0;
     pthread_mutex_lock(&c->iolock);
@@ -395,11 +395,11 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c)
     return ret;
 }
 
-XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
+xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error)
 {
     if(!c->has_error)
     {
-        XCBGenericEvent *ret = 0;
+        xcb_generic_event_t *ret = 0;
         int success;
         pthread_mutex_lock(&c->iolock);
         /* FIXME: follow X meets Z architecture changes. */
@@ -418,28 +418,28 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error)
         *error = -1;
     else
     {
-        fprintf(stderr, "XCBPollForEvent: I/O error occured, but no handler provided.\n");
+        fprintf(stderr, "xcb_poll_for_event_t: I/O error occured, but no handler provided.\n");
         abort();
     }
     return 0;
 }
 
-XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie)
+xcb_generic_error_t *xcb_request_check(xcb_connection_t *c, xcb_void_cookie_t cookie)
 {
     /* FIXME: this could hold the lock to avoid syncing unnecessarily, but
-     * that would require factoring the locking out of XCBGetInputFocus,
-     * XCBGetInputFocusReply, and XCBWaitForReply. */
-    XCBGenericError *ret;
+     * that would require factoring the locking out of xcb_get_input_focus_t,
+     * xcb_get_input_focus_reply_t, and xcb_wait_for_reply_t. */
+    xcb_generic_error_t *ret;
     void *reply;
     if(c->has_error)
         return 0;
     if(XCB_SEQUENCE_COMPARE(cookie.sequence,>,c->in.request_expected)
        && XCB_SEQUENCE_COMPARE(cookie.sequence,>,c->in.request_completed))
     {
-        free(XCBGetInputFocusReply(c, XCBGetInputFocus(c), &ret));
+        free(xcb_get_input_focus_reply(c, xcb_get_input_focus(c), &ret));
         assert(!ret);
     }
-    reply = XCBWaitForReply(c, cookie.sequence, &ret);
+    reply = xcb_wait_for_reply(c, cookie.sequence, &ret);
     assert(!reply);
     return ret;
 }
@@ -488,7 +488,7 @@ void _xcb_in_destroy(_xcb_in *in)
     }
 }
 
-int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workarounds workaround, int flags)
+int _xcb_in_expect_reply(xcb_connection_t *c, unsigned int request, enum workarounds workaround, int flags)
 {
     pending_reply *pend = malloc(sizeof(pending_reply));
     assert(workaround != WORKAROUND_NONE || flags != 0);
@@ -506,7 +506,7 @@ int _xcb_in_expect_reply(XCBConnection *c, unsigned int request, enum workaround
     return 1;
 }
 
-int _xcb_in_read(XCBConnection *c)
+int _xcb_in_read(xcb_connection_t *c)
 {
     int n = read(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len);
     if(n > 0)
@@ -519,7 +519,7 @@ int _xcb_in_read(XCBConnection *c)
     return 0;
 }
 
-int _xcb_in_read_block(XCBConnection *c, void *buf, int len)
+int _xcb_in_read_block(xcb_connection_t *c, void *buf, int len)
 {
     int done = c->in.queue_len;
     if(len < done)

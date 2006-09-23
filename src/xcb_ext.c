@@ -35,12 +35,12 @@
 typedef struct lazyreply {
     enum { LAZY_NONE = 0, LAZY_COOKIE, LAZY_FORCED } tag;
     union {
-        XCBQueryExtensionCookie cookie;
-        XCBQueryExtensionRep *reply;
+        xcb_query_extension_cookie_t cookie;
+        xcb_query_extension_reply_t *reply;
     } value;
 } lazyreply;
 
-static lazyreply *get_index(XCBConnection *c, int index)
+static lazyreply *get_index(xcb_connection_t *c, int index)
 {
     if(index > c->ext.extensions_size)
     {
@@ -55,7 +55,7 @@ static lazyreply *get_index(XCBConnection *c, int index)
     return c->ext.extensions + index - 1;
 }
 
-static lazyreply *get_lazyreply(XCBConnection *c, XCBExtension *ext)
+static lazyreply *get_lazyreply(xcb_connection_t *c, xcb_extension_t *ext)
 {
     static pthread_mutex_t global_lock = PTHREAD_MUTEX_INITIALIZER;
     static int next_global_id;
@@ -72,16 +72,16 @@ static lazyreply *get_lazyreply(XCBConnection *c, XCBExtension *ext)
     {
         /* cache miss: query the server */
         data->tag = LAZY_COOKIE;
-        data->value.cookie = XCBQueryExtension(c, strlen(ext->name), ext->name);
+        data->value.cookie = xcb_query_extension(c, strlen(ext->name), ext->name);
     }
     return data;
 }
 
 /* Public interface */
 
-/* Do not free the returned XCBQueryExtensionRep - on return, it's aliased
+/* Do not free the returned xcb_query_extension_reply_t - on return, it's aliased
  * from the cache. */
-const XCBQueryExtensionRep *XCBGetExtensionData(XCBConnection *c, XCBExtension *ext)
+const xcb_query_extension_reply_t *xcb_get_extension_data(xcb_connection_t *c, xcb_extension_t *ext)
 {
     lazyreply *data;
     if(c->has_error)
@@ -92,14 +92,14 @@ const XCBQueryExtensionRep *XCBGetExtensionData(XCBConnection *c, XCBExtension *
     if(data && data->tag == LAZY_COOKIE)
     {
         data->tag = LAZY_FORCED;
-        data->value.reply = XCBQueryExtensionReply(c, data->value.cookie, 0);
+        data->value.reply = xcb_query_extension_reply(c, data->value.cookie, 0);
     }
     pthread_mutex_unlock(&c->ext.lock);
 
     return data ? data->value.reply : 0;
 }
 
-void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext)
+void xcb_prefetch_extension_data(xcb_connection_t *c, xcb_extension_t *ext)
 {
     if(c->has_error)
         return;
@@ -110,14 +110,14 @@ void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext)
 
 /* Private interface */
 
-int _xcb_ext_init(XCBConnection *c)
+int _xcb_ext_init(xcb_connection_t *c)
 {
     if(pthread_mutex_init(&c->ext.lock, 0))
         return 0;
     return 1;
 }
 
-void _xcb_ext_destroy(XCBConnection *c)
+void _xcb_ext_destroy(xcb_connection_t *c)
 {
     pthread_mutex_destroy(&c->ext.lock);
     while(c->ext.extensions_size-- > 0)

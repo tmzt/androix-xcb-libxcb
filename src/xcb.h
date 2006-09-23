@@ -37,14 +37,14 @@
 
 /* FIXME: these names conflict with those defined in Xmd.h. */
 #ifndef XMD_H
-typedef uint8_t  BYTE;
-typedef uint8_t  BOOL;
-typedef uint8_t  CARD8;
-typedef uint16_t CARD16;
-typedef uint32_t CARD32;
-typedef int8_t   INT8;
-typedef int16_t  INT16;
-typedef int32_t  INT32;
+typedef uint8_t  uint8_t;
+typedef uint8_t  uint8_t;
+typedef uint8_t  uint8_t;
+typedef uint16_t uint16_t;
+typedef uint32_t uint32_t;
+typedef int8_t   int8_t;
+typedef int16_t  int16_t;
+typedef int32_t  int32_t;
 #endif /* XMD_H */
 
 #include <sys/uio.h>
@@ -60,7 +60,7 @@ extern "C" {
  */
 
 /**
- * @defgroup XCB_Core_Api XCB Core API
+ * @defgroup xcb__core_api_t XCB Core API
  * @brief Core API of the XCB library.
  *
  * @{
@@ -86,7 +86,7 @@ extern "C" {
  *
  * A structure that contain all data that  XCB needs to communicate with an X server.
  */
-typedef struct XCBConnection XCBConnection;  /**< Opaque structure containing all data that  XCB needs to communicate with an X server. */
+typedef struct xcb_connection_t xcb_connection_t;  /**< Opaque structure containing all data that  XCB needs to communicate with an X server. */
 
 
 /* Other types */
@@ -100,7 +100,7 @@ typedef struct {
     void *data;   /**< Data of the current iterator */
     int rem;    /**< remaining elements */
     int index;  /**< index of the current iterator */
-} XCBGenericIter;
+} xcb_generic_iterator_t;
 
 /**
  * @brief Generic reply.
@@ -108,11 +108,11 @@ typedef struct {
  * A generic reply structure.
  */
 typedef struct {
-    BYTE   response_type;  /**< Type of the response */
-    CARD8  pad0;           /**< Padding */
-    CARD16 sequence;       /**< Sequence number */
-    CARD32 length;         /**< Length of the response */
-} XCBGenericRep;
+    uint8_t   response_type;  /**< Type of the response */
+    uint8_t  pad0;           /**< Padding */
+    uint16_t sequence;       /**< Sequence number */
+    uint32_t length;         /**< Length of the response */
+} xcb_generic_reply_t;
 
 /**
  * @brief Generic event.
@@ -120,12 +120,12 @@ typedef struct {
  * A generic event structure.
  */
 typedef struct {
-    BYTE   response_type;  /**< Type of the response */
-    CARD8  pad0;           /**< Padding */
-    CARD16 sequence;       /**< Sequence number */
-    CARD32 pad[7];         /**< Padding */
-    CARD32 full_sequence;
-} XCBGenericEvent;
+    uint8_t   response_type;  /**< Type of the response */
+    uint8_t  pad0;           /**< Padding */
+    uint16_t sequence;       /**< Sequence number */
+    uint32_t pad[7];         /**< Padding */
+    uint32_t full_sequence;
+} xcb_generic_event_t;
 
 /**
  * @brief Generic error.
@@ -133,12 +133,12 @@ typedef struct {
  * A generic error structure.
  */
 typedef struct {
-    BYTE   response_type;  /**< Type of the response */
-    BYTE   error_code;     /**< Error code */
-    CARD16 sequence;       /**< Sequence number */
-    CARD32 pad[7];         /**< Padding */
-    CARD32 full_sequence;
-} XCBGenericError;
+    uint8_t   response_type;  /**< Type of the response */
+    uint8_t   error_code;     /**< Error code */
+    uint16_t sequence;       /**< Sequence number */
+    uint32_t pad[7];         /**< Padding */
+    uint32_t full_sequence;
+} xcb_generic_error_t;
 
 /**
  * @brief Generic cookie.
@@ -147,24 +147,24 @@ typedef struct {
  */
 typedef struct {
     unsigned int sequence;  /**< Sequence number */
-} XCBVoidCookie;
+} xcb_void_cookie_t;
 
 
 /* Include the generated xproto header. */
 #include "xproto.h"
 
 
-/** XCBNone is the universal null resource or null atom parameter value for many core X requests */
-#define XCBNone 0L
+/** XCB_NONE is the universal null resource or null atom parameter value for many core X requests */
+#define XCB_NONE 0L
 
-/** XCBCopyFromParent can be used for many CreateWindow parameters */
-#define XCBCopyFromParent 0L
+/** XCB_COPY_FROM_PARENT can be used for many CreateWindow parameters */
+#define XCB_COPY_FROM_PARENT 0L
 
-/** XCBCurrentTime can be used in most requests that take an XCBTIMESTAMP */
-#define XCBCurrentTime 0L
+/** XCB_CURRENT_TIME can be used in most requests that take an xcb_timestamp_t */
+#define XCB_CURRENT_TIME 0L
 
-/** XCBNoSymbol fills in unused entries in XCBKEYSYM tables */
-#define XCBNoSymbol 0L
+/** XCB_NO_SYMBOL fills in unused entries in xcb_keysym_t tables */
+#define XCB_NO_SYMBOL 0L
 
 
 /* xcb_auth.c */
@@ -174,12 +174,12 @@ typedef struct {
  *
  * A container for authorization information to be sent to the X server.
  */
-typedef struct XCBAuthInfo {
+typedef struct xcb_auth_info_t {
     int   namelen;  /**< Length of the string name (as returned by strlen). */
     char *name;     /**< String containing the authentication protocol name, such as "MIT-MAGIC-COOKIE-1" or "XDM-AUTHORIZATION-1". */
     int   datalen;  /**< Length of the data member. */
     char *data;   /**< Data interpreted in a protocol-specific manner. */
-} XCBAuthInfo;
+} xcb_auth_info_t;
 
 
 /* xcb_out.c */
@@ -192,7 +192,7 @@ typedef struct XCBAuthInfo {
  * Forces any buffered output to be written to the server. Blocks
  * until the write is complete.
  */
-int XCBFlush(XCBConnection *c);
+int xcb_flush(xcb_connection_t *c);
 
 /**
  * @brief Returns the maximum request length field from the connection
@@ -210,7 +210,7 @@ int XCBFlush(XCBConnection *c);
  * theoretical maximum lengths roughly 256kB without BIG-REQUESTS and
  * 16GB with.
  */
-CARD32 XCBGetMaximumRequestLength(XCBConnection *c);
+uint32_t xcb_get_maximum_request_length(xcb_connection_t *c);
 
 
 /* xcb_in.c */
@@ -224,7 +224,7 @@ CARD32 XCBGetMaximumRequestLength(XCBConnection *c);
  * the event of an I/O error. Blocks until either an event or error
  * arrive, or an I/O error occurs.
  */
-XCBGenericEvent *XCBWaitForEvent(XCBConnection *c);
+xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c);
 
 /**
  * @brief Returns the next event or error from the server.
@@ -241,7 +241,7 @@ XCBGenericEvent *XCBWaitForEvent(XCBConnection *c);
  * operation. If @p error is @c NULL, terminates the application when an
  * I/O error occurs.
  */
-XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error);
+xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error);
 
 /**
  * @brief Return the error for a request, or NULL if none can ever arrive.
@@ -249,7 +249,7 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error);
  * @param cookie: The request cookie.
  * @return The error for the request, or NULL if none can ever arrive.
  *
- * The XCBVoidCookie cookie supplied to this function must have resulted from
+ * The xcb_void_cookie_t cookie supplied to this function must have resulted from
  * a call to XCB[RequestName]Checked().  This function will block until one of
  * two conditions happens.  If an error is received, it will be returned.  If
  * a reply to a subsequent request has already arrived, no error can arrive
@@ -259,33 +259,33 @@ XCBGenericEvent *XCBPollForEvent(XCBConnection *c, int *error);
  * sequence number will advance beyond that provided in cookie; this is a
  * convenience to avoid races in determining whether the sync is needed.
  */
-XCBGenericError *XCBRequestCheck(XCBConnection *c, XCBVoidCookie cookie);
+xcb_generic_error_t *xcb_request_check(xcb_connection_t *c, xcb_void_cookie_t cookie);
 
 
 /* xcb_ext.c */
 
 /**
- * @typedef typedef struct XCBExtension XCBExtension
+ * @typedef typedef struct xcb_extension_t xcb_extension_t
  */
-typedef struct XCBExtension XCBExtension;  /**< Opaque structure used as key for XCBGetExtensionData. */
+typedef struct xcb_extension_t xcb_extension_t;  /**< Opaque structure used as key for xcb_get_extension_data_t. */
 
 /**
  * @brief Caches reply information from QueryExtension requests.
  * @param c: The connection.
  * @param ext: The extension data.
- * @return A pointer to the XCBQueryExtensionRep for the extension.
+ * @return A pointer to the xcb_query_extension_reply_t for the extension.
  *
  * This function is the primary interface to the "extension cache",
  * which caches reply information from QueryExtension
  * requests. Invoking this function may cause a call to
- * XCBQueryExtension to retrieve extension information from the
+ * xcb_query_extension_t to retrieve extension information from the
  * server, and may block until extension data is received from the
  * server.
  *
  * The result must not be freed. This storage is managed by the cache
  * itself.
  */
-const XCBQueryExtensionRep *XCBGetExtensionData(XCBConnection *c, XCBExtension *ext);
+const xcb_query_extension_reply_t *xcb_get_extension_data(xcb_connection_t *c, xcb_extension_t *ext);
 
 /**
  * @brief Prefetch of extension data into the extension cache
@@ -294,11 +294,11 @@ const XCBQueryExtensionRep *XCBGetExtensionData(XCBConnection *c, XCBExtension *
  *
  * This function allows a "prefetch" of extension data into the
  * extension cache. Invoking the function may cause a call to
- * XCBQueryExtension, but will not block waiting for the
- * reply. XCBGetExtensionData will return the prefetched data after
+ * xcb_query_extension_t, but will not block waiting for the
+ * reply. xcb_get_extension_data_t will return the prefetched data after
  * possibly blocking while it is retrieved.
  */
-void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext);
+void xcb_prefetch_extension_data(xcb_connection_t *c, xcb_extension_t *ext);
 
 
 /* xcb_conn.c */
@@ -306,9 +306,9 @@ void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext);
 /**
  * @brief Access the data returned by the server.
  * @param c: The connection.
- * @return A pointer to an XCBSetup structure.
+ * @return A pointer to an xcb_setup_t structure.
  *
- * Accessor for the data returned by the server when the XCBConnection
+ * Accessor for the data returned by the server when the xcb_connection_t
  * was initialized. This data includes
  * - the server's required format for images,
  * - a list of available visuals,
@@ -321,7 +321,7 @@ void XCBPrefetchExtensionData(XCBConnection *c, XCBExtension *ext);
  *
  * The result must not be freed.
  */
-const XCBSetup *XCBGetSetup(XCBConnection *c);
+const xcb_setup_t *xcb_get_setup(xcb_connection_t *c);
 
 /**
  * @brief Access the file descriptor of the connection.
@@ -329,39 +329,39 @@ const XCBSetup *XCBGetSetup(XCBConnection *c);
  * @return The file descriptor.
  *
  * Accessor for the file descriptor that was passed to the
- * XCBConnectToFD call that returned @p c.
+ * xcb_connect_to_fd_t call that returned @p c.
  */
-int XCBGetFileDescriptor(XCBConnection *c);
+int xcb_get_file_descriptor(xcb_connection_t *c);
 
 /**
  * @brief Test whether the connection has shut down due to a fatal error.
  * @param c: The connection.
  * @return 1 if the connection is in an error state; 0 otherwise.
  *
- * Some errors that occur in the context of an XCBConnection
+ * Some errors that occur in the context of an xcb_connection_t
  * are unrecoverable. When such an error occurs, the
  * connection is shut down and further operations on the
- * XCBConnection have no effect.
+ * xcb_connection_t have no effect.
  *
  * @todo Other functions should document the conditions in
  * which they shut down the connection.
  */
-int XCBConnectionHasError(XCBConnection *c);
+int xcb_connection_has_error(xcb_connection_t *c);
 
 /**
  * @brief Connects to the X server.
  * @param fd: The file descriptor.
  * @param auth_info: Authentication data.
- * @return A newly allocated XCBConnection structure.
+ * @return A newly allocated xcb_connection_t structure.
  *
  * Connects to an X server, given the open socket @p fd and the
- * XCBAuthInfo @p auth_info. The file descriptor @p fd is
- * bidirectionally connected to an X server. XCBGetTCPFD and
- * XCBGetUnixFD return appropriate file descriptors. If the connection
+ * xcb_auth_info_t @p auth_info. The file descriptor @p fd is
+ * bidirectionally connected to an X server. xcb_get_tcpfd_t and
+ * xcb_get_unix_fd_t return appropriate file descriptors. If the connection
  * should be unauthenticated, @p auth_info must be @c
- * NULL. XCBGetAuthInfo returns appropriate authentication data.
+ * NULL. xcb_get_auth_info_t returns appropriate authentication data.
  */
-XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info);
+xcb_connection_t *xcb_connect_to_fd(int fd, xcb_auth_info_t *auth_info);
 
 /**
  * @brief Closes the connection.
@@ -370,7 +370,7 @@ XCBConnection *XCBConnectToFD(int fd, XCBAuthInfo *auth_info);
  * Closes the file descriptor and frees all memory associated with the
  * connection @c c.
  */
-void XCBDisconnect(XCBConnection *c);
+void xcb_disconnect(xcb_connection_t *c);
 
 
 /* xcb_util.c */
@@ -392,13 +392,13 @@ void XCBDisconnect(XCBConnection *c);
  * can be @c NULL. If @p displayname does not contain a screen number,
  * it is set to @c 0.
  */
-int XCBParseDisplay(const char *name, char **host, int *display, int *screen);
+int xcb_parse_display(const char *name, char **host, int *display, int *screen);
 
 /**
  * @brief Connects to the X server.
  * @param displayname: The name of the display.
  * @param screenp: A pointer to a preferred screen number.
- * @return A newly allocated XCBConnection structure.
+ * @return A newly allocated xcb_connection_t structure.
  *
  * Connects to the X server specified by @p displayname. If @p
  * displayname is @c NULL, uses the value of the DISPLAY environment
@@ -406,21 +406,21 @@ int XCBParseDisplay(const char *name, char **host, int *display, int *screen);
  * int pointed to by @p screenp (if not @c NULL) will be set to that
  * screen; otherwise the screen will be set to 0.
  */
-XCBConnection *XCBConnect(const char *displayname, int *screenp);
+xcb_connection_t *xcb_connect(const char *displayname, int *screenp);
 
 /**
  * @brief Connects to the X server, using an authorization information.
  * @param displayname: The name of the display.
  * @param auth: The authorization information.
  * @param screenp: A pointer to a preferred screen number.
- * @return A newly allocated XCBConnection structure.
+ * @return A newly allocated xcb_connection_t structure.
  *
  * Connects to the X server specified by @p displayname, using the
  * authorization @p auth. If a particular screen on that server is
  * preferred, the int pointed to by @p screenp (if not @c NULL) will
  * be set to that screen; otherwise @p screenp will be set to 0.
  */
-XCBConnection *XCBConnectToDisplayWithAuthInfo(const char *display, XCBAuthInfo *auth, int *screen);
+xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *display, xcb_auth_info_t *auth, int *screen);
 
 
 /**

@@ -105,7 +105,7 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen)
 	     addr = (char *) &si->sin_addr;
 	     addrlen = 4;
 	     if (ntohl(si->sin_addr.s_addr) != 0x7f000001)
-		 family = XCBFamilyInternet;
+		 family = XCB_FAMILY_INTERNET;
 	     snprintf(dispbuf, sizeof(dispbuf), "%d", ntohs(si->sin_port) - X_TCP_PORT);
 	     display = dispbuf;
         }
@@ -158,7 +158,7 @@ static void do_append(char *buf, int *idxp, void *val, size_t valsize) {
 }
 #endif
      
-static int compute_auth(XCBAuthInfo *info, Xauth *authptr, struct sockaddr *sockname)
+static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *sockname)
 {
     if (authname_match(AUTH_MC1, authptr->name, authptr->name_length)) {
         info->datalen = memdup(&info->data, authptr->data, authptr->data_length);
@@ -216,7 +216,7 @@ static int compute_auth(XCBAuthInfo *info, Xauth *authptr, struct sockaddr *sock
     return 0;   /* Unknown authorization type */
 }
 
-int _xcb_get_auth_info(int fd, XCBAuthInfo *info)
+int _xcb_get_auth_info(int fd, xcb_auth_info_t *info)
 {
     /* code adapted from Xlib/ConnDis.c, xtrans/Xtranssocket.c,
        xtrans/Xtransutils.c */

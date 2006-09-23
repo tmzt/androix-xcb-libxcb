@@ -54,7 +54,7 @@ _xcb_map *_xcb_map_new()
     return list;
 }
 
-void _xcb_map_delete(_xcb_map *list, XCBListFreeFunc do_free)
+void _xcb_map_delete(_xcb_map *list, xcb_list_free_func_t do_free)
 {
     if(!list)
         return;
