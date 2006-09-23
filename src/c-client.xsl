@@ -89,11 +89,6 @@ authorization from the authors.
         <constant type="xcb_extension_t" name="{xcb:xcb-prefix()}_id">
           <xsl:attribute name="value">{ "<xsl:value-of select="@extension-xname" />" }</xsl:attribute>
         </constant>
-        <function type="const xcb_query_extension_reply_t *" name="{xcb:xcb-prefix('init')}">
-          <field type="xcb_connection_t *" name="c" />
-          <l>return xcb_get_extension_data(c, &amp;<!--
-          --><xsl:value-of select="xcb:xcb-prefix()" />_id);</l>
-        </function>
       </xsl:if>
       <xsl:apply-templates mode="pass1" />
     </xcb>
