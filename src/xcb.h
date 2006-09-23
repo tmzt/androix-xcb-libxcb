@@ -35,18 +35,6 @@
 #include <stdint.h>
 #endif
 
-/* FIXME: these names conflict with those defined in Xmd.h. */
-#ifndef XMD_H
-typedef uint8_t  uint8_t;
-typedef uint8_t  uint8_t;
-typedef uint8_t  uint8_t;
-typedef uint16_t uint16_t;
-typedef uint32_t uint32_t;
-typedef int8_t   int8_t;
-typedef int16_t  int16_t;
-typedef int32_t  int32_t;
-#endif /* XMD_H */
-
 #include <sys/uio.h>
 #include <pthread.h>
 
@@ -60,7 +48,7 @@ extern "C" {
  */
 
 /**
- * @defgroup xcb__core_api_t XCB Core API
+ * @defgroup XCB_Core_API XCB Core API
  * @brief Core API of the XCB library.
  *
  * @{
@@ -157,7 +145,7 @@ typedef struct {
 /** XCB_NONE is the universal null resource or null atom parameter value for many core X requests */
 #define XCB_NONE 0L
 
-/** XCB_COPY_FROM_PARENT can be used for many CreateWindow parameters */
+/** XCB_COPY_FROM_PARENT can be used for many xcb_create_window parameters */
 #define XCB_COPY_FROM_PARENT 0L
 
 /** XCB_CURRENT_TIME can be used in most requests that take an xcb_timestamp_t */

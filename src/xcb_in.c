@@ -418,7 +418,7 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error)
         *error = -1;
     else
     {
-        fprintf(stderr, "xcb_poll_for_event_t: I/O error occured, but no handler provided.\n");
+        fprintf(stderr, "xcb_poll_for_event: I/O error occured, but no handler provided.\n");
         abort();
     }
     return 0;
