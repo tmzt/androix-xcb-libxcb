@@ -237,11 +237,11 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error);
  * @param cookie: The request cookie.
  * @return The error for the request, or NULL if none can ever arrive.
  *
- * The xcb_void_cookie_t cookie supplied to this function must have resulted from
- * a call to XCB[RequestName]Checked().  This function will block until one of
- * two conditions happens.  If an error is received, it will be returned.  If
- * a reply to a subsequent request has already arrived, no error can arrive
- * for this request, so this function will return NULL.
+ * The xcb_void_cookie_t cookie supplied to this function must have resulted
+ * from a call to xcb_[request_name]_checked().  This function will block
+ * until one of two conditions happens.  If an error is received, it will be
+ * returned.  If a reply to a subsequent request has already arrived, no error
+ * can arrive for this request, so this function will return NULL.
  *
  * Note that this function will perform a sync if needed to ensure that the
  * sequence number will advance beyond that provided in cookie; this is a
@@ -266,7 +266,7 @@ typedef struct xcb_extension_t xcb_extension_t;  /**< Opaque structure used as k
  * This function is the primary interface to the "extension cache",
  * which caches reply information from QueryExtension
  * requests. Invoking this function may cause a call to
- * xcb_query_extension_t to retrieve extension information from the
+ * xcb_query_extension to retrieve extension information from the
  * server, and may block until extension data is received from the
  * server.
  *
@@ -282,8 +282,8 @@ const xcb_query_extension_reply_t *xcb_get_extension_data(xcb_connection_t *c, x
  *
  * This function allows a "prefetch" of extension data into the
  * extension cache. Invoking the function may cause a call to
- * xcb_query_extension_t, but will not block waiting for the
- * reply. xcb_get_extension_data_t will return the prefetched data after
+ * xcb_query_extension, but will not block waiting for the
+ * reply. xcb_get_extension_data will return the prefetched data after
  * possibly blocking while it is retrieved.
  */
 void xcb_prefetch_extension_data(xcb_connection_t *c, xcb_extension_t *ext);
@@ -317,7 +317,7 @@ const xcb_setup_t *xcb_get_setup(xcb_connection_t *c);
  * @return The file descriptor.
  *
  * Accessor for the file descriptor that was passed to the
- * xcb_connect_to_fd_t call that returned @p c.
+ * xcb_connect_to_fd call that returned @p c.
  */
 int xcb_get_file_descriptor(xcb_connection_t *c);
 
@@ -344,10 +344,9 @@ int xcb_connection_has_error(xcb_connection_t *c);
  *
  * Connects to an X server, given the open socket @p fd and the
  * xcb_auth_info_t @p auth_info. The file descriptor @p fd is
- * bidirectionally connected to an X server. xcb_get_tcpfd_t and
- * xcb_get_unix_fd_t return appropriate file descriptors. If the connection
+ * bidirectionally connected to an X server. If the connection
  * should be unauthenticated, @p auth_info must be @c
- * NULL. xcb_get_auth_info_t returns appropriate authentication data.
+ * NULL.
  */
 xcb_connection_t *xcb_connect_to_fd(int fd, xcb_auth_info_t *auth_info);
 

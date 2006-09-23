@@ -427,8 +427,8 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error)
 xcb_generic_error_t *xcb_request_check(xcb_connection_t *c, xcb_void_cookie_t cookie)
 {
     /* FIXME: this could hold the lock to avoid syncing unnecessarily, but
-     * that would require factoring the locking out of xcb_get_input_focus_t,
-     * xcb_get_input_focus_reply_t, and xcb_wait_for_reply_t. */
+     * that would require factoring the locking out of xcb_get_input_focus,
+     * xcb_get_input_focus_reply, and xcb_wait_for_reply. */
     xcb_generic_error_t *ret;
     void *reply;
     if(c->has_error)
