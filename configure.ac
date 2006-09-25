@@ -35,7 +35,6 @@ AC_SUBST(HTML_CHECK_RESULT)
 
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 0.9)
-PKG_CHECK_MODULES(XPROTO, xproto)
 PKG_CHECK_MODULES(XAU, xau)
 
 PKG_CHECK_MODULES(XDMCP, xdmcp,

@@ -101,8 +101,8 @@ COREPROTO   = $(CORESOURCES) $(COREHEADERS)
 xcbinclude_HEADERS = xcb.h xcbext.h xcbxlib.h $(COREHEADERS) $(EXTHEADERS)
 noinst_HEADERS = xcbint.h
 
-AM_CFLAGS = $(COPTFLAGS) $(CWARNFLAGS) $(CDEBUGFLAGS) $(XCBPROTO_CFLAGS) $(XPROTO_CFLAGS) $(XAU_CFLAGS) $(XDMCP_CFLAGS)
-libxcb_la_LIBADD = $(XCBPROTO_LIBS) $(XPROTO_LIBS) $(XAU_LIBS) $(XDMCP_LIBS)
+AM_CFLAGS = $(COPTFLAGS) $(CWARNFLAGS) $(CDEBUGFLAGS) $(XCBPROTO_CFLAGS) $(XAU_CFLAGS) $(XDMCP_CFLAGS)
+libxcb_la_LIBADD = $(XCBPROTO_LIBS) $(XAU_LIBS) $(XDMCP_LIBS)
 libxcb_la_SOURCES = \
 		xcb_conn.c xcb_out.c xcb_in.c xcb_ext.c xcb_xid.c \
 		xcb_list.c xcb_util.c xcb_xlib.c xcb_auth.c \
