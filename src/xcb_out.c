@@ -33,7 +33,7 @@
 #include "xcb.h"
 #include "xcbext.h"
 #include "xcbint.h"
-#include "extensions/bigreq.h"
+#include "bigreq.h"
 
 static int write_block(xcb_connection_t *c, struct iovec *vector, int count)
 {
