@@ -1,4 +1,5 @@
 lib_LTLIBRARIES = libxcb.la \
+                  libxcb-xlib.la \
                   libxcb-composite.la \
                   libxcb-damage.la \
                   libxcb-dpms.la \
@@ -105,7 +106,7 @@ AM_CFLAGS = $(COPTFLAGS) $(CWARNFLAGS) $(CDEBUGFLAGS) $(XCBPROTO_CFLAGS) $(XAU_C
 libxcb_la_LIBADD = $(XCBPROTO_LIBS) $(XAU_LIBS) $(XDMCP_LIBS)
 libxcb_la_SOURCES = \
 		xcb_conn.c xcb_out.c xcb_in.c xcb_ext.c xcb_xid.c \
-		xcb_list.c xcb_util.c xcb_xlib.c xcb_auth.c \
+		xcb_list.c xcb_util.c xcb_auth.c \
 		$(COREPROTO) $(ESSENTIAL_EXTENSIONS) c-client.xsl
 
 # Explanation for -version-info:
@@ -121,6 +122,10 @@ BUILT_SOURCES = $(COREPROTO) $(EXTENSIONS)
 CLEANFILES = $(COREPROTO) $(EXTENSIONS)
 
 XCB_LIBS = libxcb.la
+
+libxcb_xlib_la_LDFLAGS = -version-info 0:0:0
+libxcb_xlib_la_LIBADD = $(XCB_LIBS)
+libxcb_xlib_la_SOURCES = xcb_xlib.c
 
 # FIXME: find a way to autogenerate this from the XML files.
 
