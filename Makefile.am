@@ -4,6 +4,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 pkgconfig_DATA = \
 xcb.pc \
+xcb-xlib.pc \
 xcb-composite.pc \
 xcb-damage.pc \
 xcb-dpms.pc \
@@ -26,6 +27,7 @@ xcb-xvmc.pc
 
 EXTRA_DIST = \
 xcb.pc.in \
+xcb-xlib.pc.in \
 xcb-composite.pc.in \
 xcb-damage.pc.in \
 xcb-dpms.pc.in \
