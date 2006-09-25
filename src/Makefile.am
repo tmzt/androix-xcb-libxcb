@@ -1,23 +1,23 @@
-lib_LTLIBRARIES = libXCB.la \
-                  libXCBcomposite.la \
-                  libXCBdamage.la \
-                  libXCBdpms.la \
-                  libXCBglx.la \
-                  libXCBrandr.la \
-                  libXCBrecord.la \
-                  libXCBrender.la \
-                  libXCBres.la \
-                  libXCBscreensaver.la \
-                  libXCBshape.la \
-                  libXCBshm.la \
-                  libXCBsync.la \
-                  libXCBxevie.la \
-                  libXCBxf86dri.la \
-                  libXCBxfixes.la \
-                  libXCBxprint.la \
-                  libXCBxtest.la \
-                  libXCBxv.la \
-                  libXCBxvmc.la
+lib_LTLIBRARIES = libxcb.la \
+                  libxcb-composite.la \
+                  libxcb-damage.la \
+                  libxcb-dpms.la \
+                  libxcb-glx.la \
+                  libxcb-randr.la \
+                  libxcb-record.la \
+                  libxcb-render.la \
+                  libxcb-res.la \
+                  libxcb-screensaver.la \
+                  libxcb-shape.la \
+                  libxcb-shm.la \
+                  libxcb-sync.la \
+                  libxcb-xevie.la \
+                  libxcb-xf86dri.la \
+                  libxcb-xfixes.la \
+                  libxcb-xprint.la \
+                  libxcb-xtest.la \
+                  libxcb-xv.la \
+                  libxcb-xvmc.la
 
 EXTHEADERS = \
 		extensions/bigreq.h \
@@ -102,8 +102,8 @@ xcbinclude_HEADERS = xcb.h xcbext.h xcbxlib.h $(COREHEADERS) $(EXTHEADERS)
 noinst_HEADERS = xcbint.h
 
 AM_CFLAGS = $(COPTFLAGS) $(CWARNFLAGS) $(CDEBUGFLAGS) $(XCBPROTO_CFLAGS) $(XPROTO_CFLAGS) $(XAU_CFLAGS) $(XDMCP_CFLAGS)
-libXCB_la_LIBADD = $(XCBPROTO_LIBS) $(XPROTO_LIBS) $(XAU_LIBS) $(XDMCP_LIBS)
-libXCB_la_SOURCES = \
+libxcb_la_LIBADD = $(XCBPROTO_LIBS) $(XPROTO_LIBS) $(XAU_LIBS) $(XDMCP_LIBS)
+libxcb_la_SOURCES = \
 		xcb_conn.c xcb_out.c xcb_in.c xcb_ext.c xcb_xid.c \
 		xcb_list.c xcb_util.c xcb_xlib.c xcb_auth.c \
 		$(COREPROTO) $(ESSENTIAL_EXTENSIONS) c-client.xsl
@@ -115,90 +115,90 @@ libXCB_la_SOURCES = \
 # * If you add an interface, increment current and age and set revision to 0.
 # * If you change or remove an interface, increment current and set revision
 #   and age to 0.
-libXCB_la_LDFLAGS = -version-info 0:0:0
+libxcb_la_LDFLAGS = -version-info 0:0:0
 
 BUILT_SOURCES = $(COREPROTO) $(EXTENSIONS)
 CLEANFILES = $(COREPROTO) $(EXTENSIONS)
 
-XCB_LIBS = libXCB.la
+XCB_LIBS = libxcb.la
 
 # FIXME: find a way to autogenerate this from the XML files.
 
-libXCBcomposite_la_LDFLAGS = -version-info 0:0:0
-libXCBcomposite_la_LIBADD = $(XCB_LIBS)
-libXCBcomposite_la_SOURCES = extensions/composite.c extensions/composite.h
+libxcb_composite_la_LDFLAGS = -version-info 0:0:0
+libxcb_composite_la_LIBADD = $(XCB_LIBS)
+libxcb_composite_la_SOURCES = extensions/composite.c extensions/composite.h
 
-libXCBdamage_la_LDFLAGS = -version-info 0:0:0
-libXCBdamage_la_LIBADD = $(XCB_LIBS)
-libXCBdamage_la_SOURCES = extensions/damage.c extensions/damage.h
+libxcb_damage_la_LDFLAGS = -version-info 0:0:0
+libxcb_damage_la_LIBADD = $(XCB_LIBS)
+libxcb_damage_la_SOURCES = extensions/damage.c extensions/damage.h
 
-libXCBdpms_la_LDFLAGS = -version-info 0:0:0
-libXCBdpms_la_LIBADD = $(XCB_LIBS)
-libXCBdpms_la_SOURCES = extensions/dpms.c extensions/dpms.h
+libxcb_dpms_la_LDFLAGS = -version-info 0:0:0
+libxcb_dpms_la_LIBADD = $(XCB_LIBS)
+libxcb_dpms_la_SOURCES = extensions/dpms.c extensions/dpms.h
 
-libXCBglx_la_LDFLAGS = -version-info 0:0:0
-libXCBglx_la_LIBADD = $(XCB_LIBS)
-libXCBglx_la_SOURCES = extensions/glx.c extensions/glx.h
+libxcb_glx_la_LDFLAGS = -version-info 0:0:0
+libxcb_glx_la_LIBADD = $(XCB_LIBS)
+libxcb_glx_la_SOURCES = extensions/glx.c extensions/glx.h
 
-libXCBrandr_la_LDFLAGS = -version-info 0:0:0
-libXCBrandr_la_LIBADD = $(XCB_LIBS)
-libXCBrandr_la_SOURCES = extensions/randr.c extensions/randr.h
+libxcb_randr_la_LDFLAGS = -version-info 0:0:0
+libxcb_randr_la_LIBADD = $(XCB_LIBS)
+libxcb_randr_la_SOURCES = extensions/randr.c extensions/randr.h
 
-libXCBrecord_la_LDFLAGS = -version-info 0:0:0
-libXCBrecord_la_LIBADD = $(XCB_LIBS)
-libXCBrecord_la_SOURCES = extensions/record.c extensions/record.h
+libxcb_record_la_LDFLAGS = -version-info 0:0:0
+libxcb_record_la_LIBADD = $(XCB_LIBS)
+libxcb_record_la_SOURCES = extensions/record.c extensions/record.h
 
-libXCBrender_la_LDFLAGS = -version-info 0:0:0
-libXCBrender_la_LIBADD = $(XCB_LIBS)
-libXCBrender_la_SOURCES = extensions/render.c extensions/render.h
+libxcb_render_la_LDFLAGS = -version-info 0:0:0
+libxcb_render_la_LIBADD = $(XCB_LIBS)
+libxcb_render_la_SOURCES = extensions/render.c extensions/render.h
 
-libXCBres_la_LDFLAGS = -version-info 0:0:0
-libXCBres_la_LIBADD = $(XCB_LIBS)
-libXCBres_la_SOURCES = extensions/res.c extensions/res.h
+libxcb_res_la_LDFLAGS = -version-info 0:0:0
+libxcb_res_la_LIBADD = $(XCB_LIBS)
+libxcb_res_la_SOURCES = extensions/res.c extensions/res.h
 
-libXCBscreensaver_la_LDFLAGS = -version-info 0:0:0
-libXCBscreensaver_la_LIBADD = $(XCB_LIBS)
-libXCBscreensaver_la_SOURCES = extensions/screensaver.c extensions/screensaver.h
+libxcb_screensaver_la_LDFLAGS = -version-info 0:0:0
+libxcb_screensaver_la_LIBADD = $(XCB_LIBS)
+libxcb_screensaver_la_SOURCES = extensions/screensaver.c extensions/screensaver.h
 
-libXCBshape_la_LDFLAGS = -version-info 0:0:0
-libXCBshape_la_LIBADD = $(XCB_LIBS)
-libXCBshape_la_SOURCES = extensions/shape.c extensions/shape.h
+libxcb_shape_la_LDFLAGS = -version-info 0:0:0
+libxcb_shape_la_LIBADD = $(XCB_LIBS)
+libxcb_shape_la_SOURCES = extensions/shape.c extensions/shape.h
 
-libXCBshm_la_LDFLAGS = -version-info 0:0:0
-libXCBshm_la_LIBADD = $(XCB_LIBS)
-libXCBshm_la_SOURCES = extensions/shm.c extensions/shm.h
+libxcb_shm_la_LDFLAGS = -version-info 0:0:0
+libxcb_shm_la_LIBADD = $(XCB_LIBS)
+libxcb_shm_la_SOURCES = extensions/shm.c extensions/shm.h
 
-libXCBsync_la_LDFLAGS = -version-info 0:0:0
-libXCBsync_la_LIBADD = $(XCB_LIBS)
-libXCBsync_la_SOURCES = extensions/sync.c extensions/sync.h
+libxcb_sync_la_LDFLAGS = -version-info 0:0:0
+libxcb_sync_la_LIBADD = $(XCB_LIBS)
+libxcb_sync_la_SOURCES = extensions/sync.c extensions/sync.h
 
-libXCBxevie_la_LDFLAGS = -version-info 0:0:0
-libXCBxevie_la_LIBADD = $(XCB_LIBS)
-libXCBxevie_la_SOURCES = extensions/xevie.c extensions/xevie.h
+libxcb_xevie_la_LDFLAGS = -version-info 0:0:0
+libxcb_xevie_la_LIBADD = $(XCB_LIBS)
+libxcb_xevie_la_SOURCES = extensions/xevie.c extensions/xevie.h
 
-libXCBxf86dri_la_LDFLAGS = -version-info 0:0:0
-libXCBxf86dri_la_LIBADD = $(XCB_LIBS)
-libXCBxf86dri_la_SOURCES = extensions/xf86dri.c extensions/xf86dri.h
+libxcb_xf86dri_la_LDFLAGS = -version-info 0:0:0
+libxcb_xf86dri_la_LIBADD = $(XCB_LIBS)
+libxcb_xf86dri_la_SOURCES = extensions/xf86dri.c extensions/xf86dri.h
 
-libXCBxfixes_la_LDFLAGS = -version-info 0:0:0
-libXCBxfixes_la_LIBADD = $(XCB_LIBS)
-libXCBxfixes_la_SOURCES = extensions/xfixes.c extensions/xfixes.h
+libxcb_xfixes_la_LDFLAGS = -version-info 0:0:0
+libxcb_xfixes_la_LIBADD = $(XCB_LIBS)
+libxcb_xfixes_la_SOURCES = extensions/xfixes.c extensions/xfixes.h
 
-libXCBxprint_la_LDFLAGS = -version-info 0:0:0
-libXCBxprint_la_LIBADD = $(XCB_LIBS)
-libXCBxprint_la_SOURCES = extensions/xprint.c extensions/xprint.h
+libxcb_xprint_la_LDFLAGS = -version-info 0:0:0
+libxcb_xprint_la_LIBADD = $(XCB_LIBS)
+libxcb_xprint_la_SOURCES = extensions/xprint.c extensions/xprint.h
 
-libXCBxtest_la_LDFLAGS = -version-info 0:0:0
-libXCBxtest_la_LIBADD = $(XCB_LIBS)
-libXCBxtest_la_SOURCES = extensions/xtest.c extensions/xtest.h
+libxcb_xtest_la_LDFLAGS = -version-info 0:0:0
+libxcb_xtest_la_LIBADD = $(XCB_LIBS)
+libxcb_xtest_la_SOURCES = extensions/xtest.c extensions/xtest.h
 
-libXCBxv_la_LDFLAGS = -version-info 0:0:0
-libXCBxv_la_LIBADD = $(XCB_LIBS)
-libXCBxv_la_SOURCES = extensions/xv.c extensions/xv.h
+libxcb_xv_la_LDFLAGS = -version-info 0:0:0
+libxcb_xv_la_LIBADD = $(XCB_LIBS)
+libxcb_xv_la_SOURCES = extensions/xv.c extensions/xv.h
 
-libXCBxvmc_la_LDFLAGS = -version-info 0:0:0
-libXCBxvmc_la_LIBADD = $(XCB_LIBS)
-libXCBxvmc_la_SOURCES = extensions/xvmc.c extensions/xvmc.h
+libxcb_xvmc_la_LDFLAGS = -version-info 0:0:0
+libxcb_xvmc_la_LIBADD = $(XCB_LIBS)
+libxcb_xvmc_la_SOURCES = extensions/xvmc.c extensions/xvmc.h
 
 $(EXTHEADERS) $(EXTSOURCES): c-client.xsl
 

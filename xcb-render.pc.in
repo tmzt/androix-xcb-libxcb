@@ -7,5 +7,5 @@ Name: XCB Render
 Description: XCB Render Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBrender
+Libs: -L${libdir} -lxcb-render
 Cflags: -I${includedir}

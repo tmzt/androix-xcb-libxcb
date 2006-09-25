@@ -4,6 +4,6 @@ usr/include/X11/XCB/xcb.h
 usr/include/X11/XCB/xcbext.h
 usr/include/X11/XCB/xcbxlib.h
 usr/include/X11/XCB/xproto.h
-usr/lib/libXCB.a
-usr/lib/libXCB.so
+usr/lib/libxcb.a
+usr/lib/libxcb.so
 usr/lib/pkgconfig/xcb.pc

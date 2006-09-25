@@ -5,7 +5,7 @@ SUBDIRS =
 EXTRA_DIST = CheckLog.xsl
 AM_MAKEFLAGS = -k
 AM_CFLAGS = -Wall -Werror $(XPROTO_CFLAGS) @CHECK_CFLAGS@ -I$(top_srcdir)/src
-LDADD = @CHECK_LIBS@ $(top_builddir)/src/libXCB.la
+LDADD = @CHECK_LIBS@ $(top_builddir)/src/libxcb.la
 
 if HAVE_CHECK
 TESTS = check_all

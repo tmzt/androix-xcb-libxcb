@@ -7,5 +7,5 @@ Name: XCB XvMC
 Description: XCB XvMC Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb xcb-xv
-Libs: -L${libdir} -lXCBxvmc
+Libs: -L${libdir} -lxcb-xvmc
 Cflags: -I${includedir}

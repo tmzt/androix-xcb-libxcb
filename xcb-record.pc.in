@@ -7,5 +7,5 @@ Name: XCB Record
 Description: XCB Record Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBrecord
+Libs: -L${libdir} -lxcb-record
 Cflags: -I${includedir}

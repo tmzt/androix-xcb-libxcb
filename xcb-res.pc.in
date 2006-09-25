@@ -7,5 +7,5 @@ Name: XCB Res
 Description: XCB X-Resource Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBres
+Libs: -L${libdir} -lxcb-res
 Cflags: -I${includedir}

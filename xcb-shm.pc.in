@@ -7,5 +7,5 @@ Name: XCB Shm
 Description: XCB Shm Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBshm
+Libs: -L${libdir} -lxcb-shm
 Cflags: -I${includedir}

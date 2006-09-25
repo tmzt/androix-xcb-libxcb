@@ -7,5 +7,5 @@ Name: XCB XTEST
 Description: XCB XTEST Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBxtest
+Libs: -L${libdir} -lxcb-xtest
 Cflags: -I${includedir}

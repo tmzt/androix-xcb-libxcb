@@ -7,5 +7,5 @@ Name: XCB XFree86-DRI
 Description: XCB XFree86-DRI Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBxf86dri
+Libs: -L${libdir} -lxcb-xf86dri
 Cflags: -I${includedir}

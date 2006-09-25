@@ -1,4 +1,4 @@
 usr/include/X11/XCB/xfixes.h
-usr/lib/libXCBxfixes.a
-usr/lib/libXCBxfixes.so
+usr/lib/libxcb-xfixes.a
+usr/lib/libxcb-xfixes.so
 usr/lib/pkgconfig/xcb-xfixes.pc

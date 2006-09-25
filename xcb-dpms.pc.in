@@ -7,5 +7,5 @@ Name: XCB DPMS
 Description: XCB DPMS Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBdpms
+Libs: -L${libdir} -lxcb-dpms
 Cflags: -I${includedir}

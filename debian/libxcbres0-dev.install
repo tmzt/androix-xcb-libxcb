@@ -1,4 +1,4 @@
 usr/include/X11/XCB/res.h
-usr/lib/libXCBres.a
-usr/lib/libXCBres.so
+usr/lib/libxcb-res.a
+usr/lib/libxcb-res.so
 usr/lib/pkgconfig/xcb-res.pc

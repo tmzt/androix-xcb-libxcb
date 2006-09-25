@@ -1,4 +1,4 @@
 usr/include/X11/XCB/xevie.h
-usr/lib/libXCBxevie.a
-usr/lib/libXCBxevie.so
+usr/lib/libxcb-xevie.a
+usr/lib/libxcb-xevie.so
 usr/lib/pkgconfig/xcb-xevie.pc

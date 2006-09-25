@@ -11,7 +11,7 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding
- This package contains the library files needed to run software using libXCB,
+ This package contains the library files needed to run software using libxcb,
  the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
@@ -34,7 +34,7 @@ Depends: libxcb0 (= ${Source-Version}), x11proto-core-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, development files
  This package contains the header and library files needed to build software
- using libXCB, the X C Binding.
+ using libxcb, the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -54,8 +54,8 @@ Section: libdevel
 Architecture: any
 Depends: libxcb0 (= ${Source-Version})
 Description: X C Binding, debugging symbols
- This package contains the debugging symbols associated with libXCB, the X C
- Binding.  gdb will automatically use these symbols when debugging libXCB.
+ This package contains the debugging symbols associated with libxcb, the X C
+ Binding.  gdb will automatically use these symbols when debugging libxcb.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -76,7 +76,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, composite extension
  This package contains the library files needed to run software using
- libXCBcomposite, the composite extension for the X C Binding.
+ libxcb-composite, the composite extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -98,7 +98,7 @@ Depends: libxcbcomposite0 (= ${Source-Version}), libxcb0-dev, libxcbxfixes0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, composite extension, development files
  This package contains the header and library files needed to build software
- using libXCBcomposite, the composite extension for the X C Binding.
+ using libxcb-composite, the composite extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -119,8 +119,8 @@ Architecture: any
 Depends: libxcbcomposite0 (= ${Source-Version})
 Description: X C Binding, composite extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBcomposite, the composite extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBcomposite.
+ libxcb-composite, the composite extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-composite.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -141,7 +141,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, damage extension
  This package contains the library files needed to run software using
- libXCBdamage, the damage extension for the X C Binding.
+ libxcb-damage, the damage extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -163,7 +163,7 @@ Depends: libxcbdamage0 (= ${Source-Version}), libxcb0-dev, libxcbxfixes0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, damage extension, development files
  This package contains the header and library files needed to build software
- using libXCBdamage, the damage extension for the X C Binding.
+ using libxcb-damage, the damage extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -184,8 +184,8 @@ Architecture: any
 Depends: libxcbdamage0 (= ${Source-Version})
 Description: X C Binding, damage extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBdamage, the damage extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBdamage.
+ libxcb-damage, the damage extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-damage.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -206,7 +206,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, dpms extension
  This package contains the library files needed to run software using
- libXCBdpms, the dpms extension for the X C Binding.
+ libxcb-dpms, the dpms extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -228,7 +228,7 @@ Depends: libxcbdpms0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, dpms extension, development files
  This package contains the header and library files needed to build software
- using libXCBdpms, the dpms extension for the X C Binding.
+ using libxcb-dpms, the dpms extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -249,8 +249,8 @@ Architecture: any
 Depends: libxcbdpms0 (= ${Source-Version})
 Description: X C Binding, dpms extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBdpms, the dpms extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBdpms.
+ libxcb-dpms, the dpms extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-dpms.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -271,7 +271,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, glx extension
  This package contains the library files needed to run software using
- libXCBglx, the glx extension for the X C Binding.
+ libxcb-glx, the glx extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -293,7 +293,7 @@ Depends: libxcbglx0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, glx extension, development files
  This package contains the header and library files needed to build software
- using libXCBglx, the glx extension for the X C Binding.
+ using libxcb-glx, the glx extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -314,8 +314,8 @@ Architecture: any
 Depends: libxcbglx0 (= ${Source-Version})
 Description: X C Binding, glx extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBglx, the glx extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBglx.
+ libxcb-glx, the glx extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-glx.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -336,7 +336,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, randr extension
  This package contains the library files needed to run software using
- libXCBrandr, the randr extension for the X C Binding.
+ libxcb-randr, the randr extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -358,7 +358,7 @@ Depends: libxcbrandr0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, randr extension, development files
  This package contains the header and library files needed to build software
- using libXCBrandr, the randr extension for the X C Binding.
+ using libxcb-randr, the randr extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -379,8 +379,8 @@ Architecture: any
 Depends: libxcbrandr0 (= ${Source-Version})
 Description: X C Binding, randr extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBrandr, the randr extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBrandr.
+ libxcb-randr, the randr extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-randr.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -401,7 +401,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, record extension
  This package contains the library files needed to run software using
- libXCBrecord, the record extension for the X C Binding.
+ libxcb-record, the record extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -423,7 +423,7 @@ Depends: libxcbrecord0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, record extension, development files
  This package contains the header and library files needed to build software
- using libXCBrecord, the record extension for the X C Binding.
+ using libxcb-record, the record extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -444,8 +444,8 @@ Architecture: any
 Depends: libxcbrecord0 (= ${Source-Version})
 Description: X C Binding, record extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBrecord, the record extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBrecord.
+ libxcb-record, the record extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-record.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -466,7 +466,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, render extension
  This package contains the library files needed to run software using
- libXCBrender, the render extension for the X C Binding.
+ libxcb-render, the render extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -488,7 +488,7 @@ Depends: libxcbrender0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, render extension, development files
  This package contains the header and library files needed to build software
- using libXCBrender, the render extension for the X C Binding.
+ using libxcb-render, the render extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -509,8 +509,8 @@ Architecture: any
 Depends: libxcbrender0 (= ${Source-Version})
 Description: X C Binding, render extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBrender, the render extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBrender.
+ libxcb-render, the render extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-render.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -531,7 +531,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, res extension
  This package contains the library files needed to run software using
- libXCBres, the res extension for the X C Binding.
+ libxcb-res, the res extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -553,7 +553,7 @@ Depends: libxcbres0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, res extension, development files
  This package contains the header and library files needed to build software
- using libXCBres, the res extension for the X C Binding.
+ using libxcb-res, the res extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -574,8 +574,8 @@ Architecture: any
 Depends: libxcbres0 (= ${Source-Version})
 Description: X C Binding, res extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBres, the res extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBres.
+ libxcb-res, the res extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-res.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -596,7 +596,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, screensaver extension
  This package contains the library files needed to run software using
- libXCBscreensaver, the screensaver extension for the X C Binding.
+ libxcb-screensaver, the screensaver extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -618,7 +618,7 @@ Depends: libxcbscreensaver0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, screensaver extension, development files
  This package contains the header and library files needed to build software
- using libXCBscreensaver, the screensaver extension for the X C Binding.
+ using libxcb-screensaver, the screensaver extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -639,8 +639,8 @@ Architecture: any
 Depends: libxcbscreensaver0 (= ${Source-Version})
 Description: X C Binding, screensaver extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBscreensaver, the screensaver extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBscreensaver.
+ libxcb-screensaver, the screensaver extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-screensaver.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -661,7 +661,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, shape extension
  This package contains the library files needed to run software using
- libXCBshape, the shape extension for the X C Binding.
+ libxcb-shape, the shape extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -683,7 +683,7 @@ Depends: libxcbshape0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, shape extension, development files
  This package contains the header and library files needed to build software
- using libXCBshape, the shape extension for the X C Binding.
+ using libxcb-shape, the shape extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -704,8 +704,8 @@ Architecture: any
 Depends: libxcbshape0 (= ${Source-Version})
 Description: X C Binding, shape extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBshape, the shape extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBshape.
+ libxcb-shape, the shape extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-shape.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -726,7 +726,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, shm extension
  This package contains the library files needed to run software using
- libXCBshm, the shm extension for the X C Binding.
+ libxcb-shm, the shm extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -748,7 +748,7 @@ Depends: libxcbshm0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, shm extension, development files
  This package contains the header and library files needed to build software
- using libXCBshm, the shm extension for the X C Binding.
+ using libxcb-shm, the shm extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -769,8 +769,8 @@ Architecture: any
 Depends: libxcbshm0 (= ${Source-Version})
 Description: X C Binding, shm extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBshm, the shm extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBshm.
+ libxcb-shm, the shm extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-shm.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -791,7 +791,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, sync extension
  This package contains the library files needed to run software using
- libXCBsync, the sync extension for the X C Binding.
+ libxcb-sync, the sync extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -813,7 +813,7 @@ Depends: libxcbsync0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, sync extension, development files
  This package contains the header and library files needed to build software
- using libXCBsync, the sync extension for the X C Binding.
+ using libxcb-sync, the sync extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -834,8 +834,8 @@ Architecture: any
 Depends: libxcbsync0 (= ${Source-Version})
 Description: X C Binding, sync extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBsync, the sync extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBsync.
+ libxcb-sync, the sync extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-sync.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -856,7 +856,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xevie extension
  This package contains the library files needed to run software using
- libXCBxevie, the xevie extension for the X C Binding.
+ libxcb-xevie, the xevie extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -878,7 +878,7 @@ Depends: libxcbxevie0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xevie extension, development files
  This package contains the header and library files needed to build software
- using libXCBxevie, the xevie extension for the X C Binding.
+ using libxcb-xevie, the xevie extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -899,8 +899,8 @@ Architecture: any
 Depends: libxcbxevie0 (= ${Source-Version})
 Description: X C Binding, xevie extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxevie, the xevie extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxevie.
+ libxcb-xevie, the xevie extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xevie.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -921,7 +921,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xf86dri extension
  This package contains the library files needed to run software using
- libXCBxf86dri, the xf86dri extension for the X C Binding.
+ libxcb-xf86dri, the xf86dri extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -943,7 +943,7 @@ Depends: libxcbxf86dri0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xf86dri extension, development files
  This package contains the header and library files needed to build software
- using libXCBxf86dri, the xf86dri extension for the X C Binding.
+ using libxcb-xf86dri, the xf86dri extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -964,8 +964,8 @@ Architecture: any
 Depends: libxcbxf86dri0 (= ${Source-Version})
 Description: X C Binding, xf86dri extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxf86dri, the xf86dri extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxf86dri.
+ libxcb-xf86dri, the xf86dri extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xf86dri.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -986,7 +986,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xfixes extension
  This package contains the library files needed to run software using
- libXCBxfixes, the xfixes extension for the X C Binding.
+ libxcb-xfixes, the xfixes extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1008,7 +1008,7 @@ Depends: libxcbxfixes0 (= ${Source-Version}), libxcb0-dev, libxcbrender0-dev, li
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xfixes extension, development files
  This package contains the header and library files needed to build software
- using libXCBxfixes, the xfixes extension for the X C Binding.
+ using libxcb-xfixes, the xfixes extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1029,8 +1029,8 @@ Architecture: any
 Depends: libxcbxfixes0 (= ${Source-Version})
 Description: X C Binding, xfixes extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxfixes, the xfixes extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxfixes.
+ libxcb-xfixes, the xfixes extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xfixes.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1051,7 +1051,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xprint extension
  This package contains the library files needed to run software using
- libXCBxprint, the xprint extension for the X C Binding.
+ libxcb-xprint, the xprint extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1073,7 +1073,7 @@ Depends: libxcbxprint0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xprint extension, development files
  This package contains the header and library files needed to build software
- using libXCBxprint, the xprint extension for the X C Binding.
+ using libxcb-xprint, the xprint extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1094,8 +1094,8 @@ Architecture: any
 Depends: libxcbxprint0 (= ${Source-Version})
 Description: X C Binding, xprint extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxprint, the xprint extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxprint.
+ libxcb-xprint, the xprint extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xprint.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1116,7 +1116,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xtest extension
  This package contains the library files needed to run software using
- libXCBxtest, the xtest extension for the X C Binding.
+ libxcb-xtest, the xtest extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1138,7 +1138,7 @@ Depends: libxcbxtest0 (= ${Source-Version}), libxcb0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xtest extension, development files
  This package contains the header and library files needed to build software
- using libXCBxtest, the xtest extension for the X C Binding.
+ using libxcb-xtest, the xtest extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1159,8 +1159,8 @@ Architecture: any
 Depends: libxcbxtest0 (= ${Source-Version})
 Description: X C Binding, xtest extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxtest, the xtest extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxtest.
+ libxcb-xtest, the xtest extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xtest.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1181,7 +1181,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xv extension
  This package contains the library files needed to run software using
- libXCBxv, the xv extension for the X C Binding.
+ libxcb-xv, the xv extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1203,7 +1203,7 @@ Depends: libxcbxv0 (= ${Source-Version}), libxcb0-dev, libxcbshm0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xv extension, development files
  This package contains the header and library files needed to build software
- using libXCBxv, the xv extension for the X C Binding.
+ using libxcb-xv, the xv extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1224,8 +1224,8 @@ Architecture: any
 Depends: libxcbxv0 (= ${Source-Version})
 Description: X C Binding, xv extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxv, the xv extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxv.
+ libxcb-xv, the xv extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xv.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1246,7 +1246,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: X C Binding, xvmc extension
  This package contains the library files needed to run software using
- libXCBxvmc, the xvmc extension for the X C Binding.
+ libxcb-xvmc, the xvmc extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1268,7 +1268,7 @@ Depends: libxcbxvmc0 (= ${Source-Version}), libxcb0-dev, libxcbxv0-dev
 Pre-Depends: x11-common (>= 1:1.09)
 Description: X C Binding, xvmc extension, development files
  This package contains the header and library files needed to build software
- using libXCBxvmc, the xvmc extension for the X C Binding.
+ using libxcb-xvmc, the xvmc extension for the X C Binding.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over
@@ -1289,8 +1289,8 @@ Architecture: any
 Depends: libxcbxvmc0 (= ${Source-Version})
 Description: X C Binding, xvmc extension, debugging symbols
  This package contains the debugging symbols associated with
- libXCBxvmc, the xvmc extension for the X C Binding.  gdb will
- automatically use these symbols when debugging libXCBxvmc.
+ libxcb-xvmc, the xvmc extension for the X C Binding.  gdb will
+ automatically use these symbols when debugging libxcb-xvmc.
  .
  The XCB library provides an interface to the X Window System protocol,
  designed to replace the Xlib interface.  XCB provides several advantages over

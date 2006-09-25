@@ -7,5 +7,5 @@ Name: XCB RandR
 Description: XCB RandR Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBrandr
+Libs: -L${libdir} -lxcb-randr
 Cflags: -I${includedir}

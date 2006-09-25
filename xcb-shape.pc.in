@@ -7,5 +7,5 @@ Name: XCB Shape
 Description: XCB Shape Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBshape
+Libs: -L${libdir} -lxcb-shape
 Cflags: -I${includedir}

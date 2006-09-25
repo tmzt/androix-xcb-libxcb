@@ -7,5 +7,5 @@ Name: XCB Xprint
 Description: XCB Xprint Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBxprint
+Libs: -L${libdir} -lxcb-xprint
 Cflags: -I${includedir}

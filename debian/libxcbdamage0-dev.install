@@ -1,4 +1,4 @@
 usr/include/X11/XCB/damage.h
-usr/lib/libXCBdamage.a
-usr/lib/libXCBdamage.so
+usr/lib/libxcb-damage.a
+usr/lib/libxcb-damage.so
 usr/lib/pkgconfig/xcb-damage.pc

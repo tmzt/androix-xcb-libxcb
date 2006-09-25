@@ -7,5 +7,5 @@ Name: XCB Sync
 Description: XCB Sync Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBsync
+Libs: -L${libdir} -lxcb-sync
 Cflags: -I${includedir}

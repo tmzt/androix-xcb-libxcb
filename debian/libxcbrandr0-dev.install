@@ -1,4 +1,4 @@
 usr/include/X11/XCB/randr.h
-usr/lib/libXCBrandr.a
-usr/lib/libXCBrandr.so
+usr/lib/libxcb-randr.a
+usr/lib/libxcb-randr.so
 usr/lib/pkgconfig/xcb-randr.pc

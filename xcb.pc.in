@@ -8,6 +8,6 @@ Description: X-protocol C Binding
 Version: @PACKAGE_VERSION@
 Requires: xproto
 Requires.private: xau
-Libs: -L${libdir} -lXCB
+Libs: -L${libdir} -lxcb
 Libs.private: @LIBS@
 Cflags: -I${includedir}

@@ -1,4 +1,4 @@
 usr/include/X11/XCB/xf86dri.h
-usr/lib/libXCBxf86dri.a
-usr/lib/libXCBxf86dri.so
+usr/lib/libxcb-xf86dri.a
+usr/lib/libxcb-xf86dri.so
 usr/lib/pkgconfig/xcb-xf86dri.pc

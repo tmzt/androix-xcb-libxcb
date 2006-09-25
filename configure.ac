@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([libXCB],
+AC_INIT([libxcb],
         0.9,
         [xcb@lists.freedesktop.org])
 AC_CONFIG_SRCDIR([xcb.pc.in])

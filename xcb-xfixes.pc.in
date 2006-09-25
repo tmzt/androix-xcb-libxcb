@@ -7,5 +7,5 @@ Name: XCB XFixes
 Description: XCB XFixes Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb xcb-render xcb-shape
-Libs: -L${libdir} -lXCBxfixes
+Libs: -L${libdir} -lxcb-xfixes
 Cflags: -I${includedir}

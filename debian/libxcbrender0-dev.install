@@ -1,4 +1,4 @@
 usr/include/X11/XCB/render.h
-usr/lib/libXCBrender.a
-usr/lib/libXCBrender.so
+usr/lib/libxcb-render.a
+usr/lib/libxcb-render.so
 usr/lib/pkgconfig/xcb-render.pc

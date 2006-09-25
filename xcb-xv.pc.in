@@ -7,5 +7,5 @@ Name: XCB Xv
 Description: XCB Xv Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb xcb-shm
-Libs: -L${libdir} -lXCBxv
+Libs: -L${libdir} -lxcb-xv
 Cflags: -I${includedir}

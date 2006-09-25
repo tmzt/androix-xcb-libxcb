@@ -7,5 +7,5 @@ Name: XCB Screensaver
 Description: XCB Screensaver Extension
 Version: @PACKAGE_VERSION@
 Requires: xcb
-Libs: -L${libdir} -lXCBscreensaver
+Libs: -L${libdir} -lxcb-screensaver
 Cflags: -I${includedir}
