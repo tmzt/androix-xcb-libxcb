@@ -58,7 +58,7 @@ AC_HEADER_STDC
 AC_SEARCH_LIBS(gethostbyname, nsl)
 AC_SEARCH_LIBS(connect, socket)
 
-xcbincludedir='${includedir}/X11/XCB'
+xcbincludedir='${includedir}/xcb'
 AC_SUBST(xcbincludedir)
 
 AC_ARG_WITH(opt,

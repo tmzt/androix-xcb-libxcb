@@ -93,4 +93,5 @@ sub convert($$)
 	return "xcb" . $_;
 }
 
+s/^(\s*#\s*include\s*<)X11\/XCB\//$1xcb\//;
 s/([_A-Za-z][_A-Za-z0-9]*)([ \t]*\()?/convert($1, defined $2) . ($2 or "")/eg;
