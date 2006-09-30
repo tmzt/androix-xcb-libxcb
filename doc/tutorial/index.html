@@ -687,7 +687,7 @@ xcb_screen_iterator_t xcb_setup_roots_iterator (xcb_setup_t *R);
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t     *c;
   xcb_screen_t         *screen;
@@ -747,7 +747,7 @@ xcb_void_cookie_t xcb_create_window (xcb_connection_t *c,             /* Pointer
                                      uint16_t          height,        /* Height of the window (in pixels) */
                                      uint16_t          border_width,  /* Width of the window's border (in pixels) */
                                      uint16_t          _class,
-                                     xcb_visualid_t     visual,
+                                     xcb_visualid_t    visual,
                                      uint32_t          value_mask,
                                      const uint32_t   *value_list);
 </pre>
@@ -772,7 +772,7 @@ xcb_void_cookie_t xcb_map_window (xcb_connection_t *c,
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t *c;
   xcb_screen_t     *screen;
@@ -823,7 +823,7 @@ int xcb_flush (xcb_connection_t *c);
       This function flushes all pending requests to the X server (much
       like the <span class="code">fflush()</span> function is used to
       flush standard output). The second function is
-      <span class="code">xcb_sync()</span>:
+      <span class="code">xcb_aux_sync()</span>:
       </p>
       <pre class="code">
 int xcb_aux_sync (xcb_connection_t *c);
@@ -917,7 +917,7 @@ xcb_void_cookie_t xcb_create_gc (xcb_connection_t *c,
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t *c;
   xcb_screen_t     *screen;
@@ -1249,7 +1249,7 @@ xcb_void_cookie_t xcb_poly_fill_arc (xcb_connection_t *c,
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t    *c;
   xcb_screen_t        *screen;
@@ -1912,11 +1912,11 @@ print_modifiers (uint32_t mask)
 }
 
 int
-main (int argc, char *argv[])
+main ()
 {
-  xcb_connection_t   *c;
-  xcb_screen_t       *screen;
-  xcb_drawable_t      win;
+  xcb_connection_t    *c;
+  xcb_screen_t        *screen;
+  xcb_drawable_t       win;
   xcb_generic_event_t *e;
   uint32_t             mask = 0;
   uint32_t             values[2];
@@ -2146,7 +2146,7 @@ xcb_void_cookie_t xcb_change_property (xcb_connection_t *c,       /* Connection 
 #include &lt;X11/XCB/xcb_atom.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t *c;
   xcb_screen_t     *screen;
@@ -2676,7 +2676,7 @@ typedef struct {
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t *c;
   xcb_screen_t     *screen;
@@ -2721,7 +2721,7 @@ xcb_void_cookie_t xcb_create_colormap (xcb_connection_t *c,       /* Pointer to 
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t *c;
   xcb_screen_t     *screen;
@@ -2822,7 +2822,7 @@ xcb_alloc_color_reply_t *xcb_alloc_color_reply (xcb_connection_t        *c,
 #include &lt;X11/XCB/xcb.h&gt;
 
 int
-main (int argc, char *argv[])
+main ()
 {
   xcb_connection_t        *c;
   xcb_screen_t            *screen;
@@ -2973,12 +2973,12 @@ xcb_void_cookie_t xcb_copy_area (xcb_connection_t *c,             /* Pointer to 
                                  xcb_drawable_t    src_drawable,  /* The Drawable we want to paste */
                                  xcb_drawable_t    dst_drawable,  /* The Drawable on which we copy the previous Drawable */
                                  xcb_gcontext_t    gc,            /* A Graphic Context */
-                                 int16_t          src_x,          /* Top left x coordinate of the region we want to copy */
-                                 int16_t          src_y,          /* Top left y coordinate of the region we want to copy */
-                                 int16_t          dst_x,          /* Top left x coordinate of the region where we want to copy */
-                                 int16_t          dst_y,          /* Top left y coordinate of the region where we want to copy */
-                                 uint16_t         width,          /* Width of the region we want to copy */
-                                 uint16_t         height);        /* Height of the region we want to copy */
+                                 int16_t           src_x,         /* Top left x coordinate of the region we want to copy */
+                                 int16_t           src_y,         /* Top left y coordinate of the region we want to copy */
+                                 int16_t           dst_x,         /* Top left x coordinate of the region where we want to copy */
+                                 int16_t           dst_y,         /* Top left y coordinate of the region where we want to copy */
+                                 uint16_t          width,         /* Width of the region we want to copy */
+                                 uint16_t          height);       /* Height of the region we want to copy */
 </pre>
         <p>
         As you can see, we could copy the whole pixmap, as well as
@@ -3143,7 +3143,7 @@ xcb_change_window_attributes (conn, window, mask, &amp;value_list);
         structure. They are obtained by using a function that requires a
         <span class="code">xcb_connection_t *</span> or a member of the
         <span class="code">xcb_setup_t</span> structure
-        (via the function <span class="code">xcb_get_setup_t</span>), or
+        (via the function <span class="code">xcb_get_setup</span>), or
         a function that requires that structure.
         </p>
         <ol>
@@ -3192,9 +3192,9 @@ c = xcb_connect (display_name, &amp;screen_default_nbr);
           <li class="subtitle"><a name="ScreenCount"></a>ScreenCount
           <p>
           You get the count of screens with the functions
-          <span class="code">xcb_get_setup_t</span>
+          <span class="code">xcb_get_setup</span>
           and
-          <span class="code">xcb_setup_roots_iterator_t</span>
+          <span class="code">xcb_setup_roots_iterator</span>
           (if you need to iterate):
           </p>
           <pre class="code">
@@ -3225,10 +3225,10 @@ screen_count = xcb_setup_roots_length (xcb_get_setup (c));
           <li class="subtitle"><a name="ServerVendor"></a>ServerVendor
           <p>
           You get the name of the vendor of the server hardware with
-          the functions <span class="code">xcb_get_setup_t</span>
+          the functions <span class="code">xcb_get_setup</span>
           and
           <span
-          class="code">xcb_setup_vendor_t</span>. Beware
+          class="code">xcb_setup_vendor</span>. Beware
           that, unlike Xlib, the string returned by XCB is not
           necessarily null-terminaled:
           </p>
@@ -3250,7 +3250,7 @@ vendor[length] = '\0';
           <p>
           You get the major version of the protocol in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
@@ -3266,7 +3266,7 @@ protocol_major_version = xcb_get_setup (c)-&gt;protocol_major_version;
           <p>
           You get the minor version of the protocol in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
@@ -3282,7 +3282,7 @@ protocol_minor_version = xcb_get_setup (c)-&gt;protocol_minor_version;
           <p>
           You get the number of the release of the server hardware in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
@@ -3303,7 +3303,7 @@ release_number = xcb_get_setup (c)-&gt;release_number;
           <p>
           You get the bitmap scanline unit in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
@@ -3319,7 +3319,7 @@ bitmap_format_scanline_unit = xcb_get_setup (c)-&gt;bitmap_format_scanline_unit;
           <p>
           You get the bitmap bit order in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
@@ -3335,7 +3335,7 @@ bitmap_format_bit_order = xcb_get_setup (c)-&gt;bitmap_format_bit_order;
           <p>
           You get the bitmap scanline pad in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
@@ -3351,7 +3351,7 @@ bitmap_format_scanline_pad = xcb_get_setup (c)-&gt;bitmap_format_scanline_pad;
           <p>
           You get the image byte order in the
           <span class="code">xcb_setup_t</span>
-          structure, with the function <span class="code">xcb_get_setup_t</span>:
+          structure, with the function <span class="code">xcb_get_setup</span>:
           </p>
           <pre class="code">
 xcb_connection_t *c;
