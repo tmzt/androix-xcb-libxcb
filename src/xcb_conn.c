@@ -97,12 +97,12 @@ static int write_setup(xcb_connection_t *c, xcb_auth_info_t *auth_info)
     }
     assert(count <= sizeof(parts) / sizeof(*parts));
 
-    pthread_mutex_lock(&c->iolock);
+    _xcb_lock_io(c);
     {
         struct iovec *parts_ptr = parts;
         ret = _xcb_out_send(c, &parts_ptr, &count);
     }
-    pthread_mutex_unlock(&c->iolock);
+    _xcb_unlock_io(c);
     return ret;
 }
 
@@ -255,6 +255,16 @@ void _xcb_conn_shutdown(xcb_connection_t *c)
     c->has_error = 1;
 }
 
+void _xcb_lock_io(xcb_connection_t *c)
+{
+    pthread_mutex_lock(&c->iolock);
+}
+
+void _xcb_unlock_io(xcb_connection_t *c)
+{
+    pthread_mutex_unlock(&c->iolock);
+}
+
 int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vector, int *count)
 {
     int ret;
@@ -278,7 +288,7 @@ int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vec
         ++c->out.writing;
     }
 
-    pthread_mutex_unlock(&c->iolock);
+    _xcb_unlock_io(c);
     do {
 	ret = select(c->fd + 1, &rfds, &wfds, 0, 0);
     } while (ret == -1 && errno == EINTR);
@@ -287,7 +297,7 @@ int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vec
         _xcb_conn_shutdown(c);
 	ret = 0;
     }
-    pthread_mutex_lock(&c->iolock);
+    _xcb_lock_io(c);
 
     if(ret)
     {

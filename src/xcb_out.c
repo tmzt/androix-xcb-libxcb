@@ -163,7 +163,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
         workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
 
     /* get a sequence number and arrange for delivery. */
-    pthread_mutex_lock(&c->iolock);
+    _xcb_lock_io(c);
     /* wait for other writing threads to get out of my way. */
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
@@ -207,7 +207,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
         _xcb_conn_shutdown(c);
         request = 0;
     }
-    pthread_mutex_unlock(&c->iolock);
+    _xcb_unlock_io(c);
     return request;
 }
 
@@ -216,9 +216,9 @@ int xcb_flush(xcb_connection_t *c)
     int ret;
     if(c->has_error)
         return 0;
-    pthread_mutex_lock(&c->iolock);
+    _xcb_lock_io(c);
     ret = _xcb_out_flush_to(c, c->out.request);
-    pthread_mutex_unlock(&c->iolock);
+    _xcb_unlock_io(c);
     return ret;
 }
 
