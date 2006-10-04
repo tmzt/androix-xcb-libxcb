@@ -59,6 +59,18 @@ static int set_fd_flags(const int fd)
     return 1;
 }
 
+static int _xcb_xlib_init(_xcb_xlib *xlib)
+{
+    xlib->lock = 0;
+    pthread_cond_init(&xlib->cond, 0);
+    return 1;
+}
+
+static void _xcb_xlib_destroy(_xcb_xlib *xlib)
+{
+    pthread_cond_destroy(&xlib->cond);
+}
+
 static int write_setup(xcb_connection_t *c, xcb_auth_info_t *auth_info)
 {
     static const char pad[3];
@@ -215,6 +227,7 @@ xcb_connection_t *xcb_connect_to_fd(int fd, xcb_auth_info_t *auth_info)
     if(!(
         set_fd_flags(fd) &&
         pthread_mutex_init(&c->iolock, 0) == 0 &&
+        _xcb_xlib_init(&c->xlib) &&
         _xcb_in_init(&c->in) &&
         _xcb_out_init(&c->out) &&
         write_setup(c, auth_info) &&
@@ -239,6 +252,7 @@ void xcb_disconnect(xcb_connection_t *c)
     close(c->fd);
 
     pthread_mutex_destroy(&c->iolock);
+    _xcb_xlib_destroy(&c->xlib);
     _xcb_in_destroy(&c->in);
     _xcb_out_destroy(&c->out);
 
@@ -258,6 +272,12 @@ void _xcb_conn_shutdown(xcb_connection_t *c)
 void _xcb_lock_io(xcb_connection_t *c)
 {
     pthread_mutex_lock(&c->iolock);
+    while(c->xlib.lock)
+    {
+        if(pthread_equal(c->xlib.thread, pthread_self()))
+            break;
+        pthread_cond_wait(&c->xlib.cond, &c->iolock);
+    }
 }
 
 void _xcb_unlock_io(xcb_connection_t *c)

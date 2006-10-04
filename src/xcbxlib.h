@@ -36,4 +36,7 @@ unsigned int xcb_get_request_sent(xcb_connection_t *c);
 
 pthread_mutex_t *xcb_get_io_lock(xcb_connection_t *c);
 
+void xcb_xlib_lock(xcb_connection_t *c);
+void xcb_xlib_unlock(xcb_connection_t *c);
+
 #endif

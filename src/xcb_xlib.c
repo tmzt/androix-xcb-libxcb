@@ -26,6 +26,8 @@
 #include "xcbxlib.h"
 #include "xcbint.h"
 
+#include <assert.h>
+
 unsigned int xcb_get_request_sent(xcb_connection_t *c)
 {
     if(c->has_error)
@@ -38,4 +40,23 @@ pthread_mutex_t *xcb_get_io_lock(xcb_connection_t *c)
     if(c->has_error)
         return 0;
     return &c->iolock;
+}
+
+void xcb_xlib_lock(xcb_connection_t *c)
+{
+    _xcb_lock_io(c);
+    assert(!c->xlib.lock);
+    c->xlib.lock = 1;
+    c->xlib.thread = pthread_self();
+    _xcb_unlock_io(c);
+}
+
+void xcb_xlib_unlock(xcb_connection_t *c)
+{
+    _xcb_lock_io(c);
+    assert(c->xlib.lock);
+    assert(pthread_equal(c->xlib.thread, pthread_self()));
+    c->xlib.lock = 0;
+    pthread_cond_broadcast(&c->xlib.cond);
+    _xcb_unlock_io(c);
 }

@@ -113,6 +113,15 @@ int _xcb_in_read(xcb_connection_t *c);
 int _xcb_in_read_block(xcb_connection_t *c, void *buf, int nread);
 
 
+/* xcb_xlib.c */
+
+typedef struct _xcb_xlib {
+    int lock;
+    pthread_t thread;
+    pthread_cond_t cond;
+} _xcb_xlib;
+
+
 /* xcb_xid.c */
 
 typedef struct _xcb_xid {
@@ -150,6 +159,7 @@ struct xcb_connection_t {
 
     /* I/O data */
     pthread_mutex_t iolock;
+    _xcb_xlib xlib;
     _xcb_in in;
     _xcb_out out;
 
@@ -159,8 +169,6 @@ struct xcb_connection_t {
 };
 
 void _xcb_conn_shutdown(xcb_connection_t *c);
-void _xcb_lock_io(xcb_connection_t *c);
-void _xcb_unlock_io(xcb_connection_t *c);
 int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vector, int *count);
 
 
@@ -171,5 +179,11 @@ int _xcb_get_auth_info(int fd, xcb_auth_info_t *info);
 #ifdef GCC_HAS_VISIBILITY
 #pragma GCC visibility pop
 #endif
+
+
+/* xcb_conn.c symbols visible to xcb-xlib */
+
+void _xcb_lock_io(xcb_connection_t *c);
+void _xcb_unlock_io(xcb_connection_t *c);
 
 #endif
