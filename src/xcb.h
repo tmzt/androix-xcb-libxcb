@@ -224,12 +224,10 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c);
  * Returns the next event or error from the server, if one is
  * available, or returns @c NULL otherwise. If no event is available, that
  * might be because an I/O error like connection close occurred while
- * attempting to read the next event. The @p error parameter is a
- * pointer to an int to be filled in with the I/O error status of the
- * operation. If @p error is @c NULL, terminates the application when an
- * I/O error occurs.
+ * attempting to read the next event, in which case the connection is
+ * shut down when this function returns.
  */
-xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error);
+xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c);
 
 /**
  * @brief Return the error for a request, or NULL if none can ever arrive.

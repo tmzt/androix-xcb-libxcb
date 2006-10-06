@@ -395,33 +395,18 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c)
     return ret;
 }
 
-xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c, int *error)
+xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c)
 {
+    xcb_generic_event_t *ret = 0;
     if(!c->has_error)
     {
-        xcb_generic_event_t *ret = 0;
-        int success;
         _xcb_lock_io(c);
         /* FIXME: follow X meets Z architecture changes. */
-        success = _xcb_in_read(c);
-        if(success)
+        if(_xcb_in_read(c)) /* _xcb_in_read shuts down the connection on error */
             ret = get_event(c);
         _xcb_unlock_io(c);
-        if(success)
-        {
-            if(error)
-                *error = 0;
-            return ret;
-        }
     }
-    if(error)
-        *error = -1;
-    else
-    {
-        fprintf(stderr, "xcb_poll_for_event: I/O error occured, but no handler provided.\n");
-        abort();
-    }
-    return 0;
+    return ret;
 }
 
 xcb_generic_error_t *xcb_request_check(xcb_connection_t *c, xcb_void_cookie_t cookie)
