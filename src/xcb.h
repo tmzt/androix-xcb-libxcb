@@ -410,6 +410,14 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *display, xcb
 
 /* xcb_xid.c */
 
+/**
+ * @brief Allocates an XID for a new object.
+ * @param c: The connection.
+ * @return A newly allocated XID.
+ *
+ * Allocates an XID for a new object. Typically used just prior to
+ * various object creation functions, such as xcb_create_window.
+ */
 uint32_t xcb_generate_id(xcb_connection_t *c);
 
 
