@@ -1077,6 +1077,8 @@ authorization from the authors.
       </xsl:variable>
       <xsl:text>typedef </xsl:text>
       <xsl:if test="not(@kind)">struct</xsl:if><xsl:value-of select="@kind" />
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="@name" />
       <xsl:text> {
 </xsl:text>
       <xsl:for-each select="exprfield|field|list[@fixed]|pad">
@@ -1097,7 +1099,9 @@ authorization from the authors.
 
   <xsl:template match="enum" mode="output">
     <xsl:if test="$h">
-      <xsl:text>typedef enum {
+      <xsl:text>typedef enum </xsl:text>
+      <xsl:value-of select="@name" />
+      <xsl:text> {
     </xsl:text>
       <xsl:call-template name="list">
         <xsl:with-param name="separator"><xsl:text>,
