@@ -95,3 +95,4 @@ sub convert($$)
 
 s/^(\s*#\s*include\s*<)X11\/XCB\//$1xcb\//;
 s/([_A-Za-z][_A-Za-z0-9]*)([ \t]*\()?/convert($1, defined $2) . ($2 or "")/eg;
+s/xcb_[a-z0-9_]*_new/xcb_generate_id/g;
