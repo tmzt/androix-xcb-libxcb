@@ -270,8 +270,8 @@ authorization from the authors.
         <xsl:variable name="type-definitions"
                       select="(/xcb|document($search-path)/xcb
                               )[$is-unqualified or @header=$namespace]
-                               /*[((self::struct or self::union
-                                    or self::xidtype or self::enum
+                               /*[((self::struct or self::union or self::enum
+                                    or self::xidtype or self::xidunion
                                     or self::event or self::eventcopy
                                     or self::error or self::errorcopy)
                                    and @name=$unqualified-type)
@@ -403,7 +403,7 @@ authorization from the authors.
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="xidtype" mode="pass1">
+  <xsl:template match="xidtype|xidunion" mode="pass1">
     <typedef oldname="uint32_t" newname="{xcb:xcb-prefix(@name)}_t" />
     <iterator ref="{xcb:xcb-prefix(@name)}" />
     <iterator-functions ref="{xcb:xcb-prefix(@name)}" />
