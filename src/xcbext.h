@@ -66,11 +66,6 @@ void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_
 int xcb_poll_for_reply(xcb_connection_t *c, unsigned int request, void **reply, xcb_generic_error_t **error);
 
 
-/* xcb_xid.c */
-
-uint32_t xcb_generate_id(xcb_connection_t *c);
-
-
 /* xcb_util.c */
 
 int xcb_popcount(uint32_t mask);
