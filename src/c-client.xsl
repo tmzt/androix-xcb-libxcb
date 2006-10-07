@@ -404,17 +404,9 @@ authorization from the authors.
   </xsl:template>
 
   <xsl:template match="xidtype" mode="pass1">
-    <struct name="{xcb:xcb-prefix(@name)}_t">
-      <field type="uint32_t" name="xid" />
-    </struct>
+    <typedef oldname="uint32_t" newname="{xcb:xcb-prefix(@name)}_t" />
     <iterator ref="{xcb:xcb-prefix(@name)}" />
     <iterator-functions ref="{xcb:xcb-prefix(@name)}" />
-    <function type="{xcb:xcb-prefix(@name)}_t" name="{xcb:xcb-prefix(@name)}_new">
-      <field type="xcb_connection_t *" name="c" />
-      <l><xsl:value-of select="concat(xcb:xcb-prefix(@name), '_t')" /> ret;</l>
-      <l>ret.xid = xcb_generate_id(c);</l>
-      <l>return ret;</l>
-    </function>
   </xsl:template>
 
   <xsl:template match="struct|union" mode="pass1">
