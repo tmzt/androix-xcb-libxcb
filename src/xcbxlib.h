@@ -31,7 +31,8 @@
 #include <pthread.h>
 #include "xcb.h"
 
-/* This function must be called with the IOLock held. */
+/* The caller of this function must hold the xlib lock, using the lock
+ * functions below. */
 unsigned int xcb_get_request_sent(xcb_connection_t *c);
 
 void xcb_xlib_lock(xcb_connection_t *c);
