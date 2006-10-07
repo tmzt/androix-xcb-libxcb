@@ -68,9 +68,6 @@ authorization from the authors.
     <xsl:for-each select="/xcb/import">
       <path><xsl:value-of select="concat($extension-path, ., '.xml')" /></path>
     </xsl:for-each>
-    <xsl:if test="not($header='xproto')">
-      <path><xsl:value-of select="concat($base-path, 'xproto.xml')" /></path>
-    </xsl:if>
   </xsl:variable>
   <xsl:variable name="search-path" select="e:node-set($search-path-rtf)/path"/>
 
