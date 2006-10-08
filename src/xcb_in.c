@@ -108,8 +108,6 @@ static int read_packet(xcb_connection_t *c)
             }
             c->in.request_completed = c->in.request_read - 1;
         }
-        if(genrep.response_type == XCB_ERROR)
-            c->in.request_completed = c->in.request_read;
 
         while(c->in.pending_replies && 
 	      XCB_SEQUENCE_COMPARE (c->in.pending_replies->request, <=, c->in.request_completed))
@@ -120,6 +118,9 @@ static int read_packet(xcb_connection_t *c)
                 c->in.pending_replies_tail = &c->in.pending_replies;
             free(oldpend);
         }
+
+        if(genrep.response_type == XCB_ERROR)
+            c->in.request_completed = c->in.request_read;
     }
 
     if(genrep.response_type == XCB_ERROR || genrep.response_type == XCB_REPLY)
