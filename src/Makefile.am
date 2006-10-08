@@ -116,7 +116,7 @@ libxcb_la_SOURCES = \
 # * If you add an interface, increment current and age and set revision to 0.
 # * If you change or remove an interface, increment current and set revision
 #   and age to 0.
-libxcb_la_LDFLAGS = -version-info 0:0:0
+libxcb_la_LDFLAGS = -version-info 1:0:0
 
 BUILT_SOURCES = $(COREPROTO) $(EXTENSIONS)
 CLEANFILES = $(COREPROTO) $(EXTENSIONS)

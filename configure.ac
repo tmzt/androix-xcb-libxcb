@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.57)
 AC_INIT([libxcb],
-        0.9.91,
+        0.9.92,
         [xcb@lists.freedesktop.org])
 AC_CONFIG_SRCDIR([xcb.pc.in])
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
@@ -34,7 +34,7 @@ fi
 AC_SUBST(HTML_CHECK_RESULT)
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 0.9)
+PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 0.9.92)
 PKG_CHECK_MODULES(XAU, xau)
 
 PKG_CHECK_MODULES(XDMCP, xdmcp,
