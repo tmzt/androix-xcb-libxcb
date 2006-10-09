@@ -25,6 +25,9 @@
  * authorization from the authors.
  */
 
+/* This include file declares functions used by Xlib/XCB, but nothing else
+ * should ever use these functions or link to libxcb-xlib. */
+
 #ifndef __XCBXLIB_H
 #define __XCBXLIB_H
 
