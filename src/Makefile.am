@@ -15,6 +15,7 @@ lib_LTLIBRARIES = libxcb.la \
                   libxcb-xevie.la \
                   libxcb-xf86dri.la \
                   libxcb-xfixes.la \
+		  libxcb-xinerama.la \
                   libxcb-xprint.la \
                   libxcb-xtest.la \
                   libxcb-xv.la \
@@ -38,6 +39,7 @@ EXTHEADERS = \
 		xevie.h \
 		xf86dri.h \
 		xfixes.h \
+		xinerama.h \
 		xprint.h \
 		xtest.h \
 		xv.h \
@@ -60,6 +62,7 @@ EXTSOURCES = \
 		xevie.c \
 		xf86dri.c \
 		xfixes.c \
+		xinerama.c \
 		xprint.c \
 		xtest.c \
 		xv.c \
@@ -90,6 +93,7 @@ EXTENSION_XML = \
 		xevie.xml \
 		xf86dri.xml \
 		xfixes.xml \
+		xinerama.xml \
 		xprint.xml \
 		xtest.xml \
 		xvmc.xml \
@@ -204,6 +208,10 @@ libxcb_xv_la_SOURCES = xv.c xv.h
 libxcb_xvmc_la_LDFLAGS = -version-info 0:0:0
 libxcb_xvmc_la_LIBADD = $(XCB_LIBS)
 libxcb_xvmc_la_SOURCES = xvmc.c xvmc.h
+
+libxcb_xinerama_la_LDFLAGS = -version-info 0:0:0
+libxcb_xinerama_la_LIBADD = $(XCB_LIBS)
+libxcb_xinerama_la_SOURCES = xinerama.c xinerama.h
 
 $(EXTHEADERS) $(EXTSOURCES): c-client.xsl
 

@@ -20,6 +20,7 @@ xcb-sync.pc \
 xcb-xevie.pc \
 xcb-xf86dri.pc \
 xcb-xfixes.pc \
+xcb-xinerama.pc \
 xcb-xprint.pc \
 xcb-xtest.pc \
 xcb-xv.pc \
@@ -41,6 +42,7 @@ xcb-shape.pc.in \
 xcb-shm.pc.in \
 xcb-sync.pc.in \
 xcb-xevie.pc.in \
+xcb-xinerama.pc.in \
 xcb-xf86dri.pc.in \
 xcb-xfixes.pc.in \
 xcb-xprint.pc.in \
