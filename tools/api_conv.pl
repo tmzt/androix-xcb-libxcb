@@ -59,6 +59,7 @@ sub convert($$)
 	local $_ = shift;
 	my ($fun) = @_;
 
+	return "xcb_generate_id" if /^xcb_[a-z0-9_]+_new$/ or /^XCB[A-Z0-9]+New$/;
 	return "uint$1_t" if /^CARD(8|16|32)$/;
 	return "int$1_t" if /^INT(8|16|32)$/;
 	return "uint8_t" if $_ eq 'BOOL' or $_ eq 'BYTE';
@@ -95,4 +96,3 @@ sub convert($$)
 
 s/^(\s*#\s*include\s*<)X11\/XCB\//$1xcb\//;
 s/([_A-Za-z][_A-Za-z0-9]*)([ \t]*\()?/convert($1, defined $2) . ($2 or "")/eg;
-s/xcb_[a-z0-9_]*_new/xcb_generate_id/g;
