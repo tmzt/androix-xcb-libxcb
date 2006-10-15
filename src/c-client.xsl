@@ -342,7 +342,7 @@ authorization from the authors.
       </xsl:attribute>
       <field type="xcb_connection_t *" name="c" />
       <xsl:apply-templates select="$req/*[not(self::reply)]" mode="param" />
-      <do-request ref="{xcb:xcb-prefix($req/@name)}_request_t" opcode="{$req/@opcode}"
+      <do-request ref="{xcb:xcb-prefix($req/@name)}_request_t" opcode="{translate(xcb:xcb-prefix($req/@name), $lcase, $ucase)}"
                   checked="{$checked}">
         <xsl:if test="$req/reply">
           <xsl:attribute name="has-reply">true</xsl:attribute>
@@ -358,6 +358,7 @@ authorization from the authors.
         <field type="unsigned int" name="sequence" />
       </struct>
     </xsl:if>
+    <constant type="number" name="{xcb:xcb-prefix($req/@name)}" value="{$req/@opcode}" />
     <struct name="{xcb:xcb-prefix(@name)}_request_t">
       <field type="uint8_t" name="major_opcode" no-assign="true" />
       <xsl:if test="$ext">
