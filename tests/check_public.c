@@ -6,28 +6,50 @@
 
 /* xcb_parse_display tests {{{ */
 
+typedef enum test_type_t {
+	TEST_ARGUMENT, TEST_ENVIRONMENT, TEST_END
+} test_type_t;
+static const char *const test_string[] = { "", "via $DISPLAY " };
+
 static void parse_display_pass(const char *name, const char *host, const int display, const int screen)
 {
 	int success;
 	char *got_host;
 	int got_display, got_screen;
+	const char *argument = 0;
+	test_type_t test_type;
 
-	got_host = (char *) -1;
-	got_display = got_screen = -42;
-	mark_point();
-	success = xcb_parse_display(name, &got_host, &got_display, &got_screen);
-	fail_unless(success, "unexpected parse failure for '%s'", name);
-	fail_unless(strcmp(host, got_host) == 0, "parse produced unexpected hostname '%s' for '%s': expected '%s'", got_host, name, host);
-	fail_unless(display == got_display, "parse produced unexpected display '%d' for '%s': expected '%d'", got_display, name, display);
-	fail_unless(screen == got_screen, "parse produced unexpected screen '%d' for '%s': expected '%d'", got_screen, name, screen);
+	for(test_type = TEST_ARGUMENT; test_type != TEST_END; test_type++)
+	{
+		if(test_type == TEST_ARGUMENT)
+		{
+			argument = name;
+			putenv("DISPLAY");
+		}
+		else if(test_type == TEST_ENVIRONMENT)
+		{
+			argument = 0;
+			setenv("DISPLAY", name, 1);
+		}
 
-	got_host = (char *) -1;
-	got_display = got_screen = -42;
-	mark_point();
-	success = xcb_parse_display(name, &got_host, &got_display, 0);
-	fail_unless(success, "unexpected screenless parse failure for '%s'", name);
-	fail_unless(strcmp(host, got_host) == 0, "screenless parse produced unexpected hostname '%s' for '%s': expected '%s'", got_host, name, host);
-	fail_unless(display == got_display, "screenless parse produced unexpected display '%d' for '%s': expected '%d'", got_display, name, display);
+		got_host = (char *) -1;
+		got_display = got_screen = -42;
+		mark_point();
+		success = xcb_parse_display(argument, &got_host, &got_display, &got_screen);
+		fail_unless(success, "unexpected parse failure %sfor '%s'", test_string[test_type], name);
+		fail_unless(strcmp(host, got_host) == 0, "parse %sproduced unexpected hostname '%s' for '%s': expected '%s'", test_string[test_type], got_host, name, host);
+		fail_unless(display == got_display, "parse %sproduced unexpected display '%d' for '%s': expected '%d'", test_string[test_type], got_display, name, display);
+		fail_unless(screen == got_screen, "parse %sproduced unexpected screen '%d' for '%s': expected '%d'", test_string[test_type], got_screen, name, screen);
+
+		got_host = (char *) -1;
+		got_display = got_screen = -42;
+		mark_point();
+		success = xcb_parse_display(argument, &got_host, &got_display, 0);
+		fail_unless(success, "unexpected screenless parse failure %sfor '%s'", test_string[test_type], name);
+		fail_unless(strcmp(host, got_host) == 0, "screenless parse %sproduced unexpected hostname '%s' for '%s': expected '%s'", test_string[test_type], got_host, name, host);
+		fail_unless(display == got_display, "screenless parse %sproduced unexpected display '%d' for '%s': expected '%d'", test_string[test_type], got_display, name, display);
+	}
+	putenv("DISPLAY");
 }
 
 static void parse_display_fail(const char *name)
@@ -35,23 +57,40 @@ static void parse_display_fail(const char *name)
 	int success;
 	char *got_host;
 	int got_display, got_screen;
+	const char *argument = 0;
+	test_type_t test_type;
 
-	got_host = (char *) -1;
-	got_display = got_screen = -42;
-	mark_point();
-	success = xcb_parse_display(name, &got_host, &got_display, &got_screen);
-	fail_unless(!success, "unexpected parse success for '%s'", name);
-	fail_unless(got_host == (char *) -1, "host changed on failure for '%s': got %p", got_host);
-	fail_unless(got_display == -42, "display changed on failure for '%s': got %d", got_display);
-	fail_unless(got_screen == -42, "screen changed on failure for '%s': got %d", got_screen);
+	for(test_type = TEST_ARGUMENT; test_type != TEST_END; test_type++)
+	{
+		if(test_type == TEST_ARGUMENT)
+		{
+			argument = name;
+			putenv("DISPLAY");
+		}
+		else if(test_type == TEST_ENVIRONMENT)
+		{
+			argument = 0;
+			setenv("DISPLAY", name, 1);
+		}
 
-	got_host = (char *) -1;
-	got_display = got_screen = -42;
-	mark_point();
-	success = xcb_parse_display(name, &got_host, &got_display, 0);
-	fail_unless(!success, "unexpected screenless parse success for '%s'", name);
-	fail_unless(got_host == (char *) -1, "host changed on failure for '%s': got %p", got_host);
-	fail_unless(got_display == -42, "display changed on failure for '%s': got %d", got_display);
+		got_host = (char *) -1;
+		got_display = got_screen = -42;
+		mark_point();
+		success = xcb_parse_display(argument, &got_host, &got_display, &got_screen);
+		fail_unless(!success, "unexpected parse success %sfor '%s'", test_string[test_type], name);
+		fail_unless(got_host == (char *) -1, "host changed on parse failure %sfor '%s': got %p", test_string[test_type], name, got_host);
+		fail_unless(got_display == -42, "display changed on parse failure %sfor '%s': got %d", test_string[test_type], name, got_display);
+		fail_unless(got_screen == -42, "screen changed on parse failure %sfor '%s': got %d", test_string[test_type], name, got_screen);
+
+		got_host = (char *) -1;
+		got_display = got_screen = -42;
+		mark_point();
+		success = xcb_parse_display(argument, &got_host, &got_display, 0);
+		fail_unless(!success, "unexpected screenless parse success %sfor '%s'", test_string[test_type], name);
+		fail_unless(got_host == (char *) -1, "host changed on parse failure %sfor '%s': got %p", test_string[test_type], name, got_host);
+		fail_unless(got_display == -42, "display changed on parse failure %sfor '%s': got %d", test_string[test_type], name, got_display);
+	}
+	putenv("DISPLAY");
 }
 
 START_TEST(parse_display_unix)
