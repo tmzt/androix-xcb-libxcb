@@ -15,6 +15,7 @@ xc_misc.*
 xevie.*
 xf86dri.*
 xfixes.*
+xinerama.*
 xprint.*
 xtest.*
 xv.*
