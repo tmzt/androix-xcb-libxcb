@@ -112,7 +112,7 @@ typedef struct {
     uint8_t  pad0;           /**< Padding */
     uint16_t sequence;       /**< Sequence number */
     uint32_t pad[7];         /**< Padding */
-    uint32_t full_sequence;
+    uint32_t full_sequence;  /**< full sequence */
 } xcb_generic_event_t;
 
 /**
@@ -125,7 +125,7 @@ typedef struct {
     uint8_t   error_code;     /**< Error code */
     uint16_t sequence;       /**< Sequence number */
     uint32_t pad[7];         /**< Padding */
-    uint32_t full_sequence;
+    uint32_t full_sequence;  /**< full sequence */
 } xcb_generic_error_t;
 
 /**
@@ -217,7 +217,6 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c);
 /**
  * @brief Returns the next event or error from the server.
  * @param c: The connection to the X server.
- * @param error: A pointer to an int to be filled in with the I/O
  * error status of the operation.
  * @return The next event from the server.
  *
@@ -362,10 +361,10 @@ void xcb_disconnect(xcb_connection_t *c);
 
 /**
  * @brief Parses a display string name in the form documented by X(7x).
- * @param displayname: The name of the display.
- * @param hostp: A pointer to a malloc'd copy of the hostname.
- * @param displayp: A pointer to the display number.
- * @param screenp: A pointer to the screen number.
+ * @param name: The name of the display.
+ * @param host: A pointer to a malloc'd copy of the hostname.
+ * @param display: A pointer to the display number.
+ * @param screen: A pointer to the screen number.
  * @return 0 on failure, non 0 otherwise.
  *
  * Parses the display string name @p display_name in the form
@@ -395,9 +394,9 @@ xcb_connection_t *xcb_connect(const char *displayname, int *screenp);
 
 /**
  * @brief Connects to the X server, using an authorization information.
- * @param displayname: The name of the display.
+ * @param display: The name of the display.
  * @param auth: The authorization information.
- * @param screenp: A pointer to a preferred screen number.
+ * @param screen: A pointer to a preferred screen number.
  * @return A newly allocated xcb_connection_t structure.
  *
  * Connects to the X server specified by @p displayname, using the
