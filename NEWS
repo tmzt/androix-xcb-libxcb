@@ -1,3 +1,32 @@
+Release 1.0 RC3 (2006-11-02)
+============================
+
+Note: Version 0.9.4 of the test suite tool "check" provides a broken
+version of the AM_PATH_CHECK macro, which causes autoconf to fail due to
+insufficient quoting on the macro names it prints in its deprecation
+message. We have written a patch to fix this problem, available at:
+<http://bugs.debian.org/cgi-bin/bugreport.cgi/check-m4-am-path-check-use-quadrigraphs-in-macro-names-to-unbreak-autoconf.patch?bug=395466;msg=20;att=1>
+Version 0.9.4-2 of the Debian package for check includes this patch.
+Users of other distributions who want to re-autotool libxcb will need to
+apply this patch, use an older version of check, or wait for a fixed
+upstream version. This bug does not affect users who use the distributed
+tarballs and do not re-autotool.
+
+* Add library support for xcb-xinerama, using new protocol description
+  from xcb-proto.
+* In the generated protocol code, define and use constants for opcode
+  numbers rather than hard-coding them.
+* In the API conversion script, match only XCB-namespaced XID generators
+  when converting to xcb_generate_id.
+* Quit treating xproto specially in Makefile.am: handle it like all the
+  extensions.
+* Generate Doxygen documentation comments in the protocol stubs, and
+  provide a Doxygen config file for building HTML documentation for XCB.
+* Add note to xcbxlib.h that nothing except Xlib/XCB should use it.
+* Extend test suite to test xcb_parse_display with NULL argument and
+  display in $DISPLAY.
+
+
 Release 1.0 RC2 (2006-10-07)
 ============================
 
