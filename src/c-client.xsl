@@ -973,6 +973,18 @@ authorization from the authors.
       -->__<xsl:value-of select="$ucase-header" />_H<!--
     --></xsl:variable>
 
+<xsl:text>/**
+ * @file </xsl:text><xsl:value-of select="$header" /><xsl:text>.h
+ **/
+</xsl:text>
+<xsl:text>
+/**
+ * @defgroup XCB_</xsl:text><xsl:value-of select="$ext" /><xsl:text>_API XCB </xsl:text><xsl:value-of select="$ext" /><xsl:text> API
+ * @brief </xsl:text><xsl:value-of select="$ext" /><xsl:text> XCB Protocol Implementation.</xsl:text>
+<xsl:text>
+ * @{
+ **/
+</xsl:text>
 <xsl:text>/*
  * This file generated automatically from </xsl:text>
 <xsl:value-of select="$header" /><xsl:text>.xml by c-client.xsl using XSLT.
@@ -992,6 +1004,18 @@ authorization from the authors.
 <xsl:text>
 </xsl:text>
 </xsl:if>
+<xsl:if test="$h">
+    <xsl:choose>
+        <xsl:when test="string($ext)">
+  <xsl:text>#define XCB_</xsl:text><xsl:value-of select="translate($ext, $lcase, $ucase)"/><xsl:text>_MAJOR_VERSION </xsl:text><xsl:value-of select="/xcb/@major-version" /><xsl:text>
+</xsl:text>
+  <xsl:text>#define XCB_</xsl:text><xsl:value-of select="translate($ext, $lcase, $ucase)"/><xsl:text>_MINOR_VERSION </xsl:text><xsl:value-of select="/xcb/@minor-version" />
+  <xsl:text>
+  
+</xsl:text>
+    </xsl:when>
+  </xsl:choose>
+</xsl:if>
 
 <xsl:if test="$c"><xsl:text>
 #include &lt;assert.h&gt;
@@ -1004,6 +1028,9 @@ authorization from the authors.
 
 <xsl:if test="$h">
 <xsl:text>
+/**
+ * @}
+ */
 #endif
 </xsl:text>
 </xsl:if>
@@ -1013,6 +1040,8 @@ authorization from the authors.
     <xsl:choose>
       <xsl:when test="@type = 'number'">
         <xsl:if test="$h">
+          <xsl:text>/** Opcode for </xsl:text><xsl:value-of select="@name"/><xsl:text>. */
+</xsl:text>
           <xsl:text>#define </xsl:text>
           <xsl:value-of select="translate(@name, $lcase, $ucase)" />
           <xsl:text> </xsl:text>
@@ -1073,6 +1102,10 @@ authorization from the authors.
           <xsl:with-param name="items" select="field/@type" />
         </xsl:call-template>
       </xsl:variable>
+      <xsl:text>/**
+ * @brief </xsl:text><xsl:value-of select="@name" /><xsl:text>
+ **/
+</xsl:text>
       <xsl:text>typedef </xsl:text>
       <xsl:if test="not(@kind)">struct</xsl:if><xsl:value-of select="@kind" />
       <xsl:text> </xsl:text>
@@ -1084,7 +1117,7 @@ authorization from the authors.
         <xsl:apply-templates select=".">
           <xsl:with-param name="type-lengths" select="$type-lengths" />
         </xsl:apply-templates>
-        <xsl:text>;
+        <xsl:text>; /**&lt; </xsl:text><xsl:text> */
 </xsl:text>
       </xsl:for-each>
       <xsl:text>} </xsl:text>
@@ -1129,8 +1162,31 @@ authorization from the authors.
       <xsl:call-template name="type-lengths">
         <xsl:with-param name="items" select="field/@type" />
       </xsl:call-template>
-    </xsl:variable>
-    <xsl:value-of select="@type" />
+  </xsl:variable>
+  <!-- Doxygen for functions in header. -->
+/*****************************************************************************
+ **
+ ** <xsl:value-of select="@type" />
+ <xsl:text> </xsl:text>
+ <xsl:value-of select="@name" />
+ ** <xsl:call-template name="list">
+     <xsl:with-param name="items">
+         <xsl:for-each select="field">
+             <item>
+                 <xsl:text>
+ ** @param </xsl:text>
+                 <xsl:apply-templates select=".">
+                     <xsl:with-param name="type-lengths" select="$type-lengths" />
+                 </xsl:apply-templates>
+             </item>
+         </xsl:for-each>
+     </xsl:with-param>
+ </xsl:call-template>
+ ** @returns <xsl:value-of select="@type" />
+ **
+ *****************************************************************************/
+ 
+<xsl:value-of select="@type" />
     <xsl:text>
 </xsl:text>
     <xsl:value-of select="$decl-open" />
@@ -1148,6 +1204,7 @@ authorization from the authors.
             <xsl:apply-templates select=".">
               <xsl:with-param name="type-lengths" select="$type-lengths" />
             </xsl:apply-templates>
+            <xsl:text>  /**&lt; */</xsl:text>
           </item>
         </xsl:for-each>
       </xsl:with-param>
