@@ -28,6 +28,8 @@
 #ifndef __XCBINT_H
 #define __XCBINT_H
 
+#include "bigreq.h"
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -39,6 +41,13 @@
 enum workarounds {
     WORKAROUND_NONE,
     WORKAROUND_GLX_GET_FB_CONFIGS_BUG
+};
+
+enum lazy_reply_tag
+{
+    LAZY_NONE = 0,
+    LAZY_COOKIE,
+    LAZY_FORCED
 };
 
 #define XCB_PAD(i) (-(i) & 3)
@@ -70,7 +79,11 @@ typedef struct _xcb_out {
     unsigned int request_written;
 
     pthread_mutex_t reqlenlock;
-    uint32_t maximum_request_length;
+    enum lazy_reply_tag maximum_request_length_tag;
+    union {
+        xcb_big_requests_enable_cookie_t cookie;
+        uint32_t value;
+    } maximum_request_length;
 } _xcb_out;
 
 int _xcb_out_init(_xcb_out *out);

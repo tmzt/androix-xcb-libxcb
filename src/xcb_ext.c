@@ -33,7 +33,7 @@
 #include "xcbint.h"
 
 typedef struct lazyreply {
-    enum { LAZY_NONE = 0, LAZY_COOKIE, LAZY_FORCED } tag;
+    enum lazy_reply_tag tag;
     union {
         xcb_query_extension_cookie_t cookie;
         xcb_query_extension_reply_t *reply;

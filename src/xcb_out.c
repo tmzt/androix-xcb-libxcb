@@ -57,25 +57,49 @@ static int write_block(xcb_connection_t *c, struct iovec *vector, int count)
 
 /* Public interface */
 
+void xcb_prefetch_maximum_request_length(xcb_connection_t *c)
+{
+    if(c->has_error)
+        return;
+    pthread_mutex_lock(&c->out.reqlenlock);
+    if(c->out.maximum_request_length_tag == LAZY_NONE)
+    {
+        const xcb_query_extension_reply_t *ext;
+        ext = xcb_get_extension_data(c, &xcb_big_requests_id);
+        if(ext && ext->present)
+        {
+            c->out.maximum_request_length_tag = LAZY_COOKIE;
+            c->out.maximum_request_length.cookie = xcb_big_requests_enable(c);
+        }
+        else
+        {
+            c->out.maximum_request_length_tag = LAZY_FORCED;
+            c->out.maximum_request_length.value = c->setup->maximum_request_length;
+        }
+    }
+    pthread_mutex_unlock(&c->out.reqlenlock);
+}
+
 uint32_t xcb_get_maximum_request_length(xcb_connection_t *c)
 {
     if(c->has_error)
         return 0;
+    xcb_prefetch_maximum_request_length(c);
     pthread_mutex_lock(&c->out.reqlenlock);
-    if(!c->out.maximum_request_length)
+    if(c->out.maximum_request_length_tag == LAZY_COOKIE)
     {
-        const xcb_query_extension_reply_t *ext;
-        c->out.maximum_request_length = c->setup->maximum_request_length;
-        ext = xcb_get_extension_data(c, &xcb_big_requests_id);
-        if(ext && ext->present)
+        xcb_big_requests_enable_reply_t *r = xcb_big_requests_enable_reply(c, c->out.maximum_request_length.cookie, 0);
+        c->out.maximum_request_length_tag = LAZY_FORCED;
+        if(r)
         {
-            xcb_big_requests_enable_reply_t *r = xcb_big_requests_enable_reply(c, xcb_big_requests_enable(c), 0);
-            c->out.maximum_request_length = r->maximum_request_length;
+            c->out.maximum_request_length.value = r->maximum_request_length;
             free(r);
         }
+        else
+            c->out.maximum_request_length.value = c->setup->maximum_request_length;
     }
     pthread_mutex_unlock(&c->out.reqlenlock);
-    return c->out.maximum_request_length;
+    return c->out.maximum_request_length.value;
 }
 
 unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vector, const xcb_protocol_request_t *req)
@@ -237,7 +261,7 @@ int _xcb_out_init(_xcb_out *out)
 
     if(pthread_mutex_init(&out->reqlenlock, 0))
         return 0;
-    out->maximum_request_length = 0;
+    out->maximum_request_length_tag = LAZY_NONE;
 
     return 1;
 }

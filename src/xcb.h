@@ -183,8 +183,7 @@ typedef struct xcb_auth_info_t {
 int xcb_flush(xcb_connection_t *c);
 
 /**
- * @brief Returns the maximum request length field from the connection
- * setup data.
+ * @brief Returns the maximum request length that this server accepts.
  * @param c: The connection to the X server.
  * @return The maximum request length field.
  *
@@ -199,6 +198,25 @@ int xcb_flush(xcb_connection_t *c);
  * 16GB with.
  */
 uint32_t xcb_get_maximum_request_length(xcb_connection_t *c);
+
+/**
+ * @brief Prefetch the maximum request length without blocking.
+ * @param c: The connection to the X server.
+ *
+ * Without blocking, does as much work as possible toward computing
+ * the maximum request length accepted by the X server.
+ *
+ * Invoking this function may cause a call to xcb_big_requests_enable,
+ * but will not block waiting for the reply.
+ * xcb_get_maximum_request_length will return the prefetched data
+ * after possibly blocking while the reply is retrieved.
+ *
+ * Note that in order for this function to be fully non-blocking, the
+ * application must previously have called
+ * xcb_prefetch_extension_data(c, &xcb_big_requests_id) and the reply
+ * must have already arrived.
+ */
+void xcb_prefetch_maximum_request_length(xcb_connection_t *c);
 
 
 /* xcb_in.c */
