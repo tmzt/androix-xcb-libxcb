@@ -8,11 +8,7 @@ AC_INIT([libxcb],
 AC_CONFIG_SRCDIR([xcb.pc.in])
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
 
-dnl This ifdef has no useful effect prior to automake 1.9, but in 1.9
-dnl it allows the user to not have check.m4 installed.
-m4_ifdef([AM_PATH_CHECK],[
-AM_PATH_CHECK(0.8.2, [HAVE_CHECK=true], [HAVE_CHECK=false])
-])
+PKG_CHECK_MODULES(CHECK, [check >= 0.9.4], [HAVE_CHECK=true], [HAVE_CHECK=false])
 AM_CONDITIONAL(HAVE_CHECK, test x$HAVE_CHECK = xtrue)
 
 AC_CONFIG_HEADERS([src/config.h])
