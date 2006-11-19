@@ -973,11 +973,13 @@ authorization from the authors.
       -->__<xsl:value-of select="$ucase-header" />_H<!--
     --></xsl:variable>
 
-<xsl:text>/**
- * @file </xsl:text><xsl:value-of select="$header" /><xsl:text>.h
- **/
+<xsl:text>/*
+ * This file generated automatically from </xsl:text>
+<xsl:value-of select="$header" /><xsl:text>.xml by c-client.xsl using XSLT.
+ * Edit at your peril.
+ */
 </xsl:text>
-<xsl:text>
+<xsl:if test="$h"><xsl:text>
 /**
  * @defgroup XCB_</xsl:text><xsl:value-of select="$ext" /><xsl:text>_API XCB </xsl:text><xsl:value-of select="$ext" /><xsl:text> API
  * @brief </xsl:text><xsl:value-of select="$ext" /><xsl:text> XCB Protocol Implementation.</xsl:text>
@@ -985,14 +987,8 @@ authorization from the authors.
  * @{
  **/
 </xsl:text>
-<xsl:text>/*
- * This file generated automatically from </xsl:text>
-<xsl:value-of select="$header" /><xsl:text>.xml by c-client.xsl using XSLT.
- * Edit at your peril.
- */
-</xsl:text>
 
-<xsl:if test="$h"><xsl:text>
+<xsl:text>
 #ifndef </xsl:text><xsl:value-of select="$guard" /><xsl:text>
 #define </xsl:text><xsl:value-of select="$guard" /><xsl:text>
 </xsl:text>
@@ -1028,10 +1024,11 @@ authorization from the authors.
 
 <xsl:if test="$h">
 <xsl:text>
+#endif
+
 /**
  * @}
  */
-#endif
 </xsl:text>
 </xsl:if>
   </xsl:template>
