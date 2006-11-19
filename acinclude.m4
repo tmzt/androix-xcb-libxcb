@@ -99,10 +99,6 @@ AC_DEFUN([AM_CHECK_DOXYGEN],
     dnl Substitution
     dnl
     AC_SUBST([DOXYGEN])
-    dnl according to the autoconf doc, htmldir == docdir == ${prefix}/share/doc/${PACKAGE_NAME}
-    dnl I tried to use docdir, without success
-    htmldir=${prefix}/share/doc/${PACKAGE_NAME}
-    AC_SUBST(htmldir)
     AM_CONDITIONAL(BUILD_DOCS, test "x$BUILD_DOCS" = "xyes")
    ])
 dnl End of acinclude.m4
