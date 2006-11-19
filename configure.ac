@@ -114,6 +114,12 @@ AC_SUBST(CWARNFLAGS)
 
 GCC_CHECK_VISIBILITY()
 
+# htmldir is not defined prior to autoconf 2.59c, so on earlier versions
+# set an equivalent value.
+AC_PREREQ([2.59c], [], [AC_SUBST([htmldir], [m4_ifset([AC_PACKAGE_TARNAME],
+	  ['${datadir}/doc/${PACKAGE_TARNAME}'],
+	  ['${datadir}/doc/${PACKAGE}'])
+])])
 AM_CHECK_DOXYGEN()
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile])
