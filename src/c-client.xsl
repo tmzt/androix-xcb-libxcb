@@ -590,7 +590,7 @@ authorization from the authors.
     </list>
   </xsl:template>
 
-  <xsl:template match="field|localfield" mode="param">
+  <xsl:template match="field" mode="param">
     <field>
       <xsl:attribute name="type">
         <xsl:call-template name="canonical-type-name" />
