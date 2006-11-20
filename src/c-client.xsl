@@ -722,6 +722,10 @@ authorization from the authors.
     <l><xsl:value-of select="@ref" /> xcb_out;</l>
 
     <l />
+    <xsl:if test="not ($ext) and not($struct//*[(self::field or self::exprfield or self::pad)
+                                                and not(boolean(@no-assign))])">
+      <l>xcb_out.pad0 = 0;</l>
+    </xsl:if>
     <xsl:apply-templates select="$struct//*[(self::field or self::exprfield or self::pad)
                                             and not(boolean(@no-assign))]"
                          mode="assign" />
