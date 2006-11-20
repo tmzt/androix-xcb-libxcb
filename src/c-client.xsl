@@ -47,6 +47,8 @@ authorization from the authors.
 
   <xsl:variable name="h" select="$mode = 'header'" />
   <xsl:variable name="c" select="$mode = 'source'" />
+
+  <xsl:variable name="need-string-h" select="//request/pad[@bytes != 1]" />
   
   <!-- String used to indent lines of code. -->
   <xsl:variable name="indent-string" select="'    '" />
@@ -720,7 +722,7 @@ authorization from the authors.
     <l><xsl:value-of select="@ref" /> xcb_out;</l>
 
     <l />
-    <xsl:apply-templates select="$struct//*[(self::field or self::exprfield)
+    <xsl:apply-templates select="$struct//*[(self::field or self::exprfield or self::pad)
                                             and not(boolean(@no-assign))]"
                          mode="assign" />
 
@@ -777,6 +779,14 @@ authorization from the authors.
       <xsl:apply-templates mode="output-expression" />
       <xsl:text>;</xsl:text>
     </l>
+  </xsl:template>
+
+  <xsl:template match="pad" mode="assign">
+    <xsl:variable name="padnum"><xsl:number /></xsl:variable>
+    <l><xsl:choose>
+        <xsl:when test="@bytes = 1">xcb_out.pad<xsl:value-of select="$padnum - 1" /> = 0;</xsl:when>
+        <xsl:otherwise>memset(xcb_out.pad<xsl:value-of select="$padnum - 1" />, 0, <xsl:value-of select="@bytes" />);</xsl:otherwise>
+    </xsl:choose></l>
   </xsl:template>
 
   <xsl:template match="iterator" mode="pass2">
@@ -1013,7 +1023,10 @@ authorization from the authors.
   </xsl:choose>
 </xsl:if>
 
-<xsl:if test="$c"><xsl:text>
+<xsl:if test="$c">
+<xsl:if test="$need-string-h">
+#include &lt;string.h&gt;</xsl:if>
+<xsl:text>
 #include &lt;assert.h&gt;
 #include "xcbext.h"
 #include "</xsl:text><xsl:value-of select="$header" /><xsl:text>.h"
