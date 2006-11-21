@@ -176,8 +176,11 @@ static int _xcb_open_decnet(const char *host, const unsigned short port)
 static int _xcb_open_tcp(char *host, const unsigned short port)
 {
     int fd = -1;
-    struct addrinfo hints = { AI_ADDRCONFIG | AI_NUMERICSERV, AF_UNSPEC,
-                              SOCK_STREAM };
+    struct addrinfo hints = { AI_ADDRCONFIG
+#ifdef AI_NUMERICSERV
+                              | AI_NUMERICSERV
+#endif
+                              , AF_UNSPEC, SOCK_STREAM };
     char service[6]; /* "65535" with the trailing '\0' */
     struct addrinfo *results, *addr;
     char *bracket;
