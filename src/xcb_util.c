@@ -238,10 +238,14 @@ xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
 
-    _xcb_get_auth_info(fd, &auth);
-    c = xcb_connect_to_fd(fd, &auth);
-    free(auth.name);
-    free(auth.data);
+    if(_xcb_get_auth_info(fd, &auth, display))
+    {
+        c = xcb_connect_to_fd(fd, &auth);
+        free(auth.name);
+        free(auth.data);
+    }
+    else
+        c = xcb_connect_to_fd(fd, 0);
     return c;
 }
 
