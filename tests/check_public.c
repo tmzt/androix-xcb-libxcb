@@ -119,10 +119,22 @@ END_TEST
 
 START_TEST(parse_display_ipv6)
 {
+	parse_display_pass(":::0", "::", 0, 0);
+	parse_display_pass("1:::0", "1::", 0, 0);
 	parse_display_pass("::1:0", "::1", 0, 0);
 	parse_display_pass("::1:0.1", "::1", 0, 1);
+	parse_display_pass("::127.0.0.1:0", "::127.0.0.1", 0, 0);
+	parse_display_pass("::ffff:127.0.0.1:0", "::ffff:127.0.0.1", 0, 0);
 	parse_display_pass("2002:83fc:d052::1:0", "2002:83fc:d052::1", 0, 0);
 	parse_display_pass("2002:83fc:d052::1:0.1", "2002:83fc:d052::1", 0, 1);
+	parse_display_pass("[::]:0", "[::]", 0, 0);
+	parse_display_pass("[1::]:0", "[1::]", 0, 0);
+	parse_display_pass("[::1]:0", "[::1]", 0, 0);
+	parse_display_pass("[::1]:0.1", "[::1]", 0, 1);
+	parse_display_pass("[::127.0.0.1]:0", "[::127.0.0.1]", 0, 0);
+	parse_display_pass("[::ffff:127.0.0.1]:0", "[::ffff:127.0.0.1]", 0, 0);
+	parse_display_pass("[2002:83fc:d052::1]:0", "[2002:83fc:d052::1]", 0, 0);
+	parse_display_pass("[2002:83fc:d052::1]:0.1", "[2002:83fc:d052::1]", 0, 1);
 }
 END_TEST
 
@@ -140,15 +152,28 @@ START_TEST(parse_display_negative)
 	parse_display_fail("");
 	parse_display_fail(":");
 	parse_display_fail("::");
+	parse_display_fail(":::");
 	parse_display_fail(":.");
 	parse_display_fail(":a");
 	parse_display_fail(":a.");
 	parse_display_fail(":0.");
+	parse_display_fail(":.a");
+	parse_display_fail(":.0");
 	parse_display_fail(":0.a");
 	parse_display_fail(":0.0.");
 
+	parse_display_fail("127.0.0.1");
+	parse_display_fail("127.0.0.1:");
+	parse_display_fail("127.0.0.1::");
+	parse_display_fail("::127.0.0.1");
+	parse_display_fail("::127.0.0.1:");
+	parse_display_fail("::127.0.0.1::");
+	parse_display_fail("::ffff:127.0.0.1");
+	parse_display_fail("::ffff:127.0.0.1:");
+	parse_display_fail("::ffff:127.0.0.1::");
 	parse_display_fail("localhost");
 	parse_display_fail("localhost:");
+	parse_display_fail("localhost::");
 }
 END_TEST
 
