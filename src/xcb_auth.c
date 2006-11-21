@@ -77,11 +77,19 @@ static int authname_match(enum auth_protos kind, char *name, int namelen)
     return 1;
 }
 
+static void *_xcb_memrchr(const void *s, int c, size_t n)
+{
+    for(s = (char *) s + n - 1; n--; s = (char *) s - 1)
+        if(*(char *)s == (char)c)
+            return (void *) s;
+    return 0;
+}
+
 static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen)
 {
     char *addr = 0;
     int addrlen = 0;
-    unsigned short family;
+    unsigned short family, port = 0;
     char hostnamebuf[256];   /* big enough for max hostname */
     char dispbuf[40];   /* big enough to hold more than 2^64 base 10 */
     char *display;
@@ -89,34 +97,47 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen)
     int i;
 
     family = FamilyLocal; /* 256 */
-    switch (sockname->sa_family) {
-    case AF_INET:
-	/*block*/ {
-             struct sockaddr_in *si = (struct sockaddr_in *) sockname;
-	     assert(sizeof(*si) == socknamelen);
-	     addr = (char *) &si->sin_addr;
-	     addrlen = 4;
-	     if (ntohl(si->sin_addr.s_addr) != 0x7f000001)
-		 family = XCB_FAMILY_INTERNET;
-	     snprintf(dispbuf, sizeof(dispbuf), "%d", ntohs(si->sin_port) - X_TCP_PORT);
-	     display = dispbuf;
+    switch(sockname->sa_family)
+    {
+    case AF_INET6:
+        addr = (char *) &((struct sockaddr_in6 *)sockname)->sin6_addr;
+        addrlen = sizeof(((struct sockaddr_in6 *)sockname)->sin6_addr);
+        port = ((struct sockaddr_in6 *)sockname)->sin6_port;
+        if(!IN6_IS_ADDR_V4MAPPED(addr))
+        {
+            if(!IN6_IS_ADDR_LOOPBACK(addr))
+                family = XCB_FAMILY_INTERNET_6;
+            break;
         }
-	break;
+        addr += 12;
+        /* if v4-mapped, fall through. */
+    case AF_INET:
+        if(!addr)
+        {
+            addr = (char *) &((struct sockaddr_in *)sockname)->sin_addr;
+            port = ((struct sockaddr_in *)sockname)->sin_port;
+        }
+        addrlen = sizeof(((struct sockaddr_in *)sockname)->sin_addr);
+        if(*(in_addr_t *) addr != htonl(INADDR_LOOPBACK))
+            family = XCB_FAMILY_INTERNET;
+        break;
     case AF_UNIX:
-	/*block*/ { 
-	    struct sockaddr_un *su = (struct sockaddr_un *) sockname;
-	    char *sockbuf = (char *) sockname;
-	    assert(sizeof(*su) >= socknamelen);
-	    sockbuf[socknamelen] = 0;	/* null-terminate path */
-	    display = strrchr(su->sun_path, 'X');
-	    if (display == 0)
-		return 0;   /* sockname is mangled somehow */
-	    display++;
-	}
-	break;
+        display = _xcb_memrchr(((struct sockaddr_un *) sockname)->sun_path, 'X',
+                               socknamelen);
+        if(!display)
+            return 0;   /* sockname is mangled somehow */
+        display++;
+        break;
     default:
         return 0;   /* cannot authenticate this family */
     }
+
+    if(port)
+    {
+        snprintf(dispbuf, sizeof(dispbuf), "%hu", ntohs(port) - X_TCP_PORT);
+        display = dispbuf;
+    }
+
     if (family == FamilyLocal) {
         if (gethostname(hostnamebuf, sizeof(hostnamebuf)) == -1)
             return 0;   /* do not know own hostname */
