@@ -96,28 +96,28 @@ int xcb_parse_display(const char *name, char **host, int *displayp, int *screenp
     return 1;
 }
 
-static int _xcb_open_tcp(const char *host, const unsigned short port);
+static int _xcb_open_tcp(char *host, const unsigned short port);
 static int _xcb_open_unix(const char *file);
 #ifdef DNETCONN
 static int _xcb_open_decnet(const char *host, const unsigned short port);
 #endif
 
-static int _xcb_open(const char *host, const int display)
+static int _xcb_open(char *host, const int display)
 {
     int fd;
 
     if(*host)
     {
 #ifdef DNETCONN
-        if (strchr(host,  ':'))
+        /* DECnet displays have two colons, so xcb_parse_display will have left
+           one at the end.  However, an IPv6 address can end with *two* colons,
+           so only treat this as a DECnet display if host ends with exactly one
+           colon. */
+        char *colon = strchr(host, ':');
+        if(colon && *(colon+1) == '\0')
         {
-            /* DECnet displays have two colons, so the parser will have left
-               one at the end */
-            char *dnethost = strdup(host);
-
-            dnethost[strlen(dnethost)-1] = '\0';
-            fd = _xcb_open_decnet(dnethost, display);
-            free(dnethost);
+            *colon = '\0';
+            fd = _xcb_open_decnet(host, display);
         }
         else
 #endif
@@ -173,22 +173,37 @@ static int _xcb_open_decnet(const char *host, const unsigned short port)
 }
 #endif
 
-static int _xcb_open_tcp(const char *host, const unsigned short port)
+static int _xcb_open_tcp(char *host, const unsigned short port)
 {
-    int fd;
-    struct sockaddr_in addr;
-    struct hostent *hostaddr = gethostbyname(host);
-    if(!hostaddr)
-        return -1;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    memcpy(&addr.sin_addr, hostaddr->h_addr_list[0], sizeof(addr.sin_addr));
+    int fd = -1;
+    struct addrinfo hints = { AI_ADDRCONFIG | AI_NUMERICSERV, AF_UNSPEC,
+                              SOCK_STREAM };
+    char service[6]; /* "65535" with the trailing '\0' */
+    struct addrinfo *results, *addr;
+    char *bracket;
+    
+    /* Allow IPv6 addresses enclosed in brackets. */
+    if(host[0] == '[' && (bracket = strrchr(host, ']')) && bracket[1] == '\0')
+    {
+        *bracket = '\0';
+        ++host;
+        hints.ai_flags |= AI_NUMERICHOST;
+        hints.ai_family = AF_INET6;
+    }
 
-    fd = socket(PF_INET, SOCK_STREAM, 0);
-    if(fd == -1)
+    snprintf(service, sizeof(service), "%hu", port);
+    if(getaddrinfo(host, service, &hints, &results))
+        /* FIXME: use gai_strerror, and fill in error connection */
         return -1;
-    if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1)
-        return -1;
+
+    for(addr = results; addr; addr = addr->ai_next)
+    {
+        fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        if(fd >= 0 && connect(fd, addr->ai_addr, addr->ai_addrlen) >= 0)
+            break;
+        fd = -1;
+    }
+    freeaddrinfo(results);
     return fd;
 }
 
