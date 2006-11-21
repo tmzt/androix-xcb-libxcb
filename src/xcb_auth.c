@@ -177,6 +177,26 @@ static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *
 	    APPEND(info->data, j, si->sin_port);
 	}
 	break;
+        case AF_INET6:
+            /*block*/ {
+            struct sockaddr_in6 *si6 = (struct sockaddr_in6 *) sockname;
+            if(IN6_IS_ADDR_V4MAPPED(si6->sin6_addr.s6_addr))
+            {
+                APPEND(info->data, j, si6->sin6_addr.s6_addr[12]);
+                APPEND(info->data, j, si6->sin6_port);
+            }
+            else
+            {
+                /* XDM-AUTHORIZATION-1 does not handle IPv6 correctly.  Do the
+                   same thing Xlib does: use all zeroes for the 4-byte address
+                   and 2-byte port number. */
+                long fakeaddr = 0;
+                short fakeport = 0;
+                APPEND(info->data, j, fakeaddr);
+                APPEND(info->data, j, fakeport);
+            }
+        }
+        break;
         case AF_UNIX:
             /*block*/ {
 	    long fakeaddr = htonl(0xffffffff - next_nonce());
