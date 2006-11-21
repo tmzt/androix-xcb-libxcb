@@ -77,6 +77,8 @@ static int authname_match(enum auth_protos kind, char *name, int namelen)
     return 1;
 }
 
+#define SIN6_ADDR(s) (&((struct sockaddr_in6 *)s)->sin6_addr)
+
 static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
                           int display)
 {
@@ -92,11 +94,11 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
     switch(sockname->sa_family)
     {
     case AF_INET6:
-        addr = (char *) &((struct sockaddr_in6 *)sockname)->sin6_addr;
-        addrlen = sizeof(((struct sockaddr_in6 *)sockname)->sin6_addr);
-        if(!IN6_IS_ADDR_V4MAPPED(addr))
+        addr = (char *) SIN6_ADDR(sockname);
+        addrlen = sizeof(*SIN6_ADDR(sockname));
+        if(!IN6_IS_ADDR_V4MAPPED(SIN6_ADDR(sockname)))
         {
-            if(!IN6_IS_ADDR_LOOPBACK(addr))
+            if(!IN6_IS_ADDR_LOOPBACK(SIN6_ADDR(sockname)))
                 family = XCB_FAMILY_INTERNET_6;
             break;
         }
@@ -180,7 +182,7 @@ static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *
         case AF_INET6:
             /*block*/ {
             struct sockaddr_in6 *si6 = (struct sockaddr_in6 *) sockname;
-            if(IN6_IS_ADDR_V4MAPPED(si6->sin6_addr.s6_addr))
+            if(IN6_IS_ADDR_V4MAPPED(SIN6_ADDR(sockname)))
             {
                 APPEND(info->data, j, si6->sin6_addr.s6_addr[12]);
                 APPEND(info->data, j, si6->sin6_port);
