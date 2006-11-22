@@ -49,7 +49,7 @@ static const int error_connection = 1;
 
 int xcb_popcount(uint32_t mask)
 {
-    unsigned long y;
+    uint32_t y;
     y = (mask >> 1) & 033333333333;
     y = mask - y - ((y >> 1) & 033333333333);
     return ((y + (y >> 3)) & 030707070707) % 077;

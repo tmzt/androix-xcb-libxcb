@@ -48,7 +48,7 @@ static const int error_connection = 1;
 
 static int set_fd_flags(const int fd)
 {
-    long flags = fcntl(fd, F_GETFL, 0);
+    int flags = fcntl(fd, F_GETFL, 0);
     if(flags == -1)
         return 0;
     flags |= O_NONBLOCK;

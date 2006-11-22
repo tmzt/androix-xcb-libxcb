@@ -192,8 +192,8 @@ static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *
                 /* XDM-AUTHORIZATION-1 does not handle IPv6 correctly.  Do the
                    same thing Xlib does: use all zeroes for the 4-byte address
                    and 2-byte port number. */
-                long fakeaddr = 0;
-                short fakeport = 0;
+                uint32_t fakeaddr = 0;
+                uint16_t fakeport = 0;
                 APPEND(info->data, j, fakeaddr);
                 APPEND(info->data, j, fakeport);
             }
@@ -201,8 +201,8 @@ static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *
         break;
         case AF_UNIX:
             /*block*/ {
-	    long fakeaddr = htonl(0xffffffff - next_nonce());
-	    short fakeport = htons(getpid());
+	    uint32_t fakeaddr = htonl(0xffffffff - next_nonce());
+	    uint16_t fakeport = htons(getpid());
 	    APPEND(info->data, j, fakeaddr);
 	    APPEND(info->data, j, fakeport);
 	}
@@ -212,9 +212,7 @@ static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *
             return 0;   /* do not know how to build this */
 	}
 	{
-	    long now;
-	    time(&now);
-	    now = htonl(now);
+	    uint32_t now = htonl(time(0));
 	    APPEND(info->data, j, now);
 	}
 	assert(j <= 192 / 8);
