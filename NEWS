@@ -1,3 +1,62 @@
+Release 1.0 (2006-11-23)
+========================
+
+The "Thanksgiving" release: We feel thankful to have it released.  Five years
+have passed since XCB's initial commit on September 3rd, 2001:
+    <http://gitweb.freedesktop.org/?p=xcb.git;a=commit;h=09e54c4a3c>
+
+* Support IPv6.  XCB now supports displays with IPv6 addresses, with or without
+  enclosing square brackets, or with hosts which resolve to IPv6 addresses, by
+  using getaddrinfo instead of gethostbyname, and by including support for
+  authentication for such connections.  This allows such displays as "::1:1.1".
+
+* XCB now uses the libpthread-stubs, to properly support optional use of
+  pthreads even on platforms which do not have all the necessary pthread stubs
+  in libc or otherwise available by default.
+
+* Switch from the old AM_PATH_CHECK macro to pkg-config.  check 0.9.4 is now
+  required to build XCB's unit tests.  The version that we were requiring was
+  not actually new enough to let our unit tests compile, and the AM_PATH_CHECK
+  macro is now considered deprecated.  We know that versions of check using
+  pkg-config are new enough to work, and the check dependency was optional
+  anyway, so we've dropped support for older versions.
+
+* Provide a xcb_prefetch_maximum_request_length counterpart to
+  xcb_get_maximum_request_length.
+
+* Fix Bug #5958: zero out padding bytes in requests.
+
+* Change xcb_connect to pass the display number to _xcb_get_auth_info, which
+  passes it to get_authptr.  This allows get_authptr to stop hacking the
+  display number out of the sockaddrs of various address families, such as
+  port - X_TCP_PORT, or the number after the last X in the UNIX socket path.
+
+* Remove --with-opt and --with-debug options from configure.ac; configure
+  supports the use of custom CFLAGS, so please use that instead.
+
+* Reove support for the <localfield> tag in protocol descriptions, since they
+  no longer use it, and since new protocol descriptions should not need it
+  either.
+
+* xcb-proto has no libraries or headers, so don't use XCBPROTO_CFLAGS or
+  XCBPROTO_LIBS.
+
+* XCB builds which use xdmcp now include it in Requires.private, to support
+  static linking.
+
+* Replace "long" with uint32_t when used for a 32-bit quantity
+
+* Various enhancements to the generation of documentation with Doxygen:
+  * Check for doxygen in configure.ac
+  * Fix some Doxygen warnings.
+  * Install documentation.
+  * Handle out-of-tree builds, with srcdir != builddir.  xcb.doxygen now gets
+    generated from xcb.doxygen.in, so that it can use top_builddir and
+    top_srcdir to find source and to output documentation.
+  * Fill in PROJECT_NUMBER from @VERSION@, now that we have it readily
+    available via autoconf.
+
+
 Release 1.0 RC3 (2006-11-02)
 ============================
 
