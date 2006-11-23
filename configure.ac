@@ -55,7 +55,7 @@ AC_MSG_RESULT($XCBPROTO_XCBINCLUDEDIR)
 AC_SUBST(XCBPROTO_XCBINCLUDEDIR)
 
 AC_HEADER_STDC
-AC_SEARCH_LIBS(gethostbyname, nsl)
+AC_SEARCH_LIBS(getaddrinfo, socket)
 AC_SEARCH_LIBS(connect, socket)
 
 xcbincludedir='${includedir}/xcb'
