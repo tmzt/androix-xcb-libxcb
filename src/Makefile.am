@@ -220,7 +220,4 @@ SUFFIXES = .xml
 	            -o $@ $(srcdir)/c-client.xsl $< 
 
 $(EXTENSION_XML):
-	for i in $(EXTENSION_XML) ; do \
-           rm -f $$i ; \
-           $(LN_S) $(XCBPROTO_XCBINCLUDEDIR)/$$i $$i ; \
-        done
+	$(LN_S) -f $(XCBPROTO_XCBINCLUDEDIR)/$@ $@
