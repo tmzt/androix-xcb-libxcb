@@ -94,7 +94,7 @@ EXTENSION_XML = xproto.xml \
 xcbinclude_HEADERS = xcb.h xcbext.h xcbxlib.h $(EXTHEADERS)
 noinst_HEADERS = xcbint.h
 
-AM_CFLAGS = $(COPTFLAGS) $(CWARNFLAGS) $(CDEBUGFLAGS) $(NEEDED_CFLAGS) $(XDMCP_CFLAGS)
+AM_CFLAGS = $(CWARNFLAGS) $(NEEDED_CFLAGS) $(XDMCP_CFLAGS)
 libxcb_la_LIBADD = $(NEEDED_LIBS) $(XDMCP_LIBS)
 libxcb_la_SOURCES = \
 		xcb_conn.c xcb_out.c xcb_in.c xcb_ext.c xcb_xid.c \

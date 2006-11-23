@@ -61,50 +61,6 @@ AC_SEARCH_LIBS(connect, socket)
 xcbincludedir='${includedir}/xcb'
 AC_SUBST(xcbincludedir)
 
-AC_ARG_WITH(opt,
-AC_HELP_STRING([--with-opt],       [compile with reasonable optimizations])
-AC_HELP_STRING([--with-opt=FLAGS], [compile with specified FLAGS])
-AC_HELP_STRING([--with-opt=small], [compile for smallest code])
-AC_HELP_STRING([--without-opt],    [compile without optimization (default)]),
-[
-	case "$withval" in
-	yes)
-		COPTFLAGS="-O3"
-		;;
-	small)
-		COPTFLAGS="-Os -fomit-frame-pointer -DNDEBUG"
-		;;
-	no)
-		COPTFLAGS=""
-		;;
-	*)
-		COPTFLAGS="$withval"
-		;;
-	esac
-])
-AC_CACHE_CHECK([what compiler optimizations to apply], [COPTFLAGS], [COPTFLAGS=""])
-AC_SUBST(COPTFLAGS)
-
-AC_ARG_WITH(debug,
-AC_HELP_STRING([--with-debug],       [compile with debugging (default)])
-AC_HELP_STRING([--with-debug=FLAGS], [compile with specified debugging FLAGS])
-AC_HELP_STRING([--without-debug],    [compile without debugging]),
-[
-	case "$withval" in
-	yes)
-		CDEBUGFLAGS="-g"
-		;;
-	no)
-		CDEBUGFLAGS=""
-		;;
-	*)
-		CDEBUGFLAGS="$withval"
-		;;
-	esac
-])
-AC_CACHE_CHECK([what debugging options to apply], [CDEBUGFLAGS], [CDEBUGFLAGS="-g"])
-AC_SUBST(CDEBUGFLAGS)
-
 if  test "x$GCC" = xyes ; then
     CWARNFLAGS="-Wall -pedantic -Wpointer-arith \
 		-Wstrict-prototypes -Wmissing-declarations -Wnested-externs"
