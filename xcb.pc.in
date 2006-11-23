@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: XCB
 Description: X-protocol C Binding
 Version: @PACKAGE_VERSION@
-Requires.private: xau
+Requires.private: @NEEDED@
 Libs: -L${libdir} -lxcb
 Libs.private: @LIBS@
 Cflags: -I${includedir}

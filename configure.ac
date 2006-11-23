@@ -31,18 +31,22 @@ AC_SUBST(HTML_CHECK_RESULT)
 
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 0.9.93)
-PKG_CHECK_MODULES(XAU, xau)
+NEEDED="xau pthread-stubs"
+PKG_CHECK_MODULES(NEEDED, $NEEDED)
 
 PKG_CHECK_MODULES(XDMCP, xdmcp,
 	AC_CHECK_LIB(Xdmcp, XdmcpWrap,
 		[
 		AC_DEFINE(HASXDMAUTH,1,[Has Wraphelp.c needed for XDM AUTH protocols])
+		NEEDED="$NEEDED xdmcp"
 		],
 		[
 		XDMCP_CFLAGS=
 		XDMCP_LIBS=
 		], [$XDMCP_LIBS]),
 	[AC_MSG_RESULT(no)])
+
+AC_SUBST(NEEDED)
 
 # Find the xcb-proto protocol descriptions
 AC_MSG_CHECKING(XCBPROTO_XCBINCLUDEDIR)
