@@ -4,29 +4,39 @@ tutorial/index.html \
 tutorial/xcb.css \
 xcb.doxygen.in
 
-htmlDATA_INSTALL = cp -pR
-
-html_DATA = tutorial/
-
-uninstall-htmlDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(html_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -rf '$(DESTDIR)$(htmldir)/$$f'"; \
-	  rm -rf "$(DESTDIR)$(htmldir)/$$f"; \
-	done
-	rmdir "$(DESTDIR)$(htmldir)/" || true
+docdirs = $(srcdir)/tutorial
 
 if BUILD_DOCS
 
+docdirs += manual
+
 # rule to build documentation and copy necessary files
-manual: clean-local
+manual:
 	doxygen xcb.doxygen
 
 # rules to clean
 clean-local:
 	rm -rf manual/
 
-html_DATA += manual/
-
 endif
+
+all-local: $(docdirs)
+
+# rule to install the html documentation and tutorial in $(htmldir)
+install-data-local:
+	@if ! test -d "$(DESTDIR)$(htmldir)"; then \
+	  echo "$(mkinstalldirs) '$(DESTDIR)$(htmldir)'"; \
+	  $(mkinstalldirs) '$(DESTDIR)$(htmldir)'; \
+	fi
+	@for d in $(docdirs); do \
+	  echo "cp -pR $$d '$(DESTDIR)$(htmldir)/'"; \
+	  cp -pR $$d '$(DESTDIR)$(htmldir)/'; \
+	done
+
+uninstall-local:
+	@for d in $(docdirs); do \
+	  d=`basename $$d`; \
+	  echo "test ! -d '$(DESTDIR)$(htmldir)/'$$d || { find '$(DESTDIR)$(htmldir)/'$$d -type d ! -perm -200 -exec chmod u+w '{}' ';' && rm -rf '$(DESTDIR)$(htmldir)/'$$d; }"; \
+	  test ! -d '$(DESTDIR)$(htmldir)/'$$d || { find '$(DESTDIR)$(htmldir)/'$$d -type d ! -perm -200 -exec chmod u+w '{}' ';' && rm -rf '$(DESTDIR)$(htmldir)/'$$d; }; \
+	done
+	rmdir "$(DESTDIR)$(htmldir)/" || true
