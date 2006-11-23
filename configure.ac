@@ -84,5 +84,6 @@ AM_CHECK_DOXYGEN()
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile])
 AC_CONFIG_FILES([xcb.pc xcb-xlib.pc xcb-composite.pc xcb-damage.pc xcb-dpms.pc xcb-glx.pc xcb-randr.pc xcb-record.pc xcb-render.pc xcb-res.pc xcb-screensaver.pc xcb-shape.pc xcb-shm.pc xcb-sync.pc xcb-xevie.pc xcb-xf86dri.pc xcb-xfixes.pc xcb-xinerama.pc xcb-xprint.pc xcb-xtest.pc xcb-xv.pc xcb-xvmc.pc])
+AC_CONFIG_FILES([doc/xcb.doxygen])
 
 AC_OUTPUT

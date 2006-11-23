@@ -1,7 +1,8 @@
 
 EXTRA_DIST = \
 tutorial/index.html \
-tutorial/xcb.css
+tutorial/xcb.css \
+xcb.doxygen.in
 
 htmlDATA_INSTALL = cp -pR
 
@@ -20,7 +21,7 @@ if BUILD_DOCS
 
 # rule to build documentation and copy necessary files
 manual: clean-local
-	cd .. && doxygen xcb.doxygen
+	doxygen xcb.doxygen
 
 # rules to clean
 clean-local:
