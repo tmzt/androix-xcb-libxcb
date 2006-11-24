@@ -44,7 +44,7 @@ AC_DEFUN([AM_CHECK_DOXYGEN],
        AC_HELP_STRING(
           [--disable-build-docs],
           [Disable the build of the documentation]),
-       [if test "${disable_build_docs}" = "yes" ; then
+       [if test x"$enableval" != x"yes" ; then
            enable_build_docs="no"
         else
            enable_build_docs="yes"
