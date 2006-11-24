@@ -386,7 +386,7 @@
 #include &lt;string.h&gt;
 #include &lt;sys/time.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 #include &lt;X11/Xlib.h&gt;
 
@@ -596,7 +596,7 @@ gcc -Wall prog.c -o prog `pkg-config --cflags --libs xcb`
       and is opaque. Here is how the connection can be opened:
       </p>
       <pre class="code">
-#<include>include</include> <string>&lt;X11/XCB/xcb.h&gt;</string>
+#<include>include</include> <string>&lt;xcb/xcb.h&gt;</string>
 
 <type>int</type>
 <function>main</function> ()
@@ -684,7 +684,7 @@ xcb_screen_iterator_t xcb_setup_roots_iterator (xcb_setup_t *R);
       <pre class="code">
 #include &lt;stdio.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -731,7 +731,7 @@ typedef struct {
       We first ask for a new Id for our window, with this function:
       </p>
       <pre class="code">
-xcb_window_t xcb_window_new(xcb_connection_t *c);
+xcb_window_t xcb_generate_id(xcb_connection_t *c);
 </pre>
       <p>
       Then, XCB supplies the following function to create new windows:
@@ -769,7 +769,7 @@ xcb_void_cookie_t xcb_map_window (xcb_connection_t *c,
       <pre class="code">
 #include &lt;unistd.h&gt;      /* pause() */
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -785,7 +785,7 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Ask for our window's Id */
-  win.window = xcb_window_new(c);
+  win.window = xcb_generate_id(c);
 
   /* Create the window */
   xcb_create_window (c,                             /* Connection          */
@@ -836,8 +836,8 @@ int xcb_aux_sync (xcb_connection_t *c);
       now, we put it there.
       </p>
       <p>
-      The window that is created by the above code has a default
-      background (gray). This one can be set to a specific color,
+      The window that is created by the above code has a non defined
+      background. This one can be set to a specific color,
       thanks to the two last parameters of
       <span class="code">xcb_create_window()</span>, which are not
       described yet. See the subsections
@@ -862,7 +862,7 @@ int xcb_aux_sync (xcb_connection_t *c);
         </div>
         <div class="xcb">
         <ul>
-          <li>xcb_window_new ()
+          <li>xcb_generate_id ()
           <li>xcb_create_window ()
         </ul>
         </div>
@@ -896,7 +896,7 @@ typedef struct {
         context with this function:
         </p>
         <pre class="code">
-xcb_gcontext_t xcb_gcontext_new (xcb_connection_t *c);
+xcb_gcontext_t xcb_generate_id (xcb_connection_t *c);
 </pre>
         <p>
         Then, we set the attributes of the graphic context with this function:
@@ -914,7 +914,7 @@ xcb_void_cookie_t xcb_create_gc (xcb_connection_t *c,
         draw in foreground with a black color.
         </p>
         <pre class="code">
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -932,7 +932,7 @@ main ()
 
   /* Create a black graphic context for drawing in the foreground */
   win.window = screen-&gt;root;
-  black = xcb_gcontext_new (c);
+  black = xcb_generate_id (c);
   mask = XCB_GC_FOREGROUND;
   value[0] = screen-&gt;black_pixel;
   xcb_create_gc (c, black, win, mask, value);
@@ -970,7 +970,7 @@ main ()
           </div>
           <div class="xcb">
           <ul>
-            <li>xcb_gcontext_new ()
+            <li>xcb_generate_id ()
             <li>xcb_create_gc ()
           </ul>
           </div>
@@ -1246,7 +1246,7 @@ xcb_void_cookie_t xcb_poly_fill_arc (xcb_connection_t *c,
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -1293,14 +1293,14 @@ main ()
   /* Create black (foreground) graphic context */
   win.window = screen-&gt;root;
 
-  foreground = xcb_gcontext_new (c);
+  foreground = xcb_generate_id (c);
   mask = XCB_GC_FOREGROUND | XCB_GC_GRAPHICS_EXPOSURES;
   values[0] = screen-&gt;black_pixel;
   values[1] = 0;
   xcb_create_gc (c, foreground, win, mask, values);
 
   /* Ask for our window's Id */
-  win.window = xcb_window_new(c);
+  win.window = xcb_generate_id(c);
 
   /* Create the window */
   mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
@@ -1391,7 +1391,7 @@ main ()
         <pre class="code">
   mask = XCB_CW_EVENT_MASK;
   valwin[0] = XCB_EVENT_MASK_EXPOSURE;
-  win.window = xcb_window_new (c);
+  win.window = xcb_generate_id (c);
   xcb_create_window (c, depth, win.window, root-&gt;root,
                      0, 0, 150, 150, 10,
                      XCB_WINDOW_CLASS_INPUT_OUTPUT, root-&gt;root_visual,
@@ -1405,7 +1405,7 @@ main ()
         <pre class="code">
   mask = XCB_CW_EVENT_MASK;
   valwin[0] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
-  win.window = xcb_window_new (c);
+  win.window = xcb_generate_id (c);
   xcb_create_window (c, depth, win.window, root-&gt;root,
                      0, 0, 150, 150, 10,
                      XCB_WINDOW_CLASS_INPUT_OUTPUT, root-&gt;root_visual,
@@ -1894,7 +1894,7 @@ typedef xcb_key_press_event_t xcb_key_release_event_t;
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 void
 print_modifiers (uint32_t mask)
@@ -1928,7 +1928,7 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Ask for our window's Id */
-  win.window = xcb_window_new (c);
+  win.window = xcb_generate_id (c);
 
   /* Create the window */
   mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
@@ -2142,8 +2142,8 @@ xcb_void_cookie_t xcb_change_property (xcb_connection_t *c,       /* Connection 
         <pre class="code">
 #include &lt;string.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
-#include &lt;X11/XCB/xcb_atom.h&gt;
+#include &lt;xcb/xcb.h&gt;
+#include &lt;xcb/xcb_atom.h&gt;
 
 int
 main ()
@@ -2163,7 +2163,7 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Ask for our window's Id */
-  win = xcb_window_new (c);
+  win = xcb_generate_id (c);
 
   /* Create the window */
   xcb_create_window (c,                             /* Connection          */
@@ -2673,7 +2673,7 @@ typedef struct {
         <pre class="code">
 #include &lt;stdio.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -2702,7 +2702,7 @@ main ()
         map, with this function:
         </p>
         <pre class="code">
-xcb_colormap_t xcb_colormap_new (xcb_connection_t *c);
+xcb_colormap_t xcb_generate_id (xcb_connection_t *c);
 </pre>
         <p>
         Then, we create the color map with
@@ -2718,7 +2718,7 @@ xcb_void_cookie_t xcb_create_colormap (xcb_connection_t *c,       /* Pointer to 
         Here is an example of creation of a new color map:
         </p>
         <pre class="code">
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -2734,7 +2734,7 @@ main ()
 
   /* We create the window win here*/
 
-  cmap = xcb_colormap_new (c);
+  cmap = xcb_generate_id (c);
   xcb_create_colormap (c, XCB_COLORMAP_ALLOC_NONE, cmap, win, screen-&gt;root_visual);
 
   return 0;
@@ -2763,7 +2763,7 @@ xcb_void_cookie_t xcb_free_colormap (xcb_connection_t *c,   /* The connection */
           </div>
           <div class="xcb">
             <ul>
-              <li>xcb_colormap_new ()
+              <li>xcb_generate_id ()
               <li>xcb_create_colormap ()
             </ul>
           </div>
@@ -2819,7 +2819,7 @@ xcb_alloc_color_reply_t *xcb_alloc_color_reply (xcb_connection_t        *c,
       <pre class="code">
 #include &lt;malloc.h&gt;
 
-#include &lt;X11/XCB/xcb.h&gt;
+#include &lt;xcb/xcb.h&gt;
 
 int
 main ()
@@ -2836,7 +2836,7 @@ main ()
 
   /* We create the window win here*/
 
-  cmap = xcb_colormap_new (c);
+  cmap = xcb_generate_id (c);
   xcb_create_colormap (c, XCB_COLORMAP_ALLOC_NONE, cmap, win, screen-&gt;root_visual);
 
   rep = xcb_alloc_color_reply (c, xcb_alloc_color (c, cmap, 65535, 0, 0), NULL);
@@ -2946,7 +2946,7 @@ typedef union {
         Id to our pixmap, with this function:
         </p>
         <pre class="code">
-xcb_pixmap_t xcb_pixmap_new (xcb_connection_t *c);
+xcb_pixmap_t xcb_generate_id (xcb_connection_t *c);
 </pre>
         <p>
          Then, XCB supplies the following function to create new pixmaps:
@@ -3061,7 +3061,7 @@ xcb_void_cookie_t xcb_create_glyph_cursor_checked (xcb_connection_t *c,
         <p>
         So we first open that font (see <a href="#loadfont">Loading a Font</a>)
         and create the new cursor. As for every X ressource, we have to
-        ask for an X id with <span class="code">xcb_cursor_new</span>
+        ask for an X id with <span class="code">xcb_generate_id</span>
         first:
         </p>
         <pre class="code">
@@ -3070,10 +3070,10 @@ xcb_cursor_t         cursor;
 
 /* The connection is set */
 
-font = xcb_font_new (conn);
+font = xcb_generate_id (conn);
 xcb_open_font (conn, font, strlen ("cursor"), "cursor");
 
-cursor = xcb_cursor_new (conn);
+cursor = xcb_generate_id (conn);
 xcb_create_glyph_cursor (conn, cursor, font, font,
                          58, 58 + 1,
                          0, 0, 0,
@@ -3560,7 +3560,7 @@ if (screen) {
   uint32_t       mask;
   uint32_t       values[2];
 
-  gc = xcb_gcontext_new (c);
+  gc = xcb_generate_id (c);
   draw.window = screen-&gt;root;
   mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
   values[0] = screen-&gt;black_pixel;
