@@ -31,7 +31,7 @@ AC_SUBST(HTML_CHECK_RESULT)
 
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 1.0)
-NEEDED="xau pthread-stubs"
+NEEDED="pthread-stubs xau >= 0.99.2"
 PKG_CHECK_MODULES(NEEDED, $NEEDED)
 
 PKG_CHECK_MODULES(XDMCP, xdmcp,
