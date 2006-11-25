@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "check_suites.h"
 #include "xcb.h"
+#include "xcbext.h"
 
 /* xcb_parse_display tests {{{ */
 
@@ -179,6 +180,28 @@ END_TEST
 
 /* }}} */
 
+static void popcount_eq(uint32_t bits, int count)
+{
+	fail_unless(xcb_popcount(bits) == count, "unexpected popcount(%08x) != %d", bits, count);
+}
+
+START_TEST(popcount)
+{
+	uint32_t mask;
+	int count;
+
+	for (mask = 0xffffffff, count = 32; count >= 0; mask >>= 1, --count) {
+		popcount_eq(mask, count);
+	}
+	for (mask = 0x80000000; mask; mask >>= 1) {
+		popcount_eq(mask, 1);
+	}
+	for (mask = 0x80000000; mask > 1; mask >>= 1) {
+		popcount_eq(mask | 1, 2);
+	}
+}
+END_TEST
+
 Suite *public_suite(void)
 {
 	Suite *s = suite_create("Public API");
@@ -189,5 +212,6 @@ Suite *public_suite(void)
 	suite_add_test(s, parse_display_ipv6, "xcb_parse_display ipv6");
 	suite_add_test(s, parse_display_decnet, "xcb_parse_display decnet");
 	suite_add_test(s, parse_display_negative, "xcb_parse_display negative");
+	suite_add_test(s, popcount, "xcb_popcount");
 	return s;
 }
