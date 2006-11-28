@@ -8,8 +8,8 @@ AC_INIT([libxcb],
 AC_CONFIG_SRCDIR([xcb.pc.in])
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
 
-PKG_CHECK_MODULES(CHECK, [check >= 0.9.4], [HAVE_CHECK=true], [HAVE_CHECK=false])
-AM_CONDITIONAL(HAVE_CHECK, test x$HAVE_CHECK = xtrue)
+PKG_CHECK_MODULES(CHECK, [check >= 0.9.4], [HAVE_CHECK=yes], [HAVE_CHECK=no])
+AM_CONDITIONAL(HAVE_CHECK, test x$HAVE_CHECK = xyes)
 
 AC_CONFIG_HEADERS([src/config.h])
 
@@ -22,7 +22,7 @@ if test "$XSLTPROC" = "no"; then
 fi
 
 HTML_CHECK_RESULT=false
-if test x"$HAVE_CHECK" = xtrue; then
+if test x"$HAVE_CHECK" = xyes; then
 	if test x"$XSLTPROC" != xno; then
 		HTML_CHECK_RESULT=true
 	fi
@@ -34,11 +34,13 @@ PKG_CHECK_MODULES(XCBPROTO, xcb-proto >= 1.0)
 NEEDED="xau pthread-stubs"
 PKG_CHECK_MODULES(NEEDED, $NEEDED)
 
+have_xdmcp="no"
 PKG_CHECK_MODULES(XDMCP, xdmcp,
 	AC_CHECK_LIB(Xdmcp, XdmcpWrap,
 		[
 		AC_DEFINE(HASXDMAUTH,1,[Has Wraphelp.c needed for XDM AUTH protocols])
 		NEEDED="$NEEDED xdmcp"
+		have_xdmcp="yes"
 		],
 		[
 		XDMCP_CFLAGS=
@@ -87,3 +89,21 @@ AC_CONFIG_FILES([xcb.pc xcb-xlib.pc xcb-composite.pc xcb-damage.pc xcb-dpms.pc x
 AC_CONFIG_FILES([doc/xcb.doxygen])
 
 AC_OUTPUT
+
+dnl Configuration output
+
+echo ""
+echo "  Package: ${PACKAGE_NAME} ${PACKAGE_VERSION}"
+echo ""
+echo "  Configuration"
+echo "    XDM support.........: ${have_xdmcp}"
+echo "    Build unit tests....: ${HAVE_CHECK}"
+echo ""
+echo "  Used CFLAGS:"
+echo "    CPPFLAGS............: ${CPPFLAGS}"
+echo "    CFLAGS..............: ${CFLAGS}"
+echo "    Warning CFLAGS......: ${CWARNFLAGS}"
+echo ""
+echo "  Installation:"
+echo "    Prefix..............: ${prefix}"
+echo ""
