@@ -176,7 +176,10 @@ static int _xcb_open_decnet(const char *host, const unsigned short port)
 static int _xcb_open_tcp(char *host, const unsigned short port)
 {
     int fd = -1;
-    struct addrinfo hints = { AI_ADDRCONFIG
+    struct addrinfo hints = { 0
+#ifdef AI_ADDRCONFIG
+                              | AI_ADDRCONFIG
+#endif
 #ifdef AI_NUMERICSERV
                               | AI_NUMERICSERV
 #endif

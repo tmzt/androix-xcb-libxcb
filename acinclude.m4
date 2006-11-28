@@ -44,12 +44,16 @@ AC_DEFUN([AM_CHECK_DOXYGEN],
        AC_HELP_STRING(
           [--disable-build-docs],
           [Disable the build of the documentation]),
-       [if test "${disable_build_docs}" = "yes" ; then
+       [if test x"$enableval" != x"yes" ; then
            enable_build_docs="no"
         else
            enable_build_docs="yes"
         fi],
        [enable_build_docs="yes"])
+
+    if test "$enable_build_docs" = "no" ; then
+        BUILD_DOCS=no
+    else
     dnl
     dnl Get the prefix where doxygen is installed.
     dnl
@@ -93,6 +97,7 @@ AC_DEFUN([AM_CHECK_DOXYGEN],
            AC_MSG_WARN(
               [Warning: no doxygen detected. Documentation will not be built])
         fi])
+    fi
     AC_MSG_CHECKING([whether documentation is built])
     AC_MSG_RESULT([${BUILD_DOCS}])
     dnl

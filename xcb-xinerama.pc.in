@@ -1,11 +1,11 @@
-prefix=/opt/fdo/
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
 
 Name: XCB Xinerama
 Description: XCB Xinerama Extension
-Version: 0.9.92
+Version: @PACKAGE_VERSION@
 Requires: xcb
 Libs: -L${libdir} -lxcb-xinerama
 Cflags: -I${includedir}
