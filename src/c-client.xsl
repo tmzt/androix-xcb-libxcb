@@ -924,6 +924,14 @@ authorization from the authors.
     </xsl:for-each>
     <xsl:if test="not($kind)">
       <function type="void" name="{$ref}_next">
+        <doc>/**</doc>
+        <doc> * Get the next element of the iterator</doc>
+        <doc> * @param i Pointer to a <xsl:value-of select="$ref" />_iterator_t</doc>
+        <doc> *</doc>
+        <doc> * Get the next element in the iterator. The member rem is</doc>
+        <doc> * decreased by one. The member data points to the next</doc>
+        <doc> * element. The member index is increased by sizeof(<xsl:value-of select="$ref" />_t)</doc>
+        <doc> */</doc>
         <field type="{$ref}_iterator_t *" name="i" />
         <xsl:choose>
           <xsl:when test="$struct/list[not(@fixed)]">
@@ -1178,6 +1186,10 @@ authorization from the authors.
       </xsl:call-template>
   </xsl:variable>
   <!-- Doxygen for functions in header. -->
+    <xsl:if test="$h">
+      <xsl:apply-templates select="doc" mode="function-doc">
+      </xsl:apply-templates>
+    </xsl:if>
 /*****************************************************************************
  **
  ** <xsl:value-of select="@type" />
@@ -1240,6 +1252,11 @@ authorization from the authors.
 
 </xsl:text>
     </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="doc" mode="function-doc">
+    <xsl:value-of select="." /><xsl:text>
+</xsl:text>
   </xsl:template>
 
   <xsl:template match="l" mode="function-body">
