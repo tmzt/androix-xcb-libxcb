@@ -51,4 +51,5 @@ xcb-xv.pc.in \
 xcb-xvmc.pc.in \
 tools/README \
 tools/api_conv.pl \
-tools/constants
+tools/constants \
+autogen.sh
