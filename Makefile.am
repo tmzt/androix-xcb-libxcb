@@ -48,4 +48,7 @@ xcb-xfixes.pc.in \
 xcb-xprint.pc.in \
 xcb-xtest.pc.in \
 xcb-xv.pc.in \
-xcb-xvmc.pc.in
+xcb-xvmc.pc.in \
+tools/README \
+tools/api_conv.pl \
+tools/constants
