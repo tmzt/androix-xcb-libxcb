@@ -776,7 +776,7 @@ main ()
 {
   xcb_connection_t *c;
   xcb_screen_t     *screen;
-  xcb_drawable_t    win;
+  xcb_window_t      win;
 
   /* Open the connection to the X server */
   c = xcb_connect (NULL, NULL);
@@ -785,12 +785,12 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Ask for our window's Id */
-  win.window = xcb_generate_id(c);
+  win = xcb_generate_id(c);
 
   /* Create the window */
   xcb_create_window (c,                             /* Connection          */
                      XCB_COPY_FROM_PARENT,          /* depth (same as root)*/
-                     win.window,                    /* window Id           */
+                     win,                           /* window Id           */
                      screen-&gt;root,                  /* parent window       */
                      0, 0,                          /* x, y                */
                      150, 150,                      /* width, height       */
@@ -800,7 +800,7 @@ main ()
                      0, NULL);                      /* masks, not used yet */
 
   /* Map the window on the screen */
-  xcb_map_window (c, win.window);
+  xcb_map_window (c, win);
 
   /* Make sure commands are sent before we pause, so window is shown */
   xcb_flush (c);
@@ -931,7 +931,7 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Create a black graphic context for drawing in the foreground */
-  win.window = screen-&gt;root;
+  win = screen-&gt;root;
   black = xcb_generate_id (c);
   mask = XCB_GC_FOREGROUND;
   value[0] = screen-&gt;black_pixel;
@@ -1291,7 +1291,7 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Create black (foreground) graphic context */
-  win.window = screen-&gt;root;
+  win = screen-&gt;root;
 
   foreground = xcb_generate_id (c);
   mask = XCB_GC_FOREGROUND | XCB_GC_GRAPHICS_EXPOSURES;
@@ -1300,7 +1300,7 @@ main ()
   xcb_create_gc (c, foreground, win, mask, values);
 
   /* Ask for our window's Id */
-  win.window = xcb_generate_id(c);
+  win = xcb_generate_id(c);
 
   /* Create the window */
   mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
@@ -1308,7 +1308,7 @@ main ()
   values[1] = XCB_EVENT_MASK_EXPOSURE;
   xcb_create_window (c,                             /* Connection          */
                      XCB_COPY_FROM_PARENT,          /* depth               */
-                     win.window,                    /* window Id           */
+                     win,                           /* window Id           */
                      screen-&gt;root,                  /* parent window       */
                      0, 0,                          /* x, y                */
                      150, 150,                      /* width, height       */
@@ -1318,7 +1318,7 @@ main ()
                      mask, values);                 /* masks */
 
   /* Map the window on the screen */
-  xcb_map_window (c, win.window);
+  xcb_map_window (c, win);
 
 
   /* We flush the request */
@@ -1391,8 +1391,8 @@ main ()
         <pre class="code">
   mask = XCB_CW_EVENT_MASK;
   valwin[0] = XCB_EVENT_MASK_EXPOSURE;
-  win.window = xcb_generate_id (c);
-  xcb_create_window (c, depth, win.window, root-&gt;root,
+  win = xcb_generate_id (c);
+  xcb_create_window (c, depth, win, root-&gt;root,
                      0, 0, 150, 150, 10,
                      XCB_WINDOW_CLASS_INPUT_OUTPUT, root-&gt;root_visual,
                      mask, valwin);
@@ -1405,8 +1405,8 @@ main ()
         <pre class="code">
   mask = XCB_CW_EVENT_MASK;
   valwin[0] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS;
-  win.window = xcb_generate_id (c);
-  xcb_create_window (c, depth, win.window, root-&gt;root,
+  win = xcb_generate_id (c);
+  xcb_create_window (c, depth, win, root-&gt;root,
                      0, 0, 150, 150, 10,
                      XCB_WINDOW_CLASS_INPUT_OUTPUT, root-&gt;root_visual,
                      mask, valwin);
@@ -1916,7 +1916,7 @@ main ()
 {
   xcb_connection_t    *c;
   xcb_screen_t        *screen;
-  xcb_drawable_t       win;
+  xcb_window_t         win;
   xcb_generic_event_t *e;
   uint32_t             mask = 0;
   uint32_t             values[2];
@@ -1928,7 +1928,7 @@ main ()
   screen = xcb_setup_roots_iterator (xcb_get_setup (c)).data;
 
   /* Ask for our window's Id */
-  win.window = xcb_generate_id (c);
+  win = xcb_generate_id (c);
 
   /* Create the window */
   mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
@@ -1939,7 +1939,7 @@ main ()
               XCB_EVENT_MASK_KEY_PRESS      | XCB_EVENT_MASK_KEY_RELEASE;
   xcb_create_window (c,                             /* Connection          */
                      0,                             /* depth               */
-                     win.window,                    /* window Id           */
+                     win,                           /* window Id           */
                      screen-&gt;root,                  /* parent window       */
                      0, 0,                          /* x, y                */
                      150, 150,                      /* width, height       */
@@ -1949,7 +1949,7 @@ main ()
                      mask, values);                 /* masks */
 
   /* Map the window on the screen */
-  xcb_map_window (c, win.window);
+  xcb_map_window (c, win);
 
   xcb_flush (c);
 
@@ -3561,7 +3561,7 @@ if (screen) {
   uint32_t       values[2];
 
   gc = xcb_generate_id (c);
-  draw.window = screen-&gt;root;
+  draw = screen-&gt;root;
   mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
   values[0] = screen-&gt;black_pixel;
   values[1] = screen-&gt;white_pixel;
