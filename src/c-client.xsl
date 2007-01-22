@@ -950,6 +950,15 @@ authorization from the authors.
         </xsl:choose>
       </function>
       <function type="xcb_generic_iterator_t" name="{$ref}_end">
+        <doc>/**</doc>
+        <doc> * Return the iterator pointing to the last element</doc>
+        <doc> * @param i An <xsl:value-of select="$ref" />_iterator_t</doc>
+        <doc> * @return  The iterator pointing to the last element</doc>
+        <doc> *</doc>
+        <doc> * Set the current element in the iterator to the last element.</doc>
+        <doc> * The member rem is set to 0. The member data points to the</doc>
+        <doc> * last element.</doc>
+        <doc> */</doc>
         <field type="{$ref}_iterator_t" name="i" />
         <l>xcb_generic_iterator_t ret;</l>
         <xsl:choose>
