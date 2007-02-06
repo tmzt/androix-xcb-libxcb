@@ -101,23 +101,23 @@ span.code
   font-family: monospace;
   font-size: 12px;
 }
-pre.code type
+pre.code .type
 {
   color: #44bb44;
 }
-pre.code function
+pre.code .function
 {
   color: #449fb7;
 }
-pre.code include
+pre.code .include
 {
   color: #7d93ae;
 }
-pre.code string
+pre.code .string
 {
   color: #ef6e4b;
 }
-pre.code keyword
+pre.code .keyword
 {
   color: #00bbbb;
 }
