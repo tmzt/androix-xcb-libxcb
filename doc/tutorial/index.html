@@ -2063,7 +2063,7 @@ typedef uint32_t xcb_font_t;
         <pre class="code">
 xcb_font_t xcb_generate_id (xcb_connection_t *c);
 </pre>
-        <p>
+        <br>
         <li class="subtitle"><a name="openingfont">Opening a Font</a>
         <p>
         To open a font, we use the following function:
@@ -2140,11 +2140,12 @@ xcb_void_cookie_t xcb_image_text_8 (xcb_connection_t *c,
         This example draw a text at 10 pixels (for the base line) of
         the bottom of a window. Pressing the Esc key exits the program.
         </p>
-        <pre class="code">#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+        <pre class="code">
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
 
-#include <xcb/xcb.h>
+#include &lt;xcb/xcb.h&gt;
 
 #define WIDTH 300
 #define HEIGHT 100
@@ -2266,7 +2267,7 @@ int main ()
   int                   screen_number;
 
   /* getting the connection */
-  c = xcb_connect (NULL, &screen_number);
+  c = xcb_connect (NULL, &amp;screen_number);
   if (!c) {
     fprintf (stderr, "ERROR: can't connect to an X server\n");
     return -1;
@@ -2277,7 +2278,7 @@ int main ()
 
   screen = NULL;
   screen_iter = xcb_setup_roots_iterator (setup);
-  for (; screen_iter.rem != 0; --screen_number, xcb_screen_next (&screen_iter))
+  for (; screen_iter.rem != 0; --screen_number, xcb_screen_next (&amp;screen_iter))
     if (screen_number == 0)
       {
         screen = screen_iter.data;
