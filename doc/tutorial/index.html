@@ -705,7 +705,7 @@ main ()
     }
 
   printf ("\n");
-  printf ("Informations of screen %ld:\n", screen-&gt;root.xid);
+  printf ("Informations of screen %ld:\n", screen-&gt;root);
   printf ("  width.........: %d\n", screen-&gt;width_in_pixels);
   printf ("  height........: %d\n", screen-&gt;height_in_pixels);
   printf ("  white pixel...: %ld\n", screen-&gt;white_pixel);
@@ -722,9 +722,7 @@ main ()
       characterized by an Id. So, in XCB, a window is of type:
       </p>
       <pre class="code">
-typedef struct {
-    uint32_t xid;
-} xcb_window_t;
+typedef uint32_t xcb_window_t;
 </pre>
       <p>
       We first ask for a new Id for our window, with this function:
@@ -886,9 +884,7 @@ int xcb_aux_sync (xcb_connection_t *c);
         a Graphics Context is, as a window, characterized by an Id:
         </p>
         <pre class="code">
-typedef struct {
-    uint32_t xid;
-} xcb_gcontext_t;
+typedef uint32_t xcb_gcontext_t;
 </pre>
         <p>
         We first ask the X server to attribute an Id to our graphic
@@ -1958,25 +1954,25 @@ main ()
       xcb_expose_event_t *ev = (xcb_expose_event_t *)e;
 
       printf ("Window %ld exposed. Region to be redrawn at location (%d,%d), with dimension (%d,%d)\n",
-              ev-&gt;window.xid, ev-&gt;x, ev-&gt;y, ev-&gt;width, ev-&gt;height);
+              ev-&gt;window, ev-&gt;x, ev-&gt;y, ev-&gt;width, ev-&gt;height);
       break;
     }
     case XCB_BUTTON_PRESS: {
       xcb_button_press_event_t *ev = (xcb_button_press_event_t *)e;
       print_modifiers(ev-&gt;state);
 
-      switch (ev-&gt;detail.id) {
+      switch (ev-&gt;detail) {
       case 4:
         printf ("Wheel Button up in window %ld, at coordinates (%d,%d)\n",
-                ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+                ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
         break;
       case 5:
         printf ("Wheel Button down in window %ld, at coordinates (%d,%d)\n",
-                ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+                ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
         break;
       default:
         printf ("Button %d pressed in window %ld, at coordinates (%d,%d)\n",
-                ev-&gt;detail.id, ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+                ev-&gt;detail, ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
       }
       break;
     }
@@ -1985,28 +1981,28 @@ main ()
       print_modifiers(ev-&gt;state);
 
       printf ("Button %d released in window %ld, at coordinates (%d,%d)\n",
-              ev-&gt;detail.id, ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+              ev-&gt;detail, ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
       break;
     }
     case XCB_MOTION_NOTIFY: {
       xcb_motion_notify_event_t *ev = (xcb_motion_notify_event_t *)e;
 
       printf ("Mouse moved in window %ld, at coordinates (%d,%d)\n",
-              ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+              ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
       break;
     }
     case XCB_ENTER_NOTIFY: {
       xcb_enter_notify_event_t *ev = (xcb_enter_notify_event_t *)e;
 
       printf ("Mouse entered window %ld, at coordinates (%d,%d)\n",
-              ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+              ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
       break;
     }
     case XCB_LEAVE_NOTIFY: {
       xcb_leave_notify_event_t *ev = (xcb_leave_notify_event_t *)e;
 
       printf ("Mouse left window %ld, at coordinates (%d,%d)\n",
-              ev-&gt;event.xid, ev-&gt;event_x, ev-&gt;event_y);
+              ev-&gt;event, ev-&gt;event_x, ev-&gt;event_y);
       break;
     }
     case XCB_KEY_PRESS: {
@@ -2014,7 +2010,7 @@ main ()
       print_modifiers(ev-&gt;state);
 
       printf ("Key pressed in window %ld\n",
-              ev-&gt;event.xid);
+              ev-&gt;event);
       break;
     }
     case XCB_KEY_RELEASE: {
@@ -2022,7 +2018,7 @@ main ()
       print_modifiers(ev-&gt;state);
 
       printf ("Key released in window %ld\n",
-              ev-&gt;event.xid);
+              ev-&gt;event);
       break;
     }
     default:
@@ -2054,9 +2050,7 @@ main ()
         defined. You know what ? It's an Id:
         </p>
         <pre class="code">
-typedef struct {
-    uint32_t xid;
-} xcb_font_t;
+typedef uint32_t xcb_font_t;
 </pre>
         <p>
         It is used to contain information about a font, and is passed
@@ -2096,9 +2090,7 @@ typedef struct {
         Id. Their type are <span class="code">xcb_atom_t</span>:
         </p>
         <pre class="code">
-typedef struct {
-    uint32_t xid;
-} xcb_atom_t;
+typedef uint32_t xcb_atom_t;
 </pre>
         <p>
         To change the property of a window, we use the following
@@ -2658,9 +2650,7 @@ xcb_get_window_attributes_reply_t *xcb_get_window_attributes_reply (xcb_connecti
         In XCB, a color map is (as often in X) an Id:
         </p>
         <pre class="code">
-typedef struct {
-    uint32_t xid;
-} xcb_colormap_t;
+typedef uint32_t xcb_colormap_t;
 </pre>
         <p>
         In order to access the screen's default color map, you just
@@ -2901,19 +2891,14 @@ main ()
         of X pixmap in XCB is an Id like a window:
         </p>
         <pre class="code">
-typedef struct {
-    uint32_t xid;
-} xcb_pixmap_t;
+typedef uint32_t xcb_pixmap_t;
 </pre>
         <p>
-        In order to make the difference between a window and a pixmap,
-        XCB introduces a drawable type, which is a <b>union</b>
+        Like Xlib, there is no difference between a Drawable, a Window
+        or a Pixmap:
         </p>
         <pre class="code">
-typedef union {
-    xcb_window_t window;
-    xcb_pixmap_t pixmap;
-} xcb_drawable_t;
+typedef uint32_t xcb_drawable_t;
 </pre>
         <p>
         in order to avoid confusion between a window and a pixmap. The
@@ -3115,7 +3100,7 @@ uint32_t value_list;
 /* The cursor is already created */
 
 mask = XCB_CWCURSOR;
-value_list = cursor.xid;
+value_list = cursor;
 xcb_change_window_attributes (conn, window, mask, &amp;value_list);
 </pre>
         <p>
@@ -3910,7 +3895,7 @@ if (screen) {
 
     visual_iter = xcb_depth_visuals_iterator (depth_iter.data);
     for (; visual_iter.rem; xcb_visualtype_next (&amp;visual_iter)) {
-      if (screen-&gt;root_visual.id == visual_iter.data-&gt;visual_id.id) {
+      if (screen-&gt;root_visual == visual_iter.data-&gt;visual_id) {
         visual_type = visual_iter.data;
         break;
       }
