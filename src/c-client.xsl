@@ -342,6 +342,24 @@ authorization from the authors.
           <xsl:with-param name="request" select="$req" />
         </xsl:call-template>
       </xsl:attribute>
+      <doc>/**</doc>
+      <doc> * Delivers a request to the X server</doc>
+      <doc> * @param c The connection</doc>
+      <doc> * @return A cookie</doc>
+      <doc> *</doc>
+      <doc> * Delivers a request to the X server.</doc>
+      <doc> * </doc>
+      <xsl:if test="$checked='true' and not($req/reply)">
+        <doc> * This form can be used only if the request will not cause</doc>
+        <doc> * a reply to be generated. Any returned error will be</doc>
+        <doc> * saved for handling by xcb_request_check().</doc>
+      </xsl:if>
+      <xsl:if test="$checked='false' and $req/reply">
+        <doc> * This form can be used only if the request will cause</doc>
+        <doc> * a reply to be generated. Any returned error will be</doc>
+        <doc> * placed in the event queue.</doc>
+      </xsl:if>
+      <doc> */</doc>
       <field type="xcb_connection_t *" name="c" />
       <xsl:apply-templates select="$req/*[not(self::reply)]" mode="param" />
       <do-request ref="{xcb:xcb-prefix($req/@name)}_request_t" opcode="{translate(xcb:xcb-prefix($req/@name), $lcase, $ucase)}"
@@ -390,6 +408,18 @@ authorization from the authors.
       </struct>
       <iterator-functions ref="{xcb:xcb-prefix(@name)}" kind="_reply" />
       <function type="{xcb:xcb-prefix(@name)}_reply_t *" name="{xcb:xcb-prefix(@name)}_reply">
+        <doc>/**</doc>
+        <doc> * Return the reply</doc>
+        <doc> * @param c      The connection</doc>
+        <doc> * @param cookie The cookie</doc>
+        <doc> * @param e      The xcb_generic_error_t supplied</doc>
+        <doc> *</doc>
+        <doc> * Returns the reply of the request asked by</doc>
+        <doc> * </doc>
+        <doc> * The parameter @p e supplied to this function must be NULL if</doc>
+        <doc> * <xsl:value-of select="xcb:xcb-prefix(@name)" />_unchecked(). is used.</doc>
+        <doc> * Otherwise, it stores the error if any.</doc>
+        <doc> */</doc>
         <field type="xcb_connection_t *" name="c" />
         <field name="cookie">
           <xsl:attribute name="type">
