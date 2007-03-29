@@ -97,31 +97,19 @@ authorization from the authors.
     <xsl:param name="name" />
     <func:result>
       <xsl:text>xcb</xsl:text>
-      <xsl:choose>
-        <xsl:when test="/xcb/@extension-name = 'RandR'">
-          <xsl:text>_randr</xsl:text>
-        </xsl:when>
-        <xsl:when test="/xcb/@extension-name = 'ScreenSaver'">
-          <xsl:text>_screensaver</xsl:text>
-        </xsl:when>
-        <xsl:when test="/xcb/@extension-name = 'XF86Dri'">
-          <xsl:text>_xf86dri</xsl:text>
-        </xsl:when>
-        <xsl:when test="/xcb/@extension-name = 'XFixes'">
-          <xsl:text>_xfixes</xsl:text>
-        </xsl:when>
-        <xsl:when test="/xcb/@extension-name = 'XvMC'">
-          <xsl:text>_xvmc</xsl:text>
-        </xsl:when>
-        <xsl:when test="/xcb/@extension-name">
-          <xsl:text>_</xsl:text>
-          <xsl:call-template name="camelcase-to-underscore">
-            <xsl:with-param name="camelcase" select="/xcb/@extension-name" />
-          </xsl:call-template>
-        </xsl:when>
-        <xsl:otherwise>
-        </xsl:otherwise>
-      </xsl:choose>
+      <xsl:if test="/xcb/@extension-name">
+	<xsl:text>_</xsl:text>
+	<xsl:choose>
+	  <xsl:when test="/xcb/@extension-oneword = 'true' or /xcb/@extension-oneword = '1'">
+	    <xsl:value-of select="translate(/xcb/@extension-name, $ucase, $lcase)"/>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:call-template name="camelcase-to-underscore">
+	      <xsl:with-param name="camelcase" select="/xcb/@extension-name" />
+	    </xsl:call-template>
+	  </xsl:otherwise>
+	</xsl:choose>
+      </xsl:if>
       <xsl:if test="$name">
         <xsl:text>_</xsl:text>
         <xsl:call-template name="camelcase-to-underscore">
