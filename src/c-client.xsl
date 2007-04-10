@@ -100,13 +100,13 @@ authorization from the authors.
       <xsl:if test="/xcb/@extension-name">
 	<xsl:text>_</xsl:text>
 	<xsl:choose>
-	  <xsl:when test="/xcb/@extension-oneword = 'true' or /xcb/@extension-oneword = '1'">
-	    <xsl:value-of select="translate(/xcb/@extension-name, $ucase, $lcase)"/>
-	  </xsl:when>
-	  <xsl:otherwise>
+	  <xsl:when test="/xcb/@extension-multiword = 'true' or /xcb/@extension-multiword = '1'">
 	    <xsl:call-template name="camelcase-to-underscore">
 	      <xsl:with-param name="camelcase" select="/xcb/@extension-name" />
 	    </xsl:call-template>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:value-of select="translate(/xcb/@extension-name, $ucase, $lcase)"/>
 	  </xsl:otherwise>
 	</xsl:choose>
       </xsl:if>
