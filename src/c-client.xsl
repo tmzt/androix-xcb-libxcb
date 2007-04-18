@@ -449,6 +449,11 @@ authorization from the authors.
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="self::error|self::errorcopy">
+        <constant type="number" name="{xcb:xcb-prefix(concat('Bad', @name))}" value="{@number}" />
+      </xsl:when>
+    </xsl:choose>
     <constant type="number" name="{xcb:xcb-prefix(@name)}" value="{@number}" />
     <xsl:choose>
       <xsl:when test="self::event|self::error">

@@ -178,8 +178,9 @@
       level GUI toolkit like Motif,
       <a href="http://www.lesstif.org">LessTiff</a>,
       <a href="http://www.gtk.org">GTK</a>,
-      <a href="http://www.trolltech.com">QT</a> or
-      <a href="http://www.enlightenment.org">EWL</a>, or use
+      <a href="http://www.trolltech.com">QT</a>,
+      <a href="http://www.enlightenment.org">EWL</a>,
+      <a href="http://www.enlightenment.org">ETK</a>, or use
       <a href="http://cairographics.org">Cairo</a>.
       However,
       we need to start somewhere. More than this, knowing how things
@@ -2327,7 +2328,7 @@ int main ()
   while (1) {
     e = xcb_poll_for_event(c);
     if (e) {
-      switch (e->response_type) {
+      switch (e->response_type &amp; ~0x80) {
       case XCB_EXPOSE: {
         char *text;
 
@@ -3740,7 +3741,7 @@ int main ()
   while (1) {
     e = xcb_poll_for_event(c);
     if (e) {
-      switch (e->response_type) {
+      switch (e->response_type &amp; ~0x80) {
       case XCB_EXPOSE: {
         char *text;
 
