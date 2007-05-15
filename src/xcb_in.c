@@ -39,6 +39,7 @@
 
 #define XCB_ERROR 0
 #define XCB_REPLY 1
+#define XCB_XGE_EVENT 35
 
 struct event_list {
     xcb_generic_event_t *event;
@@ -76,7 +77,8 @@ static void wake_up_next_reader(xcb_connection_t *c)
 static int read_packet(xcb_connection_t *c)
 {
     xcb_generic_reply_t genrep;
-    int length = 32;
+    int length = 32,
+        eventlength = 0; /* length after first 32 bytes for GenericEvents */
     void *buf;
     pending_reply *pend = 0;
     struct event_list *event;
@@ -141,17 +143,36 @@ static int read_packet(xcb_connection_t *c)
         length += genrep.length * 4;
     }
 
-    buf = malloc(length + (genrep.response_type == XCB_REPLY ? 0 : sizeof(uint32_t)));
+    /* XGE events may have sizes > 32 */
+    if (genrep.response_type == XCB_XGE_EVENT)
+    {
+        eventlength = ((xcb_ge_event_t*)&genrep)->length * 4;
+    }
+
+    buf = malloc(length + eventlength +
+            (genrep.response_type == XCB_REPLY ? 0 : sizeof(uint32_t)));
     if(!buf)
     {
         _xcb_conn_shutdown(c);
         return 0;
     }
+
     if(_xcb_in_read_block(c, buf, length) <= 0)
     {
         free(buf);
         return 0;
     }
+
+    /* pull in XGE event data if available, append after event struct */
+    if (eventlength)
+    {
+        if(_xcb_in_read_block(c, &((xcb_generic_event_t*)buf)[1], eventlength) <= 0)
+        {
+            free(buf);
+            return 0;
+        }
+    }
+
     if(pend && (pend->flags & XCB_REQUEST_DISCARD_REPLY))
     {
         free(buf);
