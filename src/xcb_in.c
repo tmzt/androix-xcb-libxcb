@@ -403,7 +403,8 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c)
     {
         _xcb_lock_io(c);
         /* FIXME: follow X meets Z architecture changes. */
-        if(_xcb_in_read(c)) /* _xcb_in_read shuts down the connection on error */
+        ret = get_event(c);
+        if(!ret && _xcb_in_read(c)) /* _xcb_in_read shuts down the connection on error */
             ret = get_event(c);
         _xcb_unlock_io(c);
     }
