@@ -45,10 +45,10 @@ static void xcb_xlib_printbt(void)
 	size = backtrace(array, 20);
 	strings = backtrace_symbols(array, size);
 
-	printf("Got a backtrace:\n");
+	fprintf(stderr, "Locking assertion failure.  Backtrace:\n");
 
 	for (i = 0; i < size; ++i)
-		printf("#%i %s\n", i, strings[i]);
+		fprintf(stderr, "#%i %s\n", i, strings[i]);
 
 	free(strings);
 #endif
