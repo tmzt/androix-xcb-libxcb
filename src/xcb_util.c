@@ -55,14 +55,30 @@ int xcb_popcount(uint32_t mask)
     return ((y + (y >> 3)) & 030707070707) % 077;
 }
 
-int xcb_parse_display(const char *name, char **host, int *displayp, int *screenp)
+static int _xcb_parse_display(const char *name, char **host, char **protocol,
+                      int *displayp, int *screenp)
 {
     int len, display, screen;
-    char *colon, *dot, *end;
+    char *slash, *colon, *dot, *end;
     if(!name || !*name)
         name = getenv("DISPLAY");
     if(!name)
         return 0;
+    slash = strrchr(name, '/');
+    if (slash) {
+        len = slash - name;
+        if (protocol) {
+            *protocol = malloc(len + 1);
+            if(!*protocol)
+                return 0;
+            memcpy(*protocol, name, len);
+            (*protocol)[len] = '\0';
+        }
+        name = slash + 1;
+    } else
+        if (protocol)
+            *protocol = NULL;
+
     colon = strrchr(name, ':');
     if(!colon)
         return 0;
@@ -96,51 +112,58 @@ int xcb_parse_display(const char *name, char **host, int *displayp, int *screenp
     return 1;
 }
 
-static int _xcb_open_tcp(char *host, const unsigned short port);
-static int _xcb_open_unix(const char *file);
+int xcb_parse_display(const char *name, char **host, int *displayp,
+                             int *screenp)
+{
+    return _xcb_parse_display(name, host, NULL, displayp, screenp);
+}
+
+static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port);
+static int _xcb_open_unix(char *protocol, const char *file);
 #ifdef DNETCONN
-static int _xcb_open_decnet(const char *host, const unsigned short port);
+static int _xcb_open_decnet(const char *host, char *protocol, const unsigned short port);
 #endif
 
-static int _xcb_open(char *host, const int display)
+static int _xcb_open(char *host, char *protocol, const int display)
 {
     int fd;
+    static const char base[] = "/tmp/.X11-unix/X";
+    char file[sizeof(base) + 20];
 
     if(*host)
     {
 #ifdef DNETCONN
-        /* DECnet displays have two colons, so xcb_parse_display will have left
-           one at the end.  However, an IPv6 address can end with *two* colons,
-           so only treat this as a DECnet display if host ends with exactly one
-           colon. */
+        /* DECnet displays have two colons, so _xcb_parse_display will have
+           left one at the end.  However, an IPv6 address can end with *two*
+           colons, so only treat this as a DECnet display if host ends with
+           exactly one colon. */
         char *colon = strchr(host, ':');
         if(colon && *(colon+1) == '\0')
         {
             *colon = '\0';
-            fd = _xcb_open_decnet(host, display);
+            return _xcb_open_decnet(host, protocol, display);
         }
         else
 #endif
-        {
-            /* display specifies TCP */
-            unsigned short port = X_TCP_PORT + display;
-            fd = _xcb_open_tcp(host, port);
-        }
+            if (protocol
+                || strcmp("unix",host)) { /* follow the old unix: rule */
+
+                /* display specifies TCP */
+                unsigned short port = X_TCP_PORT + display;
+                return _xcb_open_tcp(host, protocol, port);
+            }
     }
-    else
-    {
-        /* display specifies Unix socket */
-        static const char base[] = "/tmp/.X11-unix/X";
-        char file[sizeof(base) + 20];
-        snprintf(file, sizeof(file), "%s%d", base, display);
-        fd = _xcb_open_unix(file);
-    }
+
+    /* display specifies Unix socket */
+    snprintf(file, sizeof(file), "%s%d", base, display);
+    return  _xcb_open_unix(protocol, file);
+
 
     return fd;
 }
 
 #ifdef DNETCONN
-static int _xcb_open_decnet(const char *host, const unsigned short port)
+static int _xcb_open_decnet(const char *host, const char *protocol, const unsigned short port)
 {
     int fd;
     struct sockaddr_dn addr;
@@ -148,6 +171,8 @@ static int _xcb_open_decnet(const char *host, const unsigned short port)
     struct nodeent *nodeaddr = getnodebyname(host);
 
     if(!nodeaddr)
+        return -1;
+    if (protocol && strcmp("dnet",protocol))
         return -1;
     addr.sdn_family = AF_DECnet;
 
@@ -173,7 +198,7 @@ static int _xcb_open_decnet(const char *host, const unsigned short port)
 }
 #endif
 
-static int _xcb_open_tcp(char *host, const unsigned short port)
+static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port)
 {
     int fd = -1;
     struct addrinfo hints = { 0
@@ -187,7 +212,10 @@ static int _xcb_open_tcp(char *host, const unsigned short port)
     char service[6]; /* "65535" with the trailing '\0' */
     struct addrinfo *results, *addr;
     char *bracket;
-    
+
+    if (protocol && strcmp("tcp",protocol))
+        return -1;
+
     /* Allow IPv6 addresses enclosed in brackets. */
     if(host[0] == '[' && (bracket = strrchr(host, ']')) && bracket[1] == '\0')
     {
@@ -213,10 +241,14 @@ static int _xcb_open_tcp(char *host, const unsigned short port)
     return fd;
 }
 
-static int _xcb_open_unix(const char *file)
+static int _xcb_open_unix(char *protocol, const char *file)
 {
     int fd;
     struct sockaddr_un addr = { AF_UNIX };
+
+    if (protocol && strcmp("unix",protocol))
+        return -1;
+
     strcpy(addr.sun_path, file);
 
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -231,12 +263,13 @@ xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
 {
     int fd, display = 0;
     char *host;
+    char *protocol;
     xcb_connection_t *c;
     xcb_auth_info_t auth;
 
-    if(!xcb_parse_display(displayname, &host, &display, screenp))
+    if(!_xcb_parse_display(displayname, &host, &protocol, &display, screenp))
         return (xcb_connection_t *) &error_connection;
-    fd = _xcb_open(host, display);
+    fd = _xcb_open(host, protocol, display);
     free(host);
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
@@ -256,10 +289,11 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname,
 {
     int fd, display = 0;
     char *host;
+    char *protocol;
 
-    if(!xcb_parse_display(displayname, &host, &display, screenp))
+    if(!_xcb_parse_display(displayname, &host, &protocol, &display, screenp))
         return (xcb_connection_t *) &error_connection;
-    fd = _xcb_open(host, display);
+    fd = _xcb_open(host, protocol, display);
     free(host);
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
