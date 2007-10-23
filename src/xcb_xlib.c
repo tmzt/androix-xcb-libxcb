@@ -55,9 +55,9 @@ static void xcb_xlib_printbt(void)
 }
 
 #ifndef NDEBUG
-#define xcb_assert(x) do { if (!(x)) { xcb_xlib_printbt(); assert(x); } } while(0)
+#define xcb_assert(c,x) do { if (!(x)) { xcb_xlib_printbt(); if (!(c)->xlib.sloppy_lock) assert(x); } } while(0)
 #else
-#define xcb_assert(x)
+#define xcb_assert(c,x)
 #endif
 
 unsigned int xcb_get_request_sent(xcb_connection_t *c)
@@ -70,7 +70,7 @@ unsigned int xcb_get_request_sent(xcb_connection_t *c)
 void xcb_xlib_lock(xcb_connection_t *c)
 {
     _xcb_lock_io(c);
-    xcb_assert(!c->xlib.lock);
+    xcb_assert(c, !c->xlib.lock);
     c->xlib.lock = 1;
     c->xlib.thread = pthread_self();
     _xcb_unlock_io(c);
@@ -79,8 +79,8 @@ void xcb_xlib_lock(xcb_connection_t *c)
 void xcb_xlib_unlock(xcb_connection_t *c)
 {
     _xcb_lock_io(c);
-    xcb_assert(c->xlib.lock);
-    xcb_assert(pthread_equal(c->xlib.thread, pthread_self()));
+    xcb_assert(c, c->xlib.lock);
+    xcb_assert(c, pthread_equal(c->xlib.thread, pthread_self()));
     c->xlib.lock = 0;
     pthread_cond_broadcast(&c->xlib.cond);
     _xcb_unlock_io(c);

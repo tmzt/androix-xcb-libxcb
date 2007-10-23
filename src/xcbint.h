@@ -130,6 +130,7 @@ int _xcb_in_read_block(xcb_connection_t *c, void *buf, int nread);
 
 typedef struct _xcb_xlib {
     int lock;
+    int sloppy_lock;
     pthread_t thread;
     pthread_cond_t cond;
 } _xcb_xlib;

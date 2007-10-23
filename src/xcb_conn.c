@@ -62,6 +62,9 @@ static int set_fd_flags(const int fd)
 static int _xcb_xlib_init(_xcb_xlib *xlib)
 {
     xlib->lock = 0;
+#ifndef NDEBUG
+    xlib->sloppy_lock = (getenv("LIBXCB_ALLOW_SLOPPY_LOCK") != 0);
+#endif
     pthread_cond_init(&xlib->cond, 0);
     return 1;
 }
