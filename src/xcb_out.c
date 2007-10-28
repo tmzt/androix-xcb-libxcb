@@ -190,7 +190,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
     _xcb_lock_io(c);
     /* wait for other writing threads to get out of my way. */
     while(c->out.writing)
-        pthread_cond_wait(&c->out.cond, &c->iolock);
+        _xcb_wait_io(c, &c->out.cond);
 
     request = ++c->out.request;
     /* send GetInputFocus (sync) when 64k-2 requests have been sent without
@@ -297,7 +297,7 @@ int _xcb_out_flush_to(xcb_connection_t *c, unsigned int request)
         return _xcb_out_send(c, &vec_ptr, &count);
     }
     while(c->out.writing)
-        pthread_cond_wait(&c->out.cond, &c->iolock);
+        _xcb_wait_io(c, &c->out.cond);
     assert(XCB_SEQUENCE_COMPARE(c->out.request_written, >=, request));
     return 1;
 }

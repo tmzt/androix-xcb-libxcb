@@ -288,6 +288,11 @@ void _xcb_unlock_io(xcb_connection_t *c)
     pthread_mutex_unlock(&c->iolock);
 }
 
+void _xcb_wait_io(xcb_connection_t *c, pthread_cond_t *cond)
+{
+    pthread_cond_wait(cond, &c->iolock);
+}
+
 int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vector, int *count)
 {
     int ret;
@@ -296,7 +301,7 @@ int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vec
     /* If the thing I should be doing is already being done, wait for it. */
     if(count ? c->out.writing : c->in.reading)
     {
-        pthread_cond_wait(cond, &c->iolock);
+        _xcb_wait_io(c, cond);
         return 1;
     }
 
