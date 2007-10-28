@@ -290,12 +290,25 @@ void _xcb_unlock_io(xcb_connection_t *c)
 
 void _xcb_wait_io(xcb_connection_t *c, pthread_cond_t *cond)
 {
+    int xlib_locked = c->xlib.lock;
+    if(xlib_locked)
+    {
+        c->xlib.lock = 0;
+        pthread_cond_broadcast(&c->xlib.cond);
+    }
     pthread_cond_wait(cond, &c->iolock);
+    if(xlib_locked)
+    {
+        while(c->xlib.lock)
+            pthread_cond_wait(&c->xlib.cond, &c->iolock);
+        c->xlib.lock = 1;
+        c->xlib.thread = pthread_self();
+    }
 }
 
 int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vector, int *count)
 {
-    int ret;
+    int ret, xlib_locked;
     fd_set rfds, wfds;
 
     /* If the thing I should be doing is already being done, wait for it. */
@@ -316,6 +329,12 @@ int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vec
         ++c->out.writing;
     }
 
+    xlib_locked = c->xlib.lock;
+    if(xlib_locked)
+    {
+        c->xlib.lock = 0;
+        pthread_cond_broadcast(&c->xlib.cond);
+    }
     _xcb_unlock_io(c);
     do {
 	ret = select(c->fd + 1, &rfds, &wfds, 0, 0);
@@ -326,6 +345,11 @@ int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vec
 	ret = 0;
     }
     _xcb_lock_io(c);
+    if(xlib_locked)
+    {
+        c->xlib.lock = 1;
+        c->xlib.thread = pthread_self();
+    }
 
     if(ret)
     {
