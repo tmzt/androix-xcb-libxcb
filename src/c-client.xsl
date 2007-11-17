@@ -407,6 +407,8 @@ authorization from the authors.
         <doc> * The parameter @p e supplied to this function must be NULL if</doc>
         <doc> * <xsl:value-of select="xcb:xcb-prefix(@name)" />_unchecked(). is used.</doc>
         <doc> * Otherwise, it stores the error if any.</doc>
+        <doc> *</doc>
+        <doc> * The returned value must be freed by the caller using free().</doc>
         <doc> */</doc>
         <field type="xcb_connection_t *" name="c" />
         <field name="cookie">
