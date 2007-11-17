@@ -1,3 +1,60 @@
+Release 1.1 (2007-11-04)
+========================
+
+This release requires xcb-proto 1.1, due to the addition of the
+extension-multiword attribute to the XML schema.
+
+This release contains several important bug fixes, summarized below. It
+also contains a patch much like Novell's libxcb-sloppy-lock.diff.
+Rationale from the commit message follows. The patch and this rationale
+were authored by Jamey Sharp <jamey@minilop.net>, with agreement from
+Josh Triplett <josh@freedesktop.org>.
+
+    I strongly opposed proposals like this one for a long time.
+    Originally I had a very good reason: libX11, when compiled to use
+    XCB, would crash soon after a locking correctness violation, so it
+    was better to have an informative assert failure than a mystifying
+    crash soon after.
+
+    It took some time for me to realize that I'd changed the libX11
+    implementation (for unrelated reasons) so that it could survive most
+    invalid locking situations, as long as it wasn't actually being used
+    from multiple threads concurrently.
+
+    The other thing that has changed is that most of the code with
+    incorrect locking has now been fixed. The value of the assert is
+    accordingly lower.
+
+    However, remaining broken callers do need to be fixed. That's why
+    libXCB will still noisily print a stacktrace (if possible) on each
+    assertion failure, even when assert isn't actually invoked to
+    abort() the program; and that's why aborting is still default. This
+    environment variable is provided only for use as a temporary
+    workaround for broken applications.
+
+Enhancements:
+* Print a backtrace, if possible, on locking assertion failures.
+* Skip abort() on locking assertions if LIBXCB_ALLOW_SLOPPY_LOCK is set.
+* xcb_poll_for_event: Return already-read events before reading again.
+* Output a configuration summary at the end of ./configure.
+
+Bug fixes:
+* Don't hold the xlib-xcb lock while sleeping: that allows deadlock.
+* Allow unix:<screen> style display names again.
+* Bug #9119: test xcb_popcount
+* Fix unit tests for FreeBSD
+* NetBSD doesn't have AI_ADDRCONFIG: use it only if it's available.
+* Require libXau >= 0.99.2; earlier versions have a broken .pc file
+* Use substitition variables in xcb-xinerama.pc.in
+* Update autogen.sh to one that does objdir != srcdir
+* Add tools/* and autogen.sh to EXTRA_DIST.
+* Doxygen can now be fully disabled if desired.
+
+Documentation improvements:
+* Many fixes and updates to the tutorial.
+* Iterators, requests, and replies get partial Doxygen documentation.
+
+
 Release 1.0 (2006-11-23)
 ========================
 
