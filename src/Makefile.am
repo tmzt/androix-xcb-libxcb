@@ -215,6 +215,16 @@ libxcb_xprint_la_LIBADD = $(XCB_LIBS)
 libxcb_xprint_la_SOURCES = xprint.c xprint.h
 endif
 
+if BUILD_SELINUX
+lib_LTLIBRARIES += libxcb-xselinux.la
+EXTHEADERS += xselinux.h
+EXTSOURCES += xselinux.c
+EXTENSION_XML += xselinux.xml
+libxcb_xselinux_la_LDFLAGS = -version-info 0:0:0
+libxcb_xselinux_la_LIBADD = $(XCB_LIBS)
+libxcb_xselinux_la_SOURCES = xselinux.c xselinux.h
+endif
+
 if BUILD_XTEST
 lib_LTLIBRARIES += libxcb-xtest.la
 EXTHEADERS += xtest.h

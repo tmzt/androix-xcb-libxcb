@@ -60,6 +60,9 @@ endif
 if BUILD_XPRINT
 pkgconfig_DATA += xcb-xprint.pc
 endif
+if BUILD_SELINUX
+pkgconfig_DATA += xcb-xselinux.pc
+endif
 if BUILD_XTEST
 pkgconfig_DATA += xcb-xtest.pc
 endif

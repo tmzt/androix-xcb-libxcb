@@ -18,6 +18,7 @@ xfixes.*
 xinerama.*
 xinput.*
 xprint.*
+xselinux.*
 xtest.*
 xv.*
 xvmc.*
