@@ -195,6 +195,16 @@ libxcb_xinerama_la_LIBADD = $(XCB_LIBS)
 libxcb_xinerama_la_SOURCES = xinerama.c xinerama.h
 endif
 
+if BUILD_XINPUT
+lib_LTLIBRARIES += libxcb-xinput.la
+EXTHEADERS += xinput.h
+EXTSOURCES += xinput.c
+EXTENSION_XML += xinput.xml
+libxcb_xinput_la_LDFLAGS = -version-info 0:0:0
+libxcb_xinput_la_LIBADD = $(XCB_LIBS)
+libxcb_xinput_la_SOURCES = xinput.c xinput.h
+endif
+
 if BUILD_XPRINT
 lib_LTLIBRARIES += libxcb-xprint.la
 EXTHEADERS += xprint.h

@@ -54,6 +54,9 @@ endif
 if BUILD_XINERAMA
 pkgconfig_DATA += xcb-xinerama.pc
 endif
+if BUILD_XINPUT
+pkgconfig_DATA += xcb-xinput.pc
+endif
 if BUILD_XPRINT
 pkgconfig_DATA += xcb-xprint.pc
 endif

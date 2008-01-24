@@ -118,6 +118,8 @@ AC_ARG_ENABLE(xfixes, AS_HELP_STRING([--enable-xfixes], [Build XCB XFixes Extens
 AM_CONDITIONAL(BUILD_XFIXES, [test "x$BUILD_XFIXES" = xyes])
 AC_ARG_ENABLE(xinerama, AS_HELP_STRING([--enable-xinerama], [Build XCB Xinerama Extension (default: yes)]), [BUILD_XINERAMA=$enableval], [BUILD_XINERAMA=yes])
 AM_CONDITIONAL(BUILD_XINERAMA, [test "x$BUILD_XINERAMA" = xyes])
+AC_ARG_ENABLE(xinput, AS_HELP_STRING([--enable-xinput], [Build XCB XInput Extension (EXPERIMENTAL) (default: no)]), [BUILD_XINPUT=$enableval], [BUILD_XINPUT=no])
+AM_CONDITIONAL(BUILD_XINPUT, [test "x$BUILD_XINPUT" = xyes])
 AC_ARG_ENABLE(xprint, AS_HELP_STRING([--enable-xprint], [Build XCB Xprint Extension (default: yes)]), [BUILD_XPRINT=$enableval], [BUILD_XPRINT=yes])
 AM_CONDITIONAL(BUILD_XPRINT, [test "x$BUILD_XPRINT" = xyes])
 AC_ARG_ENABLE(xtest, AS_HELP_STRING([--enable-xtest], [Build XCB XTEST Extension (default: yes)]), [BUILD_XTEST=$enableval], [BUILD_XTEST=yes])
@@ -129,7 +131,7 @@ AM_CONDITIONAL(BUILD_XVMC, [test "x$BUILD_XVMC" = xyes])
 
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile])
-AC_CONFIG_FILES([xcb.pc xcb-xlib.pc xcb-composite.pc xcb-damage.pc xcb-dpms.pc xcb-glx.pc xcb-randr.pc xcb-record.pc xcb-render.pc xcb-res.pc xcb-screensaver.pc xcb-shape.pc xcb-shm.pc xcb-sync.pc xcb-xevie.pc xcb-xf86dri.pc xcb-xfixes.pc xcb-xinerama.pc xcb-xprint.pc xcb-xtest.pc xcb-xv.pc xcb-xvmc.pc])
+AC_CONFIG_FILES([xcb.pc xcb-xlib.pc xcb-composite.pc xcb-damage.pc xcb-dpms.pc xcb-glx.pc xcb-randr.pc xcb-record.pc xcb-render.pc xcb-res.pc xcb-screensaver.pc xcb-shape.pc xcb-shm.pc xcb-sync.pc xcb-xevie.pc xcb-xf86dri.pc xcb-xfixes.pc xcb-xinerama.pc xcb-xinput.pc xcb-xprint.pc xcb-xtest.pc xcb-xv.pc xcb-xvmc.pc])
 AC_CONFIG_FILES([doc/xcb.doxygen])
 
 AC_OUTPUT
