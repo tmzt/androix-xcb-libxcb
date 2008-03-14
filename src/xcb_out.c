@@ -187,10 +187,10 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
         workaround = WORKAROUND_GLX_GET_FB_CONFIGS_BUG;
 
     /* get a sequence number and arrange for delivery. */
-    _xcb_lock_io(c);
+    pthread_mutex_lock(&c->iolock);
     /* wait for other writing threads to get out of my way. */
     while(c->out.writing)
-        _xcb_wait_io(c, &c->out.cond);
+        pthread_cond_wait(&c->out.cond, &c->iolock);
 
     request = ++c->out.request;
     /* send GetInputFocus (sync_req) when 64k-2 requests have been sent without
@@ -231,7 +231,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
         _xcb_conn_shutdown(c);
         request = 0;
     }
-    _xcb_unlock_io(c);
+    pthread_mutex_unlock(&c->iolock);
     return request;
 }
 
@@ -240,9 +240,9 @@ int xcb_flush(xcb_connection_t *c)
     int ret;
     if(c->has_error)
         return 0;
-    _xcb_lock_io(c);
+    pthread_mutex_lock(&c->iolock);
     ret = _xcb_out_flush_to(c, c->out.request);
-    _xcb_unlock_io(c);
+    pthread_mutex_unlock(&c->iolock);
     return ret;
 }
 
@@ -297,7 +297,7 @@ int _xcb_out_flush_to(xcb_connection_t *c, unsigned int request)
         return _xcb_out_send(c, &vec_ptr, &count);
     }
     while(c->out.writing)
-        _xcb_wait_io(c, &c->out.cond);
+        pthread_cond_wait(&c->out.cond, &c->iolock);
     assert(XCB_SEQUENCE_COMPARE(c->out.request_written, >=, request));
     return 1;
 }

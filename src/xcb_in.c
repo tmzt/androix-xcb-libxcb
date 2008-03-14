@@ -341,7 +341,7 @@ void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_
     if(c->has_error)
         return 0;
 
-    _xcb_lock_io(c);
+    pthread_mutex_lock(&c->iolock);
 
     /* If this request has not been written yet, write it. */
     if(_xcb_out_flush_to(c, request))
@@ -381,7 +381,7 @@ void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_
     }
 
     wake_up_next_reader(c);
-    _xcb_unlock_io(c);
+    pthread_mutex_unlock(&c->iolock);
     return ret;
 }
 
@@ -396,9 +396,9 @@ int xcb_poll_for_reply(xcb_connection_t *c, unsigned int request, void **reply, 
         return 1; /* would not block */
     }
     assert(reply != 0);
-    _xcb_lock_io(c);
+    pthread_mutex_lock(&c->iolock);
     ret = poll_for_reply(c, request, reply, error);
-    _xcb_unlock_io(c);
+    pthread_mutex_unlock(&c->iolock);
     return ret;
 }
 
@@ -407,14 +407,14 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c)
     xcb_generic_event_t *ret;
     if(c->has_error)
         return 0;
-    _xcb_lock_io(c);
+    pthread_mutex_lock(&c->iolock);
     /* get_event returns 0 on empty list. */
     while(!(ret = get_event(c)))
         if(!_xcb_conn_wait(c, &c->in.event_cond, 0, 0))
             break;
 
     wake_up_next_reader(c);
-    _xcb_unlock_io(c);
+    pthread_mutex_unlock(&c->iolock);
     return ret;
 }
 
@@ -423,12 +423,12 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c)
     xcb_generic_event_t *ret = 0;
     if(!c->has_error)
     {
-        _xcb_lock_io(c);
+        pthread_mutex_lock(&c->iolock);
         /* FIXME: follow X meets Z architecture changes. */
         ret = get_event(c);
         if(!ret && _xcb_in_read(c)) /* _xcb_in_read shuts down the connection on error */
             ret = get_event(c);
-        _xcb_unlock_io(c);
+        pthread_mutex_unlock(&c->iolock);
     }
     return ret;
 }
