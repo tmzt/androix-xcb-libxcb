@@ -2,9 +2,7 @@ SUBDIRS=src tests doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 
-pkgconfig_DATA = \
-xcb.pc \
-xcb-xlib.pc
+pkgconfig_DATA = xcb.pc
 
 if BUILD_COMPOSITE
 pkgconfig_DATA += xcb-composite.pc

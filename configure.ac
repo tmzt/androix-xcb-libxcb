@@ -50,8 +50,6 @@ PKG_CHECK_MODULES(XDMCP, xdmcp,
 		], [$XDMCP_LIBS]),
 	[AC_MSG_RESULT(no)])
 
-AC_CHECK_HEADER([execinfo.h], [AC_DEFINE(HAVE_BACKTRACE,1,[Has backtrace*() needed for retrieving stack traces])])
-
 AC_SUBST(NEEDED)
 
 # Find the xcb-proto protocol descriptions
@@ -151,7 +149,6 @@ tests/Makefile
 
 AC_CONFIG_FILES([
 xcb.pc
-xcb-xlib.pc
 xcb-composite.pc
 xcb-damage.pc
 xcb-dpms.pc

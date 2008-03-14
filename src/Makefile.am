@@ -1,5 +1,4 @@
-lib_LTLIBRARIES = libxcb.la \
-                  libxcb-xlib.la
+lib_LTLIBRARIES = libxcb.la
 
 EXTHEADERS =	xproto.h \
 		bigreq.h \
@@ -28,10 +27,6 @@ libxcb_la_SOURCES = \
 libxcb_la_LDFLAGS = -version-info 1:0:0
 
 XCB_LIBS = libxcb.la
-
-libxcb_xlib_la_LDFLAGS = -version-info 0:0:0
-libxcb_xlib_la_LIBADD = $(XCB_LIBS)
-libxcb_xlib_la_SOURCES = xcb_xlib.c
 
 # FIXME: find a way to autogenerate this from the XML files.
 
@@ -257,7 +252,7 @@ endif
 
 
 
-xcbinclude_HEADERS = xcb.h xcbext.h xcbxlib.h $(EXTHEADERS)
+xcbinclude_HEADERS = xcb.h xcbext.h $(EXTHEADERS)
 noinst_HEADERS = xcbint.h
 
 BUILT_SOURCES = $(EXTSOURCES) $(EXTHEADERS)
