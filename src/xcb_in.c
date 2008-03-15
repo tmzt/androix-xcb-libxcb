@@ -52,7 +52,8 @@ struct reply_list {
 };
 
 typedef struct pending_reply {
-    unsigned int request;
+    unsigned int first_request;
+    unsigned int last_request;
     enum workarounds workaround;
     int flags;
     struct pending_reply *next;
@@ -112,7 +113,7 @@ static int read_packet(xcb_connection_t *c)
         }
 
         while(c->in.pending_replies && 
-	      XCB_SEQUENCE_COMPARE (c->in.pending_replies->request, <=, c->in.request_completed))
+	      XCB_SEQUENCE_COMPARE (c->in.pending_replies->last_request, <=, c->in.request_completed))
         {
             pending_reply *oldpend = c->in.pending_replies;
             c->in.pending_replies = oldpend->next;
@@ -128,7 +129,9 @@ static int read_packet(xcb_connection_t *c)
     if(genrep.response_type == XCB_ERROR || genrep.response_type == XCB_REPLY)
     {
         pend = c->in.pending_replies;
-        if(pend && pend->request != c->in.request_read)
+        if(pend &&
+           (XCB_SEQUENCE_COMPARE(c->in.request_read, <, pend->first_request) ||
+            XCB_SEQUENCE_COMPARE(c->in.request_read, >, pend->last_request)))
             pend = 0;
     }
 
@@ -506,7 +509,7 @@ int _xcb_in_expect_reply(xcb_connection_t *c, unsigned int request, enum workaro
         _xcb_conn_shutdown(c);
         return 0;
     }
-    pend->request = request;
+    pend->first_request = pend->last_request = request;
     pend->workaround = workaround;
     pend->flags = flags;
     pend->next = 0;
