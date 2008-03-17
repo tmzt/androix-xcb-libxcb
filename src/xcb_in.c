@@ -113,6 +113,7 @@ static int read_packet(xcb_connection_t *c)
         }
 
         while(c->in.pending_replies && 
+              c->in.pending_replies->workaround != WORKAROUND_EXTERNAL_SOCKET_OWNER &&
 	      XCB_SEQUENCE_COMPARE (c->in.pending_replies->last_request, <=, c->in.request_completed))
         {
             pending_reply *oldpend = c->in.pending_replies;
@@ -130,8 +131,9 @@ static int read_packet(xcb_connection_t *c)
     {
         pend = c->in.pending_replies;
         if(pend &&
-           (XCB_SEQUENCE_COMPARE(c->in.request_read, <, pend->first_request) ||
-            XCB_SEQUENCE_COMPARE(c->in.request_read, >, pend->last_request)))
+           !(XCB_SEQUENCE_COMPARE(pend->first_request, <=, c->in.request_read) &&
+             (pend->workaround == WORKAROUND_EXTERNAL_SOCKET_OWNER ||
+              XCB_SEQUENCE_COMPARE(c->in.request_read, <=, pend->last_request))))
             pend = 0;
     }
 
@@ -352,7 +354,7 @@ void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_
         widened_request -= UINT64_C(1) << 32;
 
     /* If this request has not been written yet, write it. */
-    if(_xcb_out_flush_to(c, widened_request))
+    if(c->out.return_socket || _xcb_out_flush_to(c, widened_request))
     {
         pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
         reader_list reader;
@@ -521,6 +523,20 @@ int _xcb_in_expect_reply(xcb_connection_t *c, uint64_t request, enum workarounds
     *c->in.pending_replies_tail = pend;
     c->in.pending_replies_tail = &pend->next;
     return 1;
+}
+
+void _xcb_in_replies_done(xcb_connection_t *c)
+{
+    struct pending_reply *pend;
+    if (c->in.pending_replies_tail != &c->in.pending_replies)
+    {
+        pend = container_of(c->in.pending_replies_tail, struct pending_reply, next);
+        if(pend->workaround == WORKAROUND_EXTERNAL_SOCKET_OWNER)
+        {
+            pend->last_request = c->out.request;
+            pend->workaround = WORKAROUND_NONE;
+        }
+    }
 }
 
 int _xcb_in_read(xcb_connection_t *c)

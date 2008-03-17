@@ -55,6 +55,25 @@ static int write_block(xcb_connection_t *c, struct iovec *vector, int count)
     return _xcb_out_send(c, &vector, &count);
 }
 
+static void get_socket_back(xcb_connection_t *c)
+{
+    while(c->out.return_socket && c->out.socket_moving)
+        pthread_cond_wait(&c->out.socket_cond, &c->iolock);
+    if(!c->out.return_socket)
+        return;
+
+    c->out.socket_moving = 1;
+    pthread_mutex_unlock(&c->iolock);
+    c->out.return_socket(c->out.socket_closure);
+    pthread_mutex_lock(&c->iolock);
+    c->out.socket_moving = 0;
+
+    pthread_cond_broadcast(&c->out.socket_cond);
+    c->out.return_socket = 0;
+    c->out.socket_closure = 0;
+    _xcb_in_replies_done(c);
+}
+
 /* Public interface */
 
 void xcb_prefetch_maximum_request_length(xcb_connection_t *c)
@@ -191,6 +210,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
     /* wait for other writing threads to get out of my way. */
     while(c->out.writing)
         pthread_cond_wait(&c->out.cond, &c->iolock);
+    get_socket_back(c);
 
     request = ++c->out.request;
     /* send GetInputFocus (sync_req) when 64k-2 requests have been sent without
@@ -235,6 +255,39 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
     return request;
 }
 
+int xcb_take_socket(xcb_connection_t *c, void (*return_socket)(void *closure), void *closure, int flags, uint64_t *sent)
+{
+    int ret;
+    if(c->has_error)
+        return 0;
+    pthread_mutex_lock(&c->iolock);
+    get_socket_back(c);
+    ret = _xcb_out_flush_to(c, c->out.request);
+    if(ret)
+    {
+        c->out.return_socket = return_socket;
+        c->out.socket_closure = closure;
+        if(flags)
+            _xcb_in_expect_reply(c, c->out.request, WORKAROUND_EXTERNAL_SOCKET_OWNER, flags);
+        assert(c->out.request == c->out.request_written);
+        *sent = c->out.request;
+    }
+    pthread_mutex_unlock(&c->iolock);
+    return ret;
+}
+
+int xcb_writev(xcb_connection_t *c, struct iovec *vector, int count, uint64_t requests)
+{
+    int ret;
+    if(c->has_error)
+        return 0;
+    pthread_mutex_lock(&c->iolock);
+    c->out.request += requests;
+    ret = _xcb_out_send(c, &vector, &count);
+    pthread_mutex_unlock(&c->iolock);
+    return ret;
+}
+
 int xcb_flush(xcb_connection_t *c)
 {
     int ret;
@@ -250,6 +303,12 @@ int xcb_flush(xcb_connection_t *c)
 
 int _xcb_out_init(_xcb_out *out)
 {
+    if(pthread_cond_init(&out->socket_cond, 0))
+        return 0;
+    out->return_socket = 0;
+    out->socket_closure = 0;
+    out->socket_moving = 0;
+
     if(pthread_cond_init(&out->cond, 0))
         return 0;
     out->writing = 0;

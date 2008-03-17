@@ -40,7 +40,8 @@
 
 enum workarounds {
     WORKAROUND_NONE,
-    WORKAROUND_GLX_GET_FB_CONFIGS_BUG
+    WORKAROUND_GLX_GET_FB_CONFIGS_BUG,
+    WORKAROUND_EXTERNAL_SOCKET_OWNER
 };
 
 enum lazy_reply_tag
@@ -54,6 +55,12 @@ enum lazy_reply_tag
 
 #define XCB_SEQUENCE_COMPARE(a,op,b)	((int64_t) ((a) - (b)) op 0)
 #define XCB_SEQUENCE_COMPARE_32(a,op,b)	(((int) (a) - (int) (b)) op 0)
+
+#ifndef offsetof
+#define offsetof(type,member) ((size_t) &((type *)0)->member)
+#endif
+
+#define container_of(pointer,type,member) ((type *)(((char *)(pointer)) - offsetof(type, member)))
 
 /* xcb_list.c */
 
@@ -72,6 +79,11 @@ void *_xcb_map_remove(_xcb_map *q, unsigned int key);
 typedef struct _xcb_out {
     pthread_cond_t cond;
     int writing;
+
+    pthread_cond_t socket_cond;
+    void (*return_socket)(void *closure);
+    void *socket_closure;
+    int socket_moving;
 
     char queue[XCB_QUEUE_BUFFER_SIZE];
     int queue_len;
@@ -122,6 +134,7 @@ int _xcb_in_init(_xcb_in *in);
 void _xcb_in_destroy(_xcb_in *in);
 
 int _xcb_in_expect_reply(xcb_connection_t *c, uint64_t request, enum workarounds workaround, int flags);
+void _xcb_in_replies_done(xcb_connection_t *c);
 
 int _xcb_in_read(xcb_connection_t *c);
 int _xcb_in_read_block(xcb_connection_t *c, void *buf, int nread);
