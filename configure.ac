@@ -8,6 +8,8 @@ AC_INIT([libxcb],
 AC_CONFIG_SRCDIR([xcb.pc.in])
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
 
+AM_PATH_PYTHON([2.5])
+
 PKG_CHECK_MODULES(CHECK, [check >= 0.9.4], [HAVE_CHECK=yes], [HAVE_CHECK=no])
 AM_CONDITIONAL(HAVE_CHECK, test x$HAVE_CHECK = xyes)
 

@@ -263,23 +263,15 @@ noinst_HEADERS = xcbint.h
 BUILT_SOURCES = $(EXTSOURCES) $(EXTHEADERS)
 CLEANFILES = $(EXTSOURCES) $(EXTHEADERS) $(EXTENSION_XML)
 
-$(EXTHEADERS) $(EXTSOURCES): c-client.xsl
+$(EXTHEADERS) $(EXTSOURCES): c_client.py
 
 SUFFIXES = .xml
 
 .xml.h:
-	@n=`dirname $*`; test -d $$n || (echo mkdir $$n; mkdir $$n)
-	$(XSLTPROC) --stringparam mode header \
-	            --stringparam base-path $(XCBPROTO_XCBINCLUDEDIR)/ \
-	            --stringparam extension-path $(XCBPROTO_XCBINCLUDEDIR)/ \
-	            -o $@ $(srcdir)/c-client.xsl $< 
+	$(PYTHON) c_client.py $(XCBPROTO_XCBINCLUDEDIR)/$<
 
 .xml.c:
-	@n=`dirname $*`; test -d $$n || (echo mkdir $$n; mkdir $$n)
-	$(XSLTPROC) --stringparam mode source \
-	            --stringparam base-path $(XCBPROTO_XCBINCLUDEDIR)/ \
-	            --stringparam extension-path $(XCBPROTO_XCBINCLUDEDIR)/ \
-	            -o $@ $(srcdir)/c-client.xsl $< 
+	$(PYTHON) c_client.py $(XCBPROTO_XCBINCLUDEDIR)/$<
 
 $(EXTENSION_XML):
 	$(LN_S) -f $(XCBPROTO_XCBINCLUDEDIR)/$@ $@
