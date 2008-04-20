@@ -989,7 +989,8 @@ except ImportError:
     print ''
     print 'Failed to load the xcbgen Python package!'
     print 'Make sure that xcb/proto installed it on your Python path.'
-    print 'If not, you will need to create a .pth file to extend the path.'
+    print 'If not, you will need to create a .pth file or define $PYTHONPATH'
+    print 'to extend the path.'
     print 'Refer to the README file in xcb/proto for more info.'
     print ''
     raise
