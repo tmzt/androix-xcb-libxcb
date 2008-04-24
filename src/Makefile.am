@@ -15,7 +15,7 @@ AM_CFLAGS = $(CWARNFLAGS) $(NEEDED_CFLAGS) $(XDMCP_CFLAGS)
 libxcb_la_LIBADD = $(NEEDED_LIBS) $(XDMCP_LIBS)
 libxcb_la_SOURCES = \
 		xcb_conn.c xcb_out.c xcb_in.c xcb_ext.c xcb_xid.c \
-		xcb_list.c xcb_util.c xcb_auth.c c-client.xsl \
+		xcb_list.c xcb_util.c xcb_auth.c c_client.py \
 		xproto.c bigreq.c xc_misc.c
 
 # Explanation for -version-info:
