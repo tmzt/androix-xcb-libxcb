@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from xml.etree.cElementTree import *
-from sys import argv
 from os.path import basename
+import getopt
+import sys
 import re
 
 # Jump to the bottom of this file for the main routine
@@ -982,6 +983,18 @@ output = {'open'    : c_open,
 
 # Boilerplate below this point
 
+# Check for the argument that specifies path to the xcbgen python package.
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'p:')
+except getopt.GetoptError, err:
+    print str(err)
+    print 'Usage: c_client.py [-p path] file.xml'
+    sys.exit(1)
+
+for (opt, arg) in opts:
+    if opt == '-p':
+        sys.path.append(arg)
+
 # Import the module class
 try:
     from xcbgen.state import Module
@@ -996,7 +1009,7 @@ except ImportError:
     raise
 
 # Parse the xml header
-module = Module(argv[1], output)
+module = Module(args[0], output)
 
 # Build type-registry and resolve type dependencies
 module.register()
