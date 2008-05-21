@@ -112,7 +112,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
         } fields;
         uint32_t packet;
     } sync_req = { { /* GetInputFocus */ 43, 0, 1 } };
-    unsigned int request;
+    uint64_t request;
     uint32_t prefix[3] = { 0 };
     int veclen = req->count;
     enum workarounds workaround = WORKAROUND_NONE;
@@ -282,7 +282,7 @@ int _xcb_out_send(xcb_connection_t *c, struct iovec **vector, int *count)
     return ret;
 }
 
-int _xcb_out_flush_to(xcb_connection_t *c, unsigned int request)
+int _xcb_out_flush_to(xcb_connection_t *c, uint64_t request)
 {
     assert(XCB_SEQUENCE_COMPARE(request, <=, c->out.request));
     if(XCB_SEQUENCE_COMPARE(c->out.request_written, >=, request))

@@ -52,7 +52,8 @@ enum lazy_reply_tag
 
 #define XCB_PAD(i) (-(i) & 3)
 
-#define XCB_SEQUENCE_COMPARE(a,op,b)	((int) ((a) - (b)) op 0)
+#define XCB_SEQUENCE_COMPARE(a,op,b)	((int64_t) ((a) - (b)) op 0)
+#define XCB_SEQUENCE_COMPARE_32(a,op,b)	(((int) (a) - (int) (b)) op 0)
 
 /* xcb_list.c */
 
@@ -75,8 +76,8 @@ typedef struct _xcb_out {
     char queue[XCB_QUEUE_BUFFER_SIZE];
     int queue_len;
 
-    unsigned int request;
-    unsigned int request_written;
+    uint64_t request;
+    uint64_t request_written;
 
     pthread_mutex_t reqlenlock;
     enum lazy_reply_tag maximum_request_length_tag;
@@ -90,7 +91,7 @@ int _xcb_out_init(_xcb_out *out);
 void _xcb_out_destroy(_xcb_out *out);
 
 int _xcb_out_send(xcb_connection_t *c, struct iovec **vector, int *count);
-int _xcb_out_flush_to(xcb_connection_t *c, unsigned int request);
+int _xcb_out_flush_to(xcb_connection_t *c, uint64_t request);
 
 
 /* xcb_in.c */
@@ -102,9 +103,9 @@ typedef struct _xcb_in {
     char queue[4096];
     int queue_len;
 
-    unsigned int request_expected;
-    unsigned int request_read;
-    unsigned int request_completed;
+    uint64_t request_expected;
+    uint64_t request_read;
+    uint64_t request_completed;
     struct reply_list *current_reply;
     struct reply_list **current_reply_tail;
 
@@ -120,7 +121,7 @@ typedef struct _xcb_in {
 int _xcb_in_init(_xcb_in *in);
 void _xcb_in_destroy(_xcb_in *in);
 
-int _xcb_in_expect_reply(xcb_connection_t *c, unsigned int request, enum workarounds workaround, int flags);
+int _xcb_in_expect_reply(xcb_connection_t *c, uint64_t request, enum workarounds workaround, int flags);
 
 int _xcb_in_read(xcb_connection_t *c);
 int _xcb_in_read_block(xcb_connection_t *c, void *buf, int nread);
