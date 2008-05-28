@@ -77,8 +77,8 @@ static void wake_up_next_reader(xcb_connection_t *c)
 static int read_packet(xcb_connection_t *c)
 {
     xcb_generic_reply_t genrep;
-    int length = 32,
-        eventlength = 0; /* length after first 32 bytes for GenericEvents */
+    int length = 32;
+    int eventlength = 0; /* length after first 32 bytes for GenericEvents */
     void *buf;
     pending_reply *pend = 0;
     struct event_list *event;
