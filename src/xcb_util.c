@@ -246,13 +246,16 @@ static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port)
 static int _xcb_open_unix(char *protocol, const char *file)
 {
     int fd;
-    struct sockaddr_un addr = { AF_UNIX };
+    struct sockaddr_un addr;
 
     if (protocol && strcmp("unix",protocol))
         return -1;
 
     strcpy(addr.sun_path, file);
-
+    addr.sun_family = AF_UNIX;
+#if HAVE_SOCKADDR_SUN_LEN
+    addr.sun_len = SUN_LEN(&addr);
+#endif
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(fd == -1)
         return -1;

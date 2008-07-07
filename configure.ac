@@ -70,6 +70,14 @@ AC_HEADER_STDC
 AC_SEARCH_LIBS(getaddrinfo, socket)
 AC_SEARCH_LIBS(connect, socket)
 
+dnl check for the sockaddr_un.sun_len member
+AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
+		[AC_DEFINE(HAVE_SOCKADDR_SUN_LEN,1,[Have the sockaddr_un.sun_len member.])],
+		[],
+		[ #include <sys/types.h>
+		  #include <sys/un.h>
+		])
+								 										
 xcbincludedir='${includedir}/xcb'
 AC_SUBST(xcbincludedir)
 
