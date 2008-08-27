@@ -68,7 +68,7 @@ static size_t memdup(char **dst, void *src, size_t len)
     return len;
 }
 
-static int authname_match(enum auth_protos kind, char *name, int namelen)
+static int authname_match(enum auth_protos kind, char *name, size_t namelen)
 {
     if(strlen(authnames[kind]) != namelen)
 	return 0;
