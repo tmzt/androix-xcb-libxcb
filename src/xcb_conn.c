@@ -80,7 +80,7 @@ static int write_setup(xcb_connection_t *c, xcb_auth_info_t *auth_info)
     xcb_setup_request_t out;
     struct iovec parts[6];
     int count = 0;
-    int endian = 0x01020304;
+    static const uint32_t endian = 0x01020304;
     int ret;
 
     memset(&out, 0, sizeof(out));
@@ -110,7 +110,7 @@ static int write_setup(xcb_connection_t *c, xcb_auth_info_t *auth_info)
         parts[count].iov_len = XCB_PAD(out.authorization_protocol_data_len);
         parts[count++].iov_base = (char *) pad;
     }
-    assert(count <= sizeof(parts) / sizeof(*parts));
+    assert(count <= (int) (sizeof(parts) / sizeof(*parts)));
 
     _xcb_lock_io(c);
     {
