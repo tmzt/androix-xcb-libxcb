@@ -252,7 +252,7 @@ static void free_reply_list(struct reply_list *head)
     }
 }
 
-static int read_block(const int fd, void *buf, const size_t len)
+static int read_block(const int fd, void *buf, const ssize_t len)
 {
     int done = 0;
     while(done < len)
