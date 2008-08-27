@@ -111,7 +111,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
             uint16_t len;
         } fields;
         uint32_t packet;
-    } sync = { { /* GetInputFocus */ 43, 0, 1 } };
+    } sync_req = { { /* GetInputFocus */ 43, 0, 1 } };
     unsigned int request;
     uint32_t prefix[3] = { 0 };
     int veclen = req->count;
@@ -127,7 +127,7 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
     if(!(flags & XCB_REQUEST_RAW))
     {
         static const char pad[3];
-        int i;
+        unsigned int i;
         uint16_t shortlen = 0;
         size_t longlen = 0;
         assert(vector[0].iov_len >= 4);
@@ -193,16 +193,16 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
         _xcb_wait_io(c, &c->out.cond);
 
     request = ++c->out.request;
-    /* send GetInputFocus (sync) when 64k-2 requests have been sent without
+    /* send GetInputFocus (sync_req) when 64k-2 requests have been sent without
      * a reply.
-     * Also send sync (could use NoOp) at 32-bit wrap to avoid having
+     * Also send sync_req (could use NoOp) at 32-bit wrap to avoid having
      * applications see sequence 0 as that is used to indicate
      * an error in sending the request */
     while((req->isvoid &&
 	c->out.request == c->in.request_expected + (1 << 16) - 1) ||
        request == 0)
     {
-        prefix[0] = sync.packet;
+        prefix[0] = sync_req.packet;
         _xcb_in_expect_reply(c, request, WORKAROUND_NONE, XCB_REQUEST_DISCARD_REPLY);
         c->in.request_expected = c->out.request;
 	request = ++c->out.request;
