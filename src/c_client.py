@@ -183,7 +183,7 @@ def c_open(self):
         _h('extern xcb_extension_t %s;', _ns.c_ext_global_name)
 
         _c('')
-        _c('xcb_extension_t %s = { "%s" };', _ns.c_ext_global_name, _ns.ext_xname)
+        _c('xcb_extension_t %s = { "%s", 0 };', _ns.c_ext_global_name, _ns.ext_xname)
 
 def c_close(self):
     '''
