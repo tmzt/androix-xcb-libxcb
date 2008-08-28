@@ -253,7 +253,7 @@ static int _xcb_open_unix(char *protocol, const char *file)
 
     strcpy(addr.sun_path, file);
     addr.sun_family = AF_UNIX;
-#if HAVE_SOCKADDR_SUN_LEN
+#ifdef HAVE_SOCKADDR_SUN_LEN
     addr.sun_len = SUN_LEN(&addr);
 #endif
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
