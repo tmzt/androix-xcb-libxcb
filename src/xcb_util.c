@@ -201,20 +201,23 @@ static int _xcb_open_decnet(const char *host, const char *protocol, const unsign
 static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port)
 {
     int fd = -1;
-    struct addrinfo hints = { 0
-#ifdef AI_ADDRCONFIG
-                              | AI_ADDRCONFIG
-#endif
-#ifdef AI_NUMERICSERV
-                              | AI_NUMERICSERV
-#endif
-                              , AF_UNSPEC, SOCK_STREAM };
+    struct addrinfo hints;
     char service[6]; /* "65535" with the trailing '\0' */
     struct addrinfo *results, *addr;
     char *bracket;
 
     if (protocol && strcmp("tcp",protocol))
         return -1;
+
+    memset(&hints, 0, sizeof(hints));
+#ifdef AI_ADDRCONFIG
+    hints.ai_flags |= AI_ADDRCONFIG;
+#endif
+#ifdef AI_NUMERICSERV
+    hints.ai_flags |= AI_NUMERICSERV;
+#endif
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
 
 #ifdef AF_INET6
     /* Allow IPv6 addresses enclosed in brackets. */
