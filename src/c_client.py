@@ -635,9 +635,15 @@ def _c_complex(self):
     struct_fields = []
     maxtypelen = 0
 
+    varfield = None
     for field in self.fields:
         if not field.type.fixed_size():
-            break
+            varfield = field.c_field_name
+            continue
+        if varfield != None and not field.type.is_pad:
+            errmsg = '%s: warning: variable field %s followed by fixed field %s\n' % (self.c_type, varfield, field.c_field_name)
+            sys.stderr.write(errmsg)
+            # sys.exit(1)
         if field.wire:
             struct_fields.append(field)
         
