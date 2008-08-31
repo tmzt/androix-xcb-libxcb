@@ -77,7 +77,7 @@ AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
 		[ #include <sys/types.h>
 		  #include <sys/un.h>
 		])
-								 										
+
 xcbincludedir='${includedir}/xcb'
 AC_SUBST(xcbincludedir)
 
@@ -92,7 +92,7 @@ else
 fi
 AC_SUBST(CWARNFLAGS)
 
-GCC_CHECK_VISIBILITY()
+XCB_CHECK_VISIBILITY()
 
 # htmldir is not defined prior to autoconf 2.59c, so on earlier versions
 # set an equivalent value.
@@ -100,57 +100,72 @@ AC_PREREQ([2.59c], [], [AC_SUBST([htmldir], [m4_ifset([AC_PACKAGE_TARNAME],
 	  ['${datadir}/doc/${PACKAGE_TARNAME}'],
 	  ['${datadir}/doc/${PACKAGE}'])
 ])])
-AM_CHECK_DOXYGEN()
 
-AC_ARG_ENABLE(composite, AS_HELP_STRING([--enable-composite], [Build XCB Composite Extension (default: yes)]), [BUILD_COMPOSITE=$enableval], [BUILD_COMPOSITE=yes])
-AM_CONDITIONAL(BUILD_COMPOSITE, [test "x$BUILD_COMPOSITE" = xyes])
-AC_ARG_ENABLE(damage, AS_HELP_STRING([--enable-damage], [Build XCB Damage Extension (default: yes)]), [BUILD_DAMAGE=$enableval], [BUILD_DAMAGE=yes])
-AM_CONDITIONAL(BUILD_DAMAGE, [test "x$BUILD_DAMAGE" = xyes])
-AC_ARG_ENABLE(dpms, AS_HELP_STRING([--enable-dpms], [Build XCB DPMS Extension (default: yes)]), [BUILD_DPMS=$enableval], [BUILD_DPMS=yes])
-AM_CONDITIONAL(BUILD_DPMS, [test "x$BUILD_DPMS" = xyes])
-AC_ARG_ENABLE(glx, AS_HELP_STRING([--enable-glx], [Build XCB GLX Extension (default: yes)]), [BUILD_GLX=$enableval], [BUILD_GLX=yes])
-AM_CONDITIONAL(BUILD_GLX, [test "x$BUILD_GLX" = xyes])
-AC_ARG_ENABLE(randr, AS_HELP_STRING([--enable-randr], [Build XCB RandR Extension (default: yes)]), [BUILD_RANDR=$enableval], [BUILD_RANDR=yes])
-AM_CONDITIONAL(BUILD_RANDR, [test "x$BUILD_RANDR" = xyes])
-AC_ARG_ENABLE(record, AS_HELP_STRING([--enable-record], [Build XCB Record Extension (default: yes)]), [BUILD_RECORD=$enableval], [BUILD_RECORD=yes])
-AM_CONDITIONAL(BUILD_RECORD, [test "x$BUILD_RECORD" = xyes])
-AC_ARG_ENABLE(render, AS_HELP_STRING([--enable-render], [Build XCB Render Extension (default: yes)]), [BUILD_RENDER=$enableval], [BUILD_RENDER=yes])
-AM_CONDITIONAL(BUILD_RENDER, [test "x$BUILD_RENDER" = xyes])
-AC_ARG_ENABLE(res, AS_HELP_STRING([--enable-res], [Build XCB X-Resource Extension (default: yes)]), [BUILD_RES=$enableval], [BUILD_RES=yes])
-AM_CONDITIONAL(BUILD_RES, [test "x$BUILD_RES" = xyes])
-AC_ARG_ENABLE(screensaver, AS_HELP_STRING([--enable-screensaver], [Build XCB Screensaver Extension (default: yes)]), [BUILD_SCREENSAVER=$enableval], [BUILD_SCREENSAVER=yes])
-AM_CONDITIONAL(BUILD_SCREENSAVER, [test "x$BUILD_SCREENSAVER" = xyes])
-AC_ARG_ENABLE(shape, AS_HELP_STRING([--enable-shape], [Build XCB Shape Extension (default: yes)]), [BUILD_SHAPE=$enableval], [BUILD_SHAPE=yes])
-AM_CONDITIONAL(BUILD_SHAPE, [test "x$BUILD_SHAPE" = xyes])
-AC_ARG_ENABLE(shm, AS_HELP_STRING([--enable-shm], [Build XCB Shm Extension (default: yes)]), [BUILD_SHM=$enableval], [BUILD_SHM=yes])
-AM_CONDITIONAL(BUILD_SHM, [test "x$BUILD_SHM" = xyes])
-AC_ARG_ENABLE(sync, AS_HELP_STRING([--enable-sync], [Build XCB Sync Extension (default: yes)]), [BUILD_SYNC=$enableval], [BUILD_SYNC=yes])
-AM_CONDITIONAL(BUILD_SYNC, [test "x$BUILD_SYNC" = xyes])
-AC_ARG_ENABLE(xevie, AS_HELP_STRING([--enable-xevie], [Build XCB Xevie Extension (default: yes)]), [BUILD_XEVIE=$enableval], [BUILD_XEVIE=yes])
-AM_CONDITIONAL(BUILD_XEVIE, [test "x$BUILD_XEVIE" = xyes])
-AC_ARG_ENABLE(xf86dri, AS_HELP_STRING([--enable-xf86dri], [Build XCB XFree86-DRI Extension (default: yes)]), [BUILD_XF86DRI=$enableval], [BUILD_XF86DRI=yes])
-AM_CONDITIONAL(BUILD_XF86DRI, [test "x$BUILD_XF86DRI" = xyes])
-AC_ARG_ENABLE(xfixes, AS_HELP_STRING([--enable-xfixes], [Build XCB XFixes Extension (default: yes)]), [BUILD_XFIXES=$enableval], [BUILD_XFIXES=yes])
-AM_CONDITIONAL(BUILD_XFIXES, [test "x$BUILD_XFIXES" = xyes])
-AC_ARG_ENABLE(xinerama, AS_HELP_STRING([--enable-xinerama], [Build XCB Xinerama Extension (default: yes)]), [BUILD_XINERAMA=$enableval], [BUILD_XINERAMA=yes])
-AM_CONDITIONAL(BUILD_XINERAMA, [test "x$BUILD_XINERAMA" = xyes])
-AC_ARG_ENABLE(xinput, AS_HELP_STRING([--enable-xinput], [Build XCB XInput Extension (EXPERIMENTAL) (default: no)]), [BUILD_XINPUT=$enableval], [BUILD_XINPUT=no])
-AM_CONDITIONAL(BUILD_XINPUT, [test "x$BUILD_XINPUT" = xyes])
-AC_ARG_ENABLE(xprint, AS_HELP_STRING([--enable-xprint], [Build XCB Xprint Extension (default: yes)]), [BUILD_XPRINT=$enableval], [BUILD_XPRINT=yes])
-AM_CONDITIONAL(BUILD_XPRINT, [test "x$BUILD_XPRINT" = xyes])
-AC_ARG_ENABLE(xselinux, AS_HELP_STRING([--enable-xselinux], [Build XCB SELinux Extension (default: no)]), [BUILD_SELINUX=$enableval], [BUILD_SELINUX=no])
-AM_CONDITIONAL(BUILD_SELINUX, [test "x$BUILD_SELINUX" = xyes])
-AC_ARG_ENABLE(xtest, AS_HELP_STRING([--enable-xtest], [Build XCB XTEST Extension (default: yes)]), [BUILD_XTEST=$enableval], [BUILD_XTEST=yes])
-AM_CONDITIONAL(BUILD_XTEST, [test "x$BUILD_XTEST" = xyes])
-AC_ARG_ENABLE(xv, AS_HELP_STRING([--enable-xv], [Build XCB Xv Extension (default: yes)]), [BUILD_XV=$enableval], [BUILD_XV=yes])
-AM_CONDITIONAL(BUILD_XV, [test "x$BUILD_XV" = xyes])
-AC_ARG_ENABLE(xvmc, AS_HELP_STRING([--enable-xvmc], [Build XCB XvMC Extension (default: yes)]), [BUILD_XVMC=$enableval], [BUILD_XVMC=yes])
-AM_CONDITIONAL(BUILD_XVMC, [test "x$BUILD_XVMC" = xyes])
+XCB_CHECK_DOXYGEN()
+
+XCB_EXTENSION(Composite, "yes")
+XCB_EXTENSION(Damage, "yes")
+XCB_EXTENSION(DPMS, "yes")
+XCB_EXTENSION(GLX, "yes")
+XCB_EXTENSION(RandR, "yes")
+XCB_EXTENSION(Record, "yes")
+XCB_EXTENSION(Render, "yes")
+XCB_EXTENSION(Resource, "yes")
+XCB_EXTENSION(Screensaver, "yes")
+XCB_EXTENSION(Shape, "yes")
+XCB_EXTENSION(Shm, "yes")
+XCB_EXTENSION(Sync, "yes")
+XCB_EXTENSION(Xevie, "yes")
+XCB_EXTENSION(XFixes, "yes")
+XCB_EXTENSION(XFree86-DRI, "yes")
+XCB_EXTENSION(Xinerama, "yes")
+XCB_EXTENSION(XInput, "no")
+XCB_EXTENSION(Xprint, "yes")
+XCB_EXTENSION(SELinux, "no")
+XCB_EXTENSION(XTest, "yes")
+XCB_EXTENSION(Xv, "yes")
+XCB_EXTENSION(XvMC, "yes")
+XCB_EXTENSION(Composite, "yes")
+XCB_EXTENSION(Composite, "yes")
 
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile])
-AC_CONFIG_FILES([xcb.pc xcb-xlib.pc xcb-composite.pc xcb-damage.pc xcb-dpms.pc xcb-glx.pc xcb-randr.pc xcb-record.pc xcb-render.pc xcb-res.pc xcb-screensaver.pc xcb-shape.pc xcb-shm.pc xcb-sync.pc xcb-xevie.pc xcb-xf86dri.pc xcb-xfixes.pc xcb-xinerama.pc xcb-xinput.pc xcb-xprint.pc xcb-xselinux.pc xcb-xtest.pc xcb-xv.pc xcb-xvmc.pc])
-AC_CONFIG_FILES([doc/xcb.doxygen])
+AC_CONFIG_FILES([
+Makefile
+doc/Makefile
+src/Makefile
+tests/Makefile
+])
+
+AC_CONFIG_FILES([
+xcb.pc
+xcb-xlib.pc
+xcb-composite.pc
+xcb-damage.pc
+xcb-dpms.pc
+xcb-glx.pc
+xcb-randr.pc
+xcb-record.pc
+xcb-render.pc
+xcb-res.pc
+xcb-screensaver.pc
+xcb-shape.pc
+xcb-shm.pc
+xcb-sync.pc
+xcb-xevie.pc
+xcb-xf86dri.pc
+xcb-xfixes.pc
+xcb-xinerama.pc
+xcb-xinput.pc
+xcb-xprint.pc
+xcb-xselinux.pc
+xcb-xtest.pc
+xcb-xv.pc
+xcb-xvmc.pc
+])
+
+AC_CONFIG_FILES([
+doc/xcb.doxygen
+])
 
 AC_OUTPUT
 

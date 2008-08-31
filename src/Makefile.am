@@ -108,7 +108,7 @@ endif
 EXTHEADERS += res.h
 EXTSOURCES += res.c
 EXTENSION_XML += res.xml
-if BUILD_RES
+if BUILD_RESOURCE
 lib_LTLIBRARIES += libxcb-res.la
 libxcb_res_la_LDFLAGS = -version-info 0:0:0
 libxcb_res_la_LIBADD = $(XCB_LIBS)
@@ -168,7 +168,7 @@ endif
 EXTHEADERS += xf86dri.h
 EXTSOURCES += xf86dri.c
 EXTENSION_XML += xf86dri.xml
-if BUILD_XF86DRI
+if BUILD_XFREE86_DRI
 lib_LTLIBRARIES += libxcb-xf86dri.la
 libxcb_xf86dri_la_LDFLAGS = -version-info 0:0:0
 libxcb_xf86dri_la_LIBADD = $(XCB_LIBS)
