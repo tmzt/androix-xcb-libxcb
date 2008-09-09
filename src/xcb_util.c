@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -123,6 +124,9 @@ static int _xcb_open_unix(char *protocol, const char *file);
 #ifdef DNETCONN
 static int _xcb_open_decnet(const char *host, char *protocol, const unsigned short port);
 #endif
+#ifdef HAVE_ABSTRACT_SOCKETS
+static int _xcb_open_abstract(char *protocol, const char *file);
+#endif
 
 static int _xcb_open(char *host, char *protocol, const int display)
 {
@@ -156,10 +160,13 @@ static int _xcb_open(char *host, char *protocol, const int display)
 
     /* display specifies Unix socket */
     snprintf(file, sizeof(file), "%s%d", base, display);
+#ifdef HAVE_ABSTRACT_SOCKETS
+    fd = _xcb_open_abstract(protocol, file);
+    if (fd >= 0 || (errno != ENOENT && errno != ECONNREFUSED))
+        return fd;
+
+#endif
     return  _xcb_open_unix(protocol, file);
-
-
-    return fd;
 }
 
 #ifdef DNETCONN
@@ -273,6 +280,33 @@ static int _xcb_open_unix(char *protocol, const char *file)
     }
     return fd;
 }
+
+#ifdef HAVE_ABSTRACT_SOCKETS
+static int _xcb_open_abstract(char *protocol, const char *file)
+{
+    int fd;
+    struct sockaddr_un addr = {0};
+    socklen_t namelen;
+
+    if (protocol && strcmp("unix",protocol))
+        return -1;
+
+    strcpy(addr.sun_path + 1, file);
+    addr.sun_family = AF_UNIX;
+    namelen = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(file);
+#ifdef HAVE_SOCKADDR_SUN_LEN
+    addr.sun_len = 1 + strlen(file);
+#endif
+    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (fd == -1)
+        return -1;
+    if (connect(fd, (struct sockaddr *) &addr, namelen) == -1) {
+        close(fd);
+        return -1;
+    }
+    return fd;
+}
+#endif
 
 xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
 {

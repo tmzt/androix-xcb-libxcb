@@ -70,6 +70,12 @@ AC_HEADER_STDC
 AC_SEARCH_LIBS(getaddrinfo, socket)
 AC_SEARCH_LIBS(connect, socket)
 
+case $host_os in
+linux*)
+	AC_DEFINE([HAVE_ABSTRACT_SOCKETS], 1, [Define if your platform supports abstract sockets])
+	;;
+esac
+
 dnl check for the sockaddr_un.sun_len member
 AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
 		[AC_DEFINE(HAVE_SOCKADDR_SUN_LEN,1,[Have the sockaddr_un.sun_len member.])],
