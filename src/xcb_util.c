@@ -192,8 +192,10 @@ static int _xcb_open_decnet(const char *host, const char *protocol, const unsign
     accessdata.acc_accl = strlen((char *)accessdata.acc_acc);
     setsockopt(fd, DNPROTO_NSP, SO_CONACCESS, &accessdata, sizeof(accessdata));
 
-    if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1)
+    if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1) {
+        close(fd);
         return -1;
+    }
     return fd;
 }
 #endif
@@ -238,9 +240,12 @@ static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port)
     for(addr = results; addr; addr = addr->ai_next)
     {
         fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-        if(fd >= 0 && connect(fd, addr->ai_addr, addr->ai_addrlen) >= 0)
-            break;
-        fd = -1;
+        if(fd >= 0) {
+            if (connect(fd, addr->ai_addr, addr->ai_addrlen) >= 0)
+                break;
+            close(fd);
+            fd = -1;
+        }
     }
     freeaddrinfo(results);
     return fd;
@@ -262,8 +267,10 @@ static int _xcb_open_unix(char *protocol, const char *file)
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(fd == -1)
         return -1;
-    if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1)
+    if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1) {
+        close(fd);
         return -1;
+    }
     return fd;
 }
 
