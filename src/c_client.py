@@ -176,6 +176,12 @@ def c_open(self):
         for (n, h) in self.imports:
             _hc('#include "%s.h"', h)
 
+    _h('')
+    _h('#ifdef __cplusplus')
+    _h('extern "C" {')
+    _h('#endif')
+
+    if _ns.is_ext:
         _h('')
         _h('#define XCB_%s_MAJOR_VERSION %s', _ns.ext_name.upper(), _ns.major_version)
         _h('#define XCB_%s_MINOR_VERSION %s', _ns.ext_name.upper(), _ns.minor_version)
@@ -193,6 +199,12 @@ def c_close(self):
     _h_setlevel(2)
     _c_setlevel(2)
     _hc('')
+
+    _h('')
+    _h('#ifdef __cplusplus')
+    _h('}')
+    _h('#endif')
+
     _h('')
     _h('#endif')
     _h('')
