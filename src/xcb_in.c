@@ -191,6 +191,7 @@ static int read_packet(xcb_connection_t *c)
         if(!cur)
         {
             _xcb_conn_shutdown(c);
+            free(buf);
             return 0;
         }
         cur->reply = buf;
