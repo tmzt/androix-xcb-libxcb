@@ -76,6 +76,16 @@ linux*)
 	;;
 esac
 
+dnl define buffer queue size
+xcb_queue_buffer_size=16384
+AC_DEFINE(XCB_QUEUE_BUFFER_SIZE, $xcb_queue_buffer_size, [XCB buffer queue size])
+AC_ARG_WITH(queue-size,
+            AC_HELP_STRING([--with-queue-size=SIZE],
+              [Set the XCB buffer queue size (default is 16384)]),
+            [AC_DEFINE_UNQUOTED(XCB_QUEUE_BUFFER_SIZE, $withval, [XCB buffer queue size]),
+            xcb_queue_buffer_size=$withval],
+            )
+
 dnl check for the sockaddr_un.sun_len member
 AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
 		[AC_DEFINE(HAVE_SOCKADDR_SUN_LEN,1,[Have the sockaddr_un.sun_len member.])],
@@ -181,6 +191,7 @@ echo ""
 echo "  Configuration"
 echo "    XDM support.........: ${have_xdmcp}"
 echo "    Build unit tests....: ${HAVE_CHECK}"
+echo "    XCB buffer size.....: ${xcb_queue_buffer_size}"
 echo ""
 echo "  Used CFLAGS:"
 echo "    CPPFLAGS............: ${CPPFLAGS}"

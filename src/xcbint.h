@@ -72,7 +72,7 @@ typedef struct _xcb_out {
     pthread_cond_t cond;
     int writing;
 
-    char queue[4096];
+    char queue[XCB_QUEUE_BUFFER_SIZE];
     int queue_len;
 
     unsigned int request;
