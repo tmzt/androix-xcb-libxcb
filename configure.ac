@@ -131,8 +131,6 @@ XCB_EXTENSION(SELinux, "no")
 XCB_EXTENSION(XTest, "yes")
 XCB_EXTENSION(Xv, "yes")
 XCB_EXTENSION(XvMC, "yes")
-XCB_EXTENSION(Composite, "yes")
-XCB_EXTENSION(Composite, "yes")
 
 
 AC_CONFIG_FILES([
