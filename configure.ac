@@ -77,14 +77,13 @@ linux*)
 esac
 
 dnl define buffer queue size
-xcb_queue_buffer_size=16384
-AC_DEFINE(XCB_QUEUE_BUFFER_SIZE, $xcb_queue_buffer_size, [XCB buffer queue size])
-AC_ARG_WITH(queue-size,
+AC_ARG_WITH([queue-size],
             AC_HELP_STRING([--with-queue-size=SIZE],
-              [Set the XCB buffer queue size (default is 16384)]),
-            [AC_DEFINE_UNQUOTED(XCB_QUEUE_BUFFER_SIZE, $withval, [XCB buffer queue size]),
-            xcb_queue_buffer_size=$withval],
-            )
+            [Set the XCB buffer queue size (default is 16384)]),
+            [xcb_queue_buffer_size="$withval"],
+            [xcb_queue_buffer_size=16384])
+AC_DEFINE_UNQUOTED(XCB_QUEUE_BUFFER_SIZE, [$xcb_queue_buffer_size],
+                   [XCB buffer queue size])
 
 dnl check for the sockaddr_un.sun_len member
 AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
