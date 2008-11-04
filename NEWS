@@ -1,3 +1,23 @@
+Release 1.1.92 (2008-11-01)
+==============
+Enhancements:
+* Added small fix to support trailing fixed fields; also warning for non-pad fixed fields
+* Fixed overly aggressive warning about fixed field following variable
+* Added generation of extern "C" for compatibility with C++
+* Remove libxcb-xlib and xcbxlib.h.
+* Inline _xcb_lock_io, _xcb_unlock_io, and _xcb_wait_io.
+* Track 64-bit sequence numbers internally.
+* Use sequence number ranges in pending replies
+* Remove duplicate XCB_EXTENSION calls for Composite extension
+* Factorize m4 macros and add one to set X extensions
+* Allow compile-time setting for XCB queue buffer size
+* Support handing off socket write permission to external code.
+* Add support for the abstract socket namespace under Linux
+
+Bug fixes:
+* Fix tiny memory leak in read_packet
+* Fix some fd leaks in _xcb_open_*()
+
 Release 1.1 (2007-11-04)
 ========================
 
