@@ -316,10 +316,18 @@ xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
     xcb_connection_t *c;
     xcb_auth_info_t auth;
 
+#ifdef __APPLE__
+    if(displayname && strlen(displayname)>11 && !strncmp(displayname, "/tmp/launch", 11))
+        fd = _xcb_open_unix(protocol, displayname);
+    else {
+#endif        
     if(!_xcb_parse_display(displayname, &host, &protocol, &display, screenp))
         return (xcb_connection_t *) &error_connection;
     fd = _xcb_open(host, protocol, display);
     free(host);
+#ifdef __APPLE__
+    }
+#endif
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
 
@@ -340,10 +348,18 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname,
     char *host;
     char *protocol;
 
+#ifdef __APPLE__
+    if(displayname && strlen(displayname)>11 && !strncmp(displayname, "/tmp/launch", 11))
+        fd = _xcb_open_unix(protocol, displayname);
+    else {
+#endif        
     if(!_xcb_parse_display(displayname, &host, &protocol, &display, screenp))
         return (xcb_connection_t *) &error_connection;
     fd = _xcb_open(host, protocol, display);
     free(host);
+#ifdef __APPLE__
+    }
+#endif    
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
 
