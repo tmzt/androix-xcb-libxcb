@@ -130,7 +130,9 @@ static int _xcb_open_abstract(char *protocol, const char *file);
 
 static int _xcb_open(char *host, char *protocol, const int display)
 {
+#ifdef HAVE_ABSTRACT_SOCKETS
     int fd;
+#endif
     static const char base[] = "/tmp/.X11-unix/X";
     char file[sizeof(base) + 20];
 
