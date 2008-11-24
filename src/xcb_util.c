@@ -315,19 +315,22 @@ xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
     char *protocol;
     xcb_connection_t *c;
     xcb_auth_info_t auth;
+    
+    int parsed = _xcb_parse_display(displayname, &host, &protocol, &display, screenp);
 
-#ifdef __APPLE__
+#ifdef HAVE_LAUNCHD
+    if(!displayname)
+        displayname = getenv("DISPLAY");
     if(displayname && strlen(displayname)>11 && !strncmp(displayname, "/tmp/launch", 11))
-        fd = _xcb_open_unix(protocol, displayname);
-    else {
-#endif        
-    if(!_xcb_parse_display(displayname, &host, &protocol, &display, screenp))
-        return (xcb_connection_t *) &error_connection;
-    fd = _xcb_open(host, protocol, display);
-    free(host);
-#ifdef __APPLE__
-    }
+        fd = _xcb_open_unix(NULL, displayname);
+    else
 #endif
+    if(!parsed)
+        return (xcb_connection_t *) &error_connection;
+    else
+        fd = _xcb_open(host, protocol, display);
+    free(host);
+
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
 
@@ -348,18 +351,21 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname,
     char *host;
     char *protocol;
 
-#ifdef __APPLE__
+    int parsed = _xcb_parse_display(displayname, &host, &protocol, &display, screenp);
+    
+#ifdef HAVE_LAUNCHD
+    if(!displayname)
+        displayname = getenv("DISPLAY");
     if(displayname && strlen(displayname)>11 && !strncmp(displayname, "/tmp/launch", 11))
-        fd = _xcb_open_unix(protocol, displayname);
-    else {
-#endif        
-    if(!_xcb_parse_display(displayname, &host, &protocol, &display, screenp))
+        fd = _xcb_open_unix(NULL, displayname);
+    else
+#endif
+    if(!parsed)
         return (xcb_connection_t *) &error_connection;
-    fd = _xcb_open(host, protocol, display);
+    else
+        fd = _xcb_open(host, protocol, display);
     free(host);
-#ifdef __APPLE__
-    }
-#endif    
+
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
 
