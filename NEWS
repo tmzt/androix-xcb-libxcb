@@ -1,5 +1,11 @@
+Release 1.1.93 (2008-12-11)
+===========================
+Enhancements:
+* Apple: Enable support for launchd DISPLAY socket
+* Treat XIDs the same as other cardinal values.
+
 Release 1.1.92 (2008-11-01)
-==============
+===========================
 Enhancements:
 * Added small fix to support trailing fixed fields; also warning for non-pad fixed fields
 * Fixed overly aggressive warning about fixed field following variable
