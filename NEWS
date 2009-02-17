@@ -1,3 +1,7 @@
+Release 1.2 (2009-02-17)
+========================
+* Stop packaging auto-generated C files into tarball.
+
 Release 1.1.93 (2008-12-11)
 ===========================
 Enhancements:
