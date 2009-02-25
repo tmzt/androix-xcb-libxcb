@@ -222,17 +222,15 @@ def c_enum(self, name):
     '''
     _h_setlevel(0)
     _h('')
-    _h('typedef enum %s {', _t(name))
 
-    count = len(self.values)
+    next = -1
 
     for (enam, eval) in self.values:
-        count = count - 1
-        equals = ' = ' if eval != '' else ''
-        comma = ',' if count > 0 else ''
-        _h('    %s%s%s%s', _n(name + (enam,)).upper(), equals, eval, comma)
-
-    _h('} %s;', _t(name))
+        if eval == '':
+            next += 1
+        else:
+            next = int(eval)
+        _h('static const uint32_t %s = %d;', _n(name + (enam,)).upper(), next)
 
 def _c_type_setup(self, name, postfix):
     '''
