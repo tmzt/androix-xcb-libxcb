@@ -187,7 +187,7 @@ static int compute_auth(xcb_auth_info_t *info, Xauth *authptr, struct sockaddr *
             struct sockaddr_in6 *si6 = (struct sockaddr_in6 *) sockname;
             if(IN6_IS_ADDR_V4MAPPED(SIN6_ADDR(sockname)))
             {
-                APPEND(info->data, j, si6->sin6_addr.s6_addr[12]);
+                do_append(info->data, j, &si6->sin6_addr.s6_addr[12], 4);
                 APPEND(info->data, j, si6->sin6_port);
             }
             else
