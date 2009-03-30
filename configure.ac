@@ -116,6 +116,8 @@ AC_PREREQ([2.59c], [], [AC_SUBST([htmldir], [m4_ifset([AC_PACKAGE_TARNAME],
 
 XCB_CHECK_DOXYGEN()
 
+AC_CHECK_FUNC(poll, [AC_DEFINE(USE_POLL, 1, [poll() function is available])], )
+
 XCB_EXTENSION(Composite, "yes")
 XCB_EXTENSION(Damage, "yes")
 XCB_EXTENSION(DPMS, "yes")
