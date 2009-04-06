@@ -243,7 +243,14 @@ int _xcb_get_auth_info(int fd, xcb_auth_info_t *info, int display)
     int ret = 1;
 
     if (getpeername(fd, sockname, &socknamelen) == -1)
-        return 0;  /* can only authenticate sockets */
+    {
+        if (getsockname(fd, sockname, &socknamelen) == -1)
+            return 0;  /* can only authenticate sockets */
+        if (sockname->sa_family != AF_UNIX)
+            return 0;
+        /* Some systems like hpux or Hurd do not expose peer names
+         * for UNIX Domain Sockets.  We do not need it anyway.  */
+    }
 
     authptr = get_authptr(sockname, socknamelen, display);
     if (authptr == 0)
