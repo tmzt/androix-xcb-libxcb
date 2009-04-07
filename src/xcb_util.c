@@ -125,7 +125,7 @@ static int _xcb_open_unix(char *protocol, const char *file);
 static int _xcb_open_decnet(const char *host, char *protocol, const unsigned short port);
 #endif
 #ifdef HAVE_ABSTRACT_SOCKETS
-static int _xcb_open_abstract(char *protocol, const char *file);
+static int _xcb_open_abstract(char *protocol, const char *file, size_t filelen);
 #endif
 
 static int _xcb_open(char *host, char *protocol, const int display)
@@ -135,6 +135,7 @@ static int _xcb_open(char *host, char *protocol, const int display)
 #endif
     static const char base[] = "/tmp/.X11-unix/X";
     char file[sizeof(base) + 20];
+    int filelen;
 
     if(*host)
     {
@@ -161,9 +162,13 @@ static int _xcb_open(char *host, char *protocol, const int display)
     }
 
     /* display specifies Unix socket */
-    snprintf(file, sizeof(file), "%s%d", base, display);
+    filelen = snprintf(file, sizeof(file), "%s%d", base, display);
+    if(filelen < 0)
+        return -1;
+    /* snprintf may truncate the file */
+    filelen = MIN(filelen, sizeof(file) - 1);
 #ifdef HAVE_ABSTRACT_SOCKETS
-    fd = _xcb_open_abstract(protocol, file);
+    fd = _xcb_open_abstract(protocol, file, filelen);
     if (fd >= 0 || (errno != ENOENT && errno != ECONNREFUSED))
         return fd;
 
@@ -284,7 +289,7 @@ static int _xcb_open_unix(char *protocol, const char *file)
 }
 
 #ifdef HAVE_ABSTRACT_SOCKETS
-static int _xcb_open_abstract(char *protocol, const char *file)
+static int _xcb_open_abstract(char *protocol, const char *file, size_t filelen)
 {
     int fd;
     struct sockaddr_un addr = {0};
@@ -295,9 +300,9 @@ static int _xcb_open_abstract(char *protocol, const char *file)
 
     strcpy(addr.sun_path + 1, file);
     addr.sun_family = AF_UNIX;
-    namelen = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(file);
+    namelen = offsetof(struct sockaddr_un, sun_path) + 1 + filelen;
 #ifdef HAVE_SOCKADDR_SUN_LEN
-    addr.sun_len = 1 + strlen(file);
+    addr.sun_len = 1 + filelen;
 #endif
     fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd == -1)
