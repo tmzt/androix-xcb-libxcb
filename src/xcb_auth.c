@@ -49,11 +49,21 @@ enum auth_protos {
     N_AUTH_PROTOS
 };
 
+#define AUTH_PROTO_XDM_AUTHORIZATION "XDM-AUTHORIZATION-1"
+#define AUTH_PROTO_MIT_MAGIC_COOKIE "MIT-MAGIC-COOKIE-1"
+
 static char *authnames[N_AUTH_PROTOS] = {
 #ifdef HASXDMAUTH
-    "XDM-AUTHORIZATION-1",
+    AUTH_PROTO_XDM_AUTHORIZATION,
 #endif
-    "MIT-MAGIC-COOKIE-1",
+    AUTH_PROTO_MIT_MAGIC_COOKIE,
+};
+
+static int authnameslen[N_AUTH_PROTOS] = {
+#ifdef HASXDMAUTH
+    sizeof(AUTH_PROTO_XDM_AUTHORIZATION) - 1,
+#endif
+    sizeof(AUTH_PROTO_MIT_MAGIC_COOKIE) - 1,
 };
 
 static size_t memdup(char **dst, void *src, size_t len)
@@ -70,7 +80,7 @@ static size_t memdup(char **dst, void *src, size_t len)
 
 static int authname_match(enum auth_protos kind, char *name, size_t namelen)
 {
-    if(strlen(authnames[kind]) != namelen)
+    if(authnameslen[kind] != namelen)
 	return 0;
     if(memcmp(authnames[kind], name, namelen))
 	return 0;
@@ -87,8 +97,6 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
     unsigned short family;
     char hostnamebuf[256];   /* big enough for max hostname */
     char dispbuf[40];   /* big enough to hold more than 2^64 base 10 */
-    int authnamelens[N_AUTH_PROTOS];
-    int i;
 
     family = FamilyLocal; /* 256 */
     switch(sockname->sa_family)
@@ -128,12 +136,10 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
         addrlen = strlen(addr);
     }
 
-    for (i = 0; i < N_AUTH_PROTOS; i++)
-	authnamelens[i] = strlen(authnames[i]);
     return XauGetBestAuthByAddr (family,
                                  (unsigned short) addrlen, addr,
                                  (unsigned short) strlen(dispbuf), dispbuf,
-                                 N_AUTH_PROTOS, authnames, authnamelens);
+                                 N_AUTH_PROTOS, authnames, authnameslen);
 }
 
 #ifdef HASXDMAUTH
