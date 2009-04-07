@@ -193,8 +193,9 @@ static int _xcb_open_decnet(const char *host, const char *protocol, const unsign
     addr.sdn_add.a_len = nodeaddr->n_length;
     memcpy(addr.sdn_add.a_addr, nodeaddr->n_addr, addr.sdn_add.a_len);
 
-    sprintf((char *)addr.sdn_objname, "X$X%d", port);
-    addr.sdn_objnamel = strlen((char *)addr.sdn_objname);
+    addr.sdn_objnamel = sprintf((char *)addr.sdn_objname, "X$X%d", port);
+    if(addr.sdn_objnamel < 0)
+        return -1;
     addr.sdn_objnum = 0;
 
     fd = socket(PF_DECnet, SOCK_STREAM, 0);
@@ -202,8 +203,9 @@ static int _xcb_open_decnet(const char *host, const char *protocol, const unsign
         return -1;
 
     memset(&accessdata, 0, sizeof(accessdata));
-    sprintf((char*)accessdata.acc_acc, "%d", getuid());
-    accessdata.acc_accl = strlen((char *)accessdata.acc_acc);
+    accessdata.acc_accl = sprintf((char*)accessdata.acc_acc, "%d", getuid());
+    if(accessdata.acc_accl < 0)
+        return -1;
     setsockopt(fd, DNPROTO_NSP, SO_CONACCESS, &accessdata, sizeof(accessdata));
 
     if(connect(fd, (struct sockaddr *) &addr, sizeof(addr)) == -1) {
