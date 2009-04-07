@@ -317,39 +317,7 @@ static int _xcb_open_abstract(char *protocol, const char *file, size_t filelen)
 
 xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
 {
-    int fd, display = 0;
-    char *host;
-    char *protocol;
-    xcb_connection_t *c;
-    xcb_auth_info_t auth;
-    
-    int parsed = _xcb_parse_display(displayname, &host, &protocol, &display, screenp);
-
-#ifdef HAVE_LAUNCHD
-    if(!displayname)
-        displayname = getenv("DISPLAY");
-    if(displayname && strlen(displayname)>11 && !strncmp(displayname, "/tmp/launch", 11))
-        fd = _xcb_open_unix(NULL, displayname);
-    else
-#endif
-    if(!parsed)
-        return (xcb_connection_t *) &error_connection;
-    else
-        fd = _xcb_open(host, protocol, display);
-    free(host);
-
-    if(fd == -1)
-        return (xcb_connection_t *) &error_connection;
-
-    if(_xcb_get_auth_info(fd, &auth, display))
-    {
-        c = xcb_connect_to_fd(fd, &auth);
-        free(auth.name);
-        free(auth.data);
-    }
-    else
-        c = xcb_connect_to_fd(fd, 0);
-    return c;
+    return xcb_connect_to_display_with_auth_info(displayname, NULL, screenp);
 }
 
 xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname, xcb_auth_info_t *auth, int *screenp)
@@ -357,6 +325,8 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname,
     int fd, display = 0;
     char *host;
     char *protocol;
+    xcb_auth_info_t ourauth;
+    xcb_connection_t *c;
 
     int parsed = _xcb_parse_display(displayname, &host, &protocol, &display, screenp);
     
@@ -376,5 +346,17 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname,
     if(fd == -1)
         return (xcb_connection_t *) &error_connection;
 
-    return xcb_connect_to_fd(fd, auth);
+    if(auth)
+        return xcb_connect_to_fd(fd, auth);
+
+    if(_xcb_get_auth_info(fd, &ourauth, display))
+    {
+        c = xcb_connect_to_fd(fd, &ourauth);
+        free(ourauth.name);
+        free(ourauth.data);
+    }
+    else
+        c = xcb_connect_to_fd(fd, 0);
+
+    return c;
 }
