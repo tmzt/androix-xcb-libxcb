@@ -97,6 +97,7 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
     unsigned short family;
     char hostnamebuf[256];   /* big enough for max hostname */
     char dispbuf[40];   /* big enough to hold more than 2^64 base 10 */
+    int dispbuflen;
 
     family = FamilyLocal; /* 256 */
     switch(sockname->sa_family)
@@ -127,7 +128,11 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
         return 0;   /* cannot authenticate this family */
     }
 
-    snprintf(dispbuf, sizeof(dispbuf), "%d", display);
+    dispbuflen = snprintf(dispbuf, sizeof(dispbuf), "%d", display);
+    if(dispbuflen < 0)
+        return 0;
+    /* snprintf may have truncate our text */
+    dispbuflen = MIN(dispbuflen, sizeof(dispbuf) - 1);
 
     if (family == FamilyLocal) {
         if (gethostname(hostnamebuf, sizeof(hostnamebuf)) == -1)
@@ -138,7 +143,7 @@ static Xauth *get_authptr(struct sockaddr *sockname, unsigned int socknamelen,
 
     return XauGetBestAuthByAddr (family,
                                  (unsigned short) addrlen, addr,
-                                 (unsigned short) strlen(dispbuf), dispbuf,
+                                 (unsigned short) dispbuflen, dispbuf,
                                  N_AUTH_PROTOS, authnames, authnameslen);
 }
 
