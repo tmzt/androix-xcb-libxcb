@@ -250,17 +250,21 @@ int _xcb_get_auth_info(int fd, xcb_auth_info_t *info, int display)
     char sockbuf[sizeof(struct sockaddr) + MAXPATHLEN];
     unsigned int socknamelen = sizeof(sockbuf);   /* need extra space */
     struct sockaddr *sockname = (struct sockaddr *) &sockbuf;
+    int gotsockname = 0;
     Xauth *authptr = 0;
     int ret = 1;
 
+    /* Some systems like hpux or Hurd do not expose peer names
+     * for UNIX Domain Sockets, but this is irrelevant,
+     * since compute_auth() ignores the peer name in this
+     * case anyway.*/
     if (getpeername(fd, sockname, &socknamelen) == -1)
     {
-        if (getsockname(fd, sockname, &socknamelen) == -1)
-            return 0;  /* can only authenticate sockets */
         if (sockname->sa_family != AF_UNIX)
-            return 0;
-        /* Some systems like hpux or Hurd do not expose peer names
-         * for UNIX Domain Sockets.  We do not need it anyway.  */
+            return 0;   /* except for AF_UNIX, sockets should have peernames */
+        if (getsockname(fd, sockname, &socknamelen) == -1)
+            return 0;   /* can only authenticate sockets */
+        gotsockname = 1;
     }
 
     authptr = get_authptr(sockname, socknamelen, display);
@@ -268,14 +272,28 @@ int _xcb_get_auth_info(int fd, xcb_auth_info_t *info, int display)
         return 0;   /* cannot find good auth data */
 
     info->namelen = memdup(&info->name, authptr->name, authptr->name_length);
-    if(info->namelen)
-	ret = compute_auth(info, authptr, sockname);
+    if (!info->namelen)
+        goto no_auth;   /* out of memory */
+
+    if (!gotsockname && getsockname(fd, sockname, &socknamelen) == -1)
+    {
+        free(info->name);
+        goto no_auth;   /* can only authenticate sockets */
+    }
+
+    ret = compute_auth(info, authptr, sockname);
     if(!ret)
     {
-	free(info->name);
-	info->name = 0;
-	info->namelen = 0;
+        free(info->name);
+        goto no_auth;   /* cannot build auth record */
     }
+
     XauDisposeAuth(authptr);
     return ret;
+
+ no_auth:
+    info->name = 0;
+    info->namelen = 0;
+    XauDisposeAuth(authptr);
+    return 0;
 }
