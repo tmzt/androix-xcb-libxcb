@@ -58,6 +58,10 @@ XCBPROTO_XCBINCLUDEDIR=`$PKG_CONFIG --variable=xcbincludedir xcb-proto`
 AC_MSG_RESULT($XCBPROTO_XCBINCLUDEDIR)
 AC_SUBST(XCBPROTO_XCBINCLUDEDIR)
 
+# Find the xcb-proto version
+XCBPROTO_VERSION=`$PKG_CONFIG --modversion xcb-proto`
+AC_SUBST(XCBPROTO_VERSION)
+
 # Find the xcbgen Python package
 AC_MSG_CHECKING(XCBPROTO_XCBPYTHONDIR)
 XCBPROTO_XCBPYTHONDIR=`$PKG_CONFIG --variable=pythondir xcb-proto`
