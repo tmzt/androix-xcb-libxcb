@@ -30,6 +30,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #ifdef DNETCONN
 #include <netdnet/dnetdb.h>
 #include <netdnet/dn.h>
@@ -257,6 +258,9 @@ static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port)
     {
         fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
         if(fd >= 0) {
+            int on = 1;
+            setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
+
             if (connect(fd, addr->ai_addr, addr->ai_addrlen) >= 0)
                 break;
             close(fd);
