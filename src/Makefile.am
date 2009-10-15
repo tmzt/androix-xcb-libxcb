@@ -60,6 +60,16 @@ libxcb_dpms_la_LIBADD = $(XCB_LIBS)
 nodist_libxcb_dpms_la_SOURCES = dpms.c dpms.h
 endif
 
+EXTHEADERS += dri2.h
+EXTSOURCES += dri2.c
+EXTENSION_XML += dri2.xml
+if BUILD_DRI2
+lib_LTLIBRARIES += libxcb-dri2.la
+libxcb_dri2_la_LDFLAGS = -version-info 0:0:0 -no-undefined
+libxcb_dri2_la_LIBADD = $(XCB_LIBS)
+nodist_libxcb_dri2_la_SOURCES = dri2.c dri2.h
+endif
+
 EXTHEADERS += glx.h
 EXTSOURCES += glx.c
 EXTENSION_XML += glx.xml

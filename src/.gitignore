@@ -2,6 +2,7 @@ bigreq.*
 composite.*
 damage.*
 dpms.*
+dri2.*
 glx.*
 randr.*
 record.*
