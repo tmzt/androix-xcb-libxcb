@@ -122,7 +122,7 @@ XCB_CHECK_DOXYGEN()
 
 case $host_os in
 	# darwin has poll() but can't be used to poll character devices (atleast through SnowLeopard)
-	darwin*)
+	darwin*) ;;
 	*)
 		AC_CHECK_FUNC(poll, [AC_DEFINE(USE_POLL, 1, [poll() function is available])], )
 	;;
