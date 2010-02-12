@@ -106,7 +106,7 @@ typedef struct _xcb_out {
 int _xcb_out_init(_xcb_out *out);
 void _xcb_out_destroy(_xcb_out *out);
 
-int _xcb_out_send(xcb_connection_t *c, struct iovec **vector, int *count);
+int _xcb_out_send(xcb_connection_t *c, struct iovec *vector, int count);
 int _xcb_out_flush_to(xcb_connection_t *c, uint64_t request);
 
 
