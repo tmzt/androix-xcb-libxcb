@@ -37,9 +37,13 @@
 #include "xcbint.h"
 #if USE_POLL
 #include <poll.h>
-#else
+#elif !defined WIN32
 #include <sys/select.h>
 #endif
+
+#ifdef _WIN32
+#include "windefs.h"
+#endif /* _WIN32 */
 
 #define XCB_ERROR 0
 #define XCB_REPLY 1
@@ -267,12 +271,22 @@ static int read_block(const int fd, void *buf, const ssize_t len)
     int done = 0;
     while(done < len)
     {
+#ifndef _WIN32
         int ret = read(fd, ((char *) buf) + done, len - done);
+#else
+        int ret = recv(fd, ((char *) buf) + done, len - done,0);
+#endif /* !_WIN32 */
+
         if(ret > 0)
             done += ret;
+#ifndef _WIN32
         if(ret < 0 && errno == EAGAIN)
+#else
+        if(ret == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
+#endif /* !_Win32 */
         {
 #if USE_POLL
+#ifndef _WIN32
             struct pollfd pfd;
             pfd.fd = fd;
             pfd.events = POLLIN;
@@ -280,14 +294,21 @@ static int read_block(const int fd, void *buf, const ssize_t len)
             do {
                 ret = poll(&pfd, 1, -1);
             } while (ret == -1 && errno == EINTR);
+#endif /* !_WIN32 */
 #else
             fd_set fds;
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
+#ifndef _WIN32
 	    do {
 		ret = select(fd + 1, &fds, 0, 0, 0);
 	    } while (ret == -1 && errno == EINTR);
-#endif
+#else
+	    /* the do while loop used for the non-windows version isn't required*/
+	    /* for windows since there are no signals in Windows hence no EINTR*/	    
+	    ret = select(fd + 1, &fds, 0, 0, 0);
+#endif /* !_WIN32 */
+#endif /* USE_POLL */
         }
         if(ret <= 0)
             return ret;
@@ -665,12 +686,20 @@ void _xcb_in_replies_done(xcb_connection_t *c)
 
 int _xcb_in_read(xcb_connection_t *c)
 {
+#ifndef _WIN32
     int n = read(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len);
+#else
+    int n = recv(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len,0);
+#endif /* !_WIN32 */
     if(n > 0)
         c->in.queue_len += n;
     while(read_packet(c))
         /* empty */;
+#ifndef _WIN32
     if((n > 0) || (n < 0 && errno == EAGAIN))
+#else
+    if((n > 0) || (n < 0 && WSAGetLastError() == WSAEWOULDBLOCK))
+#endif /* !_WIN32 */
         return 1;
     _xcb_conn_shutdown(c);
     return 0;

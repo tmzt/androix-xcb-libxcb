@@ -27,22 +27,25 @@
 
 #include <assert.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #ifdef DNETCONN
 #include <netdnet/dnetdb.h>
 #include <netdnet/dn.h>
 #endif
-#include <netdb.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include "windefs.h"
+#else
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#endif /* _WIN32 */
 
 #include "xcb.h"
 #include "xcbext.h"
@@ -122,7 +125,9 @@ int xcb_parse_display(const char *name, char **host, int *displayp,
 }
 
 static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port);
+#ifndef _WIN32
 static int _xcb_open_unix(char *protocol, const char *file);
+#endif /* !WIN32 */
 #ifdef DNETCONN
 static int _xcb_open_decnet(const char *host, char *protocol, const unsigned short port);
 #endif
@@ -162,7 +167,7 @@ static int _xcb_open(char *host, char *protocol, const int display)
                 return _xcb_open_tcp(host, protocol, port);
             }
     }
-
+#ifndef _WIN32
     /* display specifies Unix socket */
     filelen = snprintf(file, sizeof(file), "%s%d", base, display);
     if(filelen < 0)
@@ -176,6 +181,7 @@ static int _xcb_open(char *host, char *protocol, const int display)
 
 #endif
     return  _xcb_open_unix(protocol, file);
+#endif /* !_WIN32 */
 }
 
 static int _xcb_socket(int family, int type, int proto)
@@ -188,8 +194,10 @@ static int _xcb_socket(int family, int type, int proto)
 #endif
     {
 	fd = socket(family, type, proto);
+#ifndef _WIN32
 	if (fd >= 0)
 	    fcntl(fd, F_SETFD, FD_CLOEXEC);
+#endif
     }
     return fd;
 }
@@ -289,6 +297,7 @@ static int _xcb_open_tcp(char *host, char *protocol, const unsigned short port)
     return fd;
 }
 
+#ifndef _WIN32
 static int _xcb_open_unix(char *protocol, const char *file)
 {
     int fd;
@@ -311,6 +320,7 @@ static int _xcb_open_unix(char *protocol, const char *file)
     }
     return fd;
 }
+#endif /* !_WIN32 */
 
 #ifdef HAVE_ABSTRACT_SOCKETS
 static int _xcb_open_abstract(char *protocol, const char *file, size_t filelen)
