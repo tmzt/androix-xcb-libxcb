@@ -154,9 +154,7 @@ static int read_packet(xcb_connection_t *c)
 
     /* XGE events may have sizes > 32 */
     if (genrep.response_type == XCB_XGE_EVENT)
-    {
-        eventlength = ((xcb_ge_event_t*)&genrep)->length * 4;
-    }
+        eventlength = genrep.length * 4;
 
     buf = malloc(length + eventlength +
             (genrep.response_type == XCB_REPLY ? 0 : sizeof(uint32_t)));
