@@ -39,7 +39,7 @@
 #include <string.h>
 
 #ifdef _WIN32
-#include "windefs.h"
+#include "xcb_windefs.h"
 #else
 #include <sys/socket.h>
 #include <sys/un.h>

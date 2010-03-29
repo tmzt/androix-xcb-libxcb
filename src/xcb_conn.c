@@ -37,12 +37,12 @@
 #include "xcbint.h"
 #if USE_POLL
 #include <poll.h>
-#elif !defined WIN32
+#elif !defined _WIN32
 #include <sys/select.h>
 #endif
 
 #ifdef _WIN32
-#include "windefs.h"
+#include "xcb_windefs.h"
 #else
 #include <netinet/in.h>
 #endif /* _WIN32 */
@@ -77,7 +77,7 @@ static int set_fd_flags(const int fd)
     if(fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
         return 0;
     return 1;
-#endif /* WIN32 */
+#endif /* _WIN32 */
 }
 
 static int write_setup(xcb_connection_t *c, xcb_auth_info_t *auth_info)

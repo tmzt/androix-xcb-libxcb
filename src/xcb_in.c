@@ -37,12 +37,12 @@
 #include "xcbint.h"
 #if USE_POLL
 #include <poll.h>
-#elif !defined WIN32
+#elif !defined _WIN32
 #include <sys/select.h>
 #endif
 
 #ifdef _WIN32
-#include "windefs.h"
+#include "xcb_windefs.h"
 #endif /* _WIN32 */
 
 #define XCB_ERROR 0

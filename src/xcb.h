@@ -38,7 +38,7 @@
 #ifndef _WIN32
 #include <sys/uio.h>
 #else
-#include "windefs.h"
+#include "xcb_windefs.h"
 #endif
 #include <pthread.h>
 
