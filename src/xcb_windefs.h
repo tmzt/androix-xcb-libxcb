@@ -24,8 +24,8 @@
  */
 
 
-#ifndef _WINDEFS_H
-#define _WINDEFS_H
+#ifndef _XCB_WINDEFS_H
+#define _XCB_WINDEFS_H
 
 #ifndef WINVER
 #define WINVER 0x0501 /* required for getaddrinfo/freeaddrinfo defined only for WinXP and above */
@@ -42,4 +42,4 @@ struct iovec  {
 
 typedef unsigned int in_addr_t;
 
-#endif /* windefs.h */
+#endif /* xcb_windefs.h */
