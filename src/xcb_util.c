@@ -44,6 +44,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <fcntl.h>
 #include <netdb.h>
 #endif /* _WIN32 */
 
