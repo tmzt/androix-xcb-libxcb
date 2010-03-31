@@ -286,7 +286,6 @@ static int read_block(const int fd, void *buf, const ssize_t len)
 #endif /* !_Win32 */
         {
 #if USE_POLL
-#ifndef _WIN32
             struct pollfd pfd;
             pfd.fd = fd;
             pfd.events = POLLIN;
@@ -294,7 +293,6 @@ static int read_block(const int fd, void *buf, const ssize_t len)
             do {
                 ret = poll(&pfd, 1, -1);
             } while (ret == -1 && errno == EINTR);
-#endif /* !_WIN32 */
 #else
             fd_set fds;
             FD_ZERO(&fds);
