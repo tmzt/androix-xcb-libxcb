@@ -338,6 +338,7 @@ int _xcb_out_send(xcb_connection_t *c, struct iovec *vector, int count)
         ret = _xcb_conn_wait(c, &c->out.cond, &vector, &count);
     c->out.request_written = c->out.request;
     pthread_cond_broadcast(&c->out.cond);
+    _xcb_in_wake_up_next_reader(c);
     return ret;
 }
 

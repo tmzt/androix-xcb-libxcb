@@ -137,6 +137,8 @@ typedef struct _xcb_in {
 int _xcb_in_init(_xcb_in *in);
 void _xcb_in_destroy(_xcb_in *in);
 
+void _xcb_in_wake_up_next_reader(xcb_connection_t *c);
+
 int _xcb_in_expect_reply(xcb_connection_t *c, uint64_t request, enum workarounds workaround, int flags);
 void _xcb_in_replies_done(xcb_connection_t *c);
 
