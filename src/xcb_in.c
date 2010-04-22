@@ -39,6 +39,7 @@
 #include <poll.h>
 #elif !defined _WIN32
 #include <sys/select.h>
+#include <sys/socket.h>
 #endif
 
 #ifdef _WIN32
@@ -48,6 +49,11 @@
 #define XCB_ERROR 0
 #define XCB_REPLY 1
 #define XCB_XGE_EVENT 35
+
+/* required for compiling for Win32 using MinGW */
+#ifndef MSG_WAITALL
+#define MSG_WAITALL 0
+#endif
 
 struct event_list {
     xcb_generic_event_t *event;
@@ -271,12 +277,7 @@ static int read_block(const int fd, void *buf, const ssize_t len)
     int done = 0;
     while(done < len)
     {
-#ifndef _WIN32
-        int ret = read(fd, ((char *) buf) + done, len - done);
-#else
-        int ret = recv(fd, ((char *) buf) + done, len - done,0);
-#endif /* !_WIN32 */
-
+        int ret = recv(fd, ((char *) buf) + done, len - done,MSG_WAITALL);
         if(ret > 0)
             done += ret;
 #ifndef _WIN32
@@ -681,11 +682,7 @@ void _xcb_in_replies_done(xcb_connection_t *c)
 
 int _xcb_in_read(xcb_connection_t *c)
 {
-#ifndef _WIN32
-    int n = read(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len);
-#else
-    int n = recv(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len,0);
-#endif /* !_WIN32 */
+    int n = recv(c->fd, c->in.queue + c->in.queue_len, sizeof(c->in.queue) - c->in.queue_len,MSG_WAITALL);
     if(n > 0)
         c->in.queue_len += n;
     while(read_packet(c))
