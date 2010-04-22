@@ -297,15 +297,12 @@ static int read_block(const int fd, void *buf, const ssize_t len)
             fd_set fds;
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
-#ifndef _WIN32
+
+	    /* Initializing errno here makes sure that for Win32 this loop will execute only once */
+	    errno = 0;  
 	    do {
 		ret = select(fd + 1, &fds, 0, 0, 0);
 	    } while (ret == -1 && errno == EINTR);
-#else
-	    /* the do while loop used for the non-windows version isn't required*/
-	    /* for windows since there are no signals in Windows hence no EINTR*/	    
-	    ret = select(fd + 1, &fds, 0, 0, 0);
-#endif /* !_WIN32 */
 #endif /* USE_POLL */
         }
         if(ret <= 0)

@@ -180,10 +180,10 @@ static int _xcb_open(char *host, char *protocol, const int display)
     fd = _xcb_open_abstract(protocol, file, filelen);
     if (fd >= 0 || (errno != ENOENT && errno != ECONNREFUSED))
         return fd;
-
 #endif
     return  _xcb_open_unix(protocol, file);
 #endif /* !_WIN32 */
+    return -1; /* if control reaches here then something has gone wrong */
 }
 
 static int _xcb_socket(int family, int type, int proto)
