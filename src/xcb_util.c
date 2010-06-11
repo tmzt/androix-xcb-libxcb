@@ -64,6 +64,7 @@ static int _xcb_parse_display(const char *name, char **host, char **protocol,
 {
     int len, display, screen;
     char *slash, *colon, *dot, *end;
+
     if(!name || !*name)
         name = getenv("DISPLAY");
     if(!name)
@@ -92,35 +93,43 @@ static int _xcb_parse_display(const char *name, char **host, char **protocol,
 
     colon = strrchr(name, ':');
     if(!colon)
-        return 0;
+        goto error_out;
     len = colon - name;
     ++colon;
     display = strtoul(colon, &dot, 10);
     if(dot == colon)
-        return 0;
+        goto error_out;
     if(*dot == '\0')
         screen = 0;
     else
     {
         if(*dot != '.')
-            return 0;
+            goto error_out;
         ++dot;
         screen = strtoul(dot, &end, 10);
         if(end == dot || *end != '\0')
-            return 0;
+            goto error_out;
     }
     /* At this point, the display string is fully parsed and valid, but
      * the caller's memory is untouched. */
 
     *host = malloc(len + 1);
     if(!*host)
-        return 0;
+        goto error_out;
     memcpy(*host, name, len);
     (*host)[len] = '\0';
     *displayp = display;
     if(screenp)
         *screenp = screen;
     return 1;
+
+error_out:
+    if (protocol) {
+        free(*protocol);
+        *protocol = NULL;
+    }
+
+    return 0;
 }
 
 int xcb_parse_display(const char *name, char **host, int *displayp,
