@@ -398,24 +398,28 @@ xcb_connection_t *xcb_connect(const char *displayname, int *screenp)
 xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname, xcb_auth_info_t *auth, int *screenp)
 {
     int fd, display = 0;
-    char *host;
-    char *protocol;
+    char *host = NULL;
+    char *protocol = NULL;
     xcb_auth_info_t ourauth;
     xcb_connection_t *c;
 
     int parsed = _xcb_parse_display(displayname, &host, &protocol, &display, screenp);
     
-    if(!parsed)
-        return (xcb_connection_t *) &error_connection;
-    else
+    if(!parsed) {
+        c = (xcb_connection_t *) &error_connection;
+        goto out;
+    } else
         fd = _xcb_open(host, protocol, display);
-    free(host);
 
-    if(fd == -1)
-        return (xcb_connection_t *) &error_connection;
+    if(fd == -1) {
+        c = (xcb_connection_t *) &error_connection;
+        goto out;
+    }
 
-    if(auth)
-        return xcb_connect_to_fd(fd, auth);
+    if(auth) {
+        c = xcb_connect_to_fd(fd, auth);
+        goto out;
+    }
 
     if(_xcb_get_auth_info(fd, &ourauth, display))
     {
@@ -426,5 +430,8 @@ xcb_connection_t *xcb_connect_to_display_with_auth_info(const char *displayname,
     else
         c = xcb_connect_to_fd(fd, 0);
 
+out:
+    free(host);
+    free(protocol);
     return c;
 }
