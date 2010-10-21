@@ -39,6 +39,10 @@
 #include <sys/un.h>
 #endif /* _WIN32 */
 
+#ifdef bionic
+#include <arpa/inet.h>
+#endif
+
 #include "xcb.h"
 #include "xcbint.h"
 
